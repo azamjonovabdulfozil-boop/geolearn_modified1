@@ -1,0 +1,30 @@
+[
+  {
+    "id": 1,
+    "createdAt": "2026-06-19T10:17:22.203Z",
+    "totalScore": 0,
+    "avatarUrl": null,
+    "name": "Administrator",
+    "username": "admin",
+    "passwordHash": "0d448347b4733acd7f2d78a61e4c76b0052a56d4dee748bd34fbc52a4294a054",
+    "role": "teacher",
+    "grade": null,
+    "theme": "light",
+    "language": "uz",
+    "fontSize": "medium"
+  },
+  {
+    "id": 2,
+    "createdAt": "2026-06-19T10:23:54.569Z",
+    "totalScore": 0,
+    "avatarUrl": null,
+    "name": "sasasasa",
+    "username": "sasasasa",
+    "passwordHash": "14eafab5ed586964b5ae66707f91a8dcddae3ee8aaef39ce95087cc3a5f62b82",
+    "role": "student",
+    "grade": 7,
+    "theme": "light",
+    "language": "uz",
+    "fontSize": "medium"
+  }
+]

@@ -1,0 +1,3138 @@
+[
+  {
+    "id": 1,
+    "createdAt": "2026-06-19T10:30:47.842Z",
+    "tests": [
+      {
+        "id": 1,
+        "question": "Bo'sh joyni to'ldiring: «Yer _____ — geografiya darsining muhim mavzularidan biri bo'lib, quyida uning asosiy mazmuni batafsil yoritiladi.»",
+        "questionText": "Bo'sh joyni to'ldiring: «Yer _____ — geografiya darsining muhim mavzularidan biri bo'lib, quyida uning asosiy mazmuni batafsil yoritiladi.»",
+        "options": [
+          "muhim",
+          "sayyorasi",
+          "mavzularidan",
+          "darsining"
+        ],
+        "correctIndex": 1
+      },
+      {
+        "id": 2,
+        "question": "«1. Yer sayyorasi» mavzusida «geografiya» tushunchasi nimani anglatadi?",
+        "questionText": "«1. Yer sayyorasi» mavzusida «geografiya» tushunchasi nimani anglatadi?",
+        "options": [
+          "mavzularidan",
+          "geografiya",
+          "muhim",
+          "biri"
+        ],
+        "correctIndex": 1
+      },
+      {
+        "id": 3,
+        "question": "Quyidagi atamalardan qaysi biri «1. Yer sayyorasi» mavzusiga bevosita aloqador?",
+        "questionText": "Quyidagi atamalardan qaysi biri «1. Yer sayyorasi» mavzusiga bevosita aloqador?",
+        "options": [
+          "biri",
+          "darsining",
+          "mavzularidan",
+          "quyida"
+        ],
+        "correctIndex": 1
+      },
+      {
+        "id": 4,
+        "question": "Matnda «yer sayyorasi bilan bog'liq asosiy tushunchalar, ta'riflar va qonuniyatlar bilan...» — bu fikr nima haqida?",
+        "questionText": "Matnda «yer sayyorasi bilan bog'liq asosiy tushunchalar, ta'riflar va qonuniyatlar bilan...» — bu fikr nima haqida?",
+        "options": [
+          "quyida",
+          "biri",
+          "mazmuni",
+          "muhim"
+        ],
+        "correctIndex": 3
+      },
+      {
+        "id": 5,
+        "question": "«mavzularidan» so'zining geografik ma'nosi nima?",
+        "questionText": "«mavzularidan» so'zining geografik ma'nosi nima?",
+        "options": [
+          "mazmuni",
+          "batafsil",
+          "quyida",
+          "mavzularidan"
+        ],
+        "correctIndex": 3
+      },
+      {
+        "id": 6,
+        "question": "«1. Yer sayyorasi» mavzusining asosiy tushunchalaridan biri qaysi?",
+        "questionText": "«1. Yer sayyorasi» mavzusining asosiy tushunchalaridan biri qaysi?",
+        "options": [
+          "batafsil",
+          "mazmuni",
+          "yoritiladi",
+          "biri"
+        ],
+        "correctIndex": 3
+      },
+      {
+        "id": 7,
+        "question": "Matndagi «Yerning aylanishi kun va tun almashinishiga sabab Quyosh atrofida ayla» fikriga eng mos kelgan tushuncha qaysi?",
+        "questionText": "Matndagi «Yerning aylanishi kun va tun almashinishiga sabab Quyosh atrofida ayla» fikriga eng mos kelgan tushuncha qaysi?",
+        "options": [
+          "yoritiladi",
+          "quyida",
+          "batafsil",
+          "quyosh"
+        ],
+        "correctIndex": 1
+      },
+      {
+        "id": 8,
+        "question": "Quyidagilardan qaysi biri «1. Yer sayyorasi» bilan bog'liq emas?",
+        "questionText": "Quyidagilardan qaysi biri «1. Yer sayyorasi» bilan bog'liq emas?",
+        "options": [
+          "tizimidagi",
+          "quyosh",
+          "yoritiladi",
+          "mazmuni"
+        ],
+        "correctIndex": 3
+      },
+      {
+        "id": 9,
+        "question": "«batafsil» qanday geografik obyekt yoki hodisa hisoblanadi?",
+        "questionText": "«batafsil» qanday geografik obyekt yoki hodisa hisoblanadi?",
+        "options": [
+          "uchinchi",
+          "tizimidagi",
+          "quyosh",
+          "batafsil"
+        ],
+        "correctIndex": 3
+      },
+      {
+        "id": 10,
+        "question": "Matnga ko'ra «1. Yer sayyorasi» mavzusida nima alohida ta'kidlangan?",
+        "questionText": "Matnga ko'ra «1. Yer sayyorasi» mavzusida nima alohida ta'kidlangan?",
+        "options": [
+          "yoritiladi",
+          "tizimidagi",
+          "sayyora",
+          "uchinchi"
+        ],
+        "correctIndex": 0
+      },
+      {
+        "id": 11,
+        "question": "«1. Yer sayyorasi»ni o'rganishda qaysi tushuncha kalit hisoblanadi?",
+        "questionText": "«1. Yer sayyorasi»ni o'rganishda qaysi tushuncha kalit hisoblanadi?",
+        "options": [
+          "uchinchi",
+          "quyosh",
+          "ushbu",
+          "sayyora"
+        ],
+        "correctIndex": 1
+      },
+      {
+        "id": 12,
+        "question": "«Yerning aylanishi kun va tun «sayyorasi» tushunchasi mavzuda markaziy o'rin tutadi va unin» — bu jumla qaysi tushuncha haqida?",
+        "questionText": "«Yerning aylanishi kun va tun «sayyorasi» tushunchasi mavzuda markaziy o'rin tutadi va unin» — bu jumla qaysi tushuncha haqida?",
+        "options": [
+          "sayyora",
+          "tizimidagi",
+          "ushbu",
+          "doirasida"
+        ],
+        "correctIndex": 1
+      },
+      {
+        "id": 13,
+        "question": "Geografiya nuqtai nazaridan «uchinchi» nimani bildiradi?",
+        "questionText": "Geografiya nuqtai nazaridan «uchinchi» nimani bildiradi?",
+        "options": [
+          "ushbu",
+          "doirasida",
+          "uchinchi",
+          "o'quvchilar"
+        ],
+        "correctIndex": 2
+      },
+      {
+        "id": 14,
+        "question": "«1. Yer sayyorasi» mavzusi doirasida qaysi atama keng yoritilgan?",
+        "questionText": "«1. Yer sayyorasi» mavzusi doirasida qaysi atama keng yoritilgan?",
+        "options": [
+          "o'quvchilar",
+          "sayyora",
+          "bog'liq",
+          "doirasida"
+        ],
+        "correctIndex": 1
+      },
+      {
+        "id": 15,
+        "question": "Berilgan matnda qaysi tushuncha asosiy o'rin tutadi?",
+        "questionText": "Berilgan matnda qaysi tushuncha asosiy o'rin tutadi?",
+        "options": [
+          "bog'liq",
+          "tushunchalar",
+          "ushbu",
+          "o'quvchilar"
+        ],
+        "correctIndex": 2
+      }
+    ],
+    "lessonId": 1,
+    "title": "1. Yer sayyorasi",
+    "content": "1. Yer sayyorasi — geografiya darsining muhim mavzularidan biri bo'lib, quyida uning asosiy mazmuni batafsil yoritiladi. Yer Quyosh tizimidagi uchinchi sayyora hisoblanadi. Ushbu mavzu doirasida o'quvchilar 1. yer sayyorasi bilan bog'liq asosiy tushunchalar, ta'riflar va qonuniyatlar bilan tanishadilar. U quruqlik va suvdan tashkil topgan bo‘lib, insoniyat yashaydigan yagona ma’lum sayyoradir. Yerning shakli geoidga yaqin bo‘lib, o‘z o‘qi atrofida va Quyosh atrofida harakat qiladi. Yerning aylanishi kun va tun almashinishiga sabab Quyosh atrofida aylanishi esa fasllarning hosil bo‘lishiga olib keladi. Yer atmosferasi tirik organizmlar uchun zarur bo‘lgan kislorod va boshqa gazlarni saqlaydi. Yerning ichki tuzilishi yadro, mantiya va yer po‘stidan iborat.Yer Quyosh tizimidagi uchinchi sayyora hisoblanadi. suvdan tashkil topgan bo‘lib, insoniyat yashaydigan yagona ma’lum sayyoradir. geoidga yaqin bo‘lib, o‘z o‘qi atrofida va Quyosh atrofida harakat qiladi. Yerning aylanishi kun va tun «sayyorasi» tushunchasi mavzuda markaziy o'rin tutadi va uning ma'nosini bilish bilimni mustahkamlaydi. «quyosh» bilan bog'liq jihatlar mavzuni chuqurroq anglashga yordam beradi. «tizimidagi» kabi atamalar geografik ma'lumotlarni tizimli o'rganishda alohida ahamiyatga ega. 1. Yer sayyorasi tabiat, jamiyat va inson faoliyati o'rtasidagi o'zaro aloqalarni ko'rsatib beradi.",
+    "openTests": [
+      {
+        "id": 1,
+        "question": "Bo'sh joyni to'ldiring: «Yer _____ — geografiya darsining muhim mavzularidan biri bo'lib, quyida uning asosiy mazmuni batafsil yoritiladi.»",
+        "questionText": "Bo'sh joyni to'ldiring: «Yer _____ — geografiya darsining muhim mavzularidan biri bo'lib, quyida uning asosiy mazmuni batafsil yoritiladi.»",
+        "options": [
+          "muhim",
+          "sayyorasi",
+          "mavzularidan",
+          "darsining"
+        ],
+        "correctIndex": 1
+      },
+      {
+        "id": 2,
+        "question": "«1. Yer sayyorasi» mavzusida «geografiya» tushunchasi nimani anglatadi?",
+        "questionText": "«1. Yer sayyorasi» mavzusida «geografiya» tushunchasi nimani anglatadi?",
+        "options": [
+          "mavzularidan",
+          "geografiya",
+          "muhim",
+          "biri"
+        ],
+        "correctIndex": 1
+      },
+      {
+        "id": 3,
+        "question": "Quyidagi atamalardan qaysi biri «1. Yer sayyorasi» mavzusiga bevosita aloqador?",
+        "questionText": "Quyidagi atamalardan qaysi biri «1. Yer sayyorasi» mavzusiga bevosita aloqador?",
+        "options": [
+          "biri",
+          "darsining",
+          "mavzularidan",
+          "quyida"
+        ],
+        "correctIndex": 1
+      },
+      {
+        "id": 4,
+        "question": "Matnda «yer sayyorasi bilan bog'liq asosiy tushunchalar, ta'riflar va qonuniyatlar bilan...» — bu fikr nima haqida?",
+        "questionText": "Matnda «yer sayyorasi bilan bog'liq asosiy tushunchalar, ta'riflar va qonuniyatlar bilan...» — bu fikr nima haqida?",
+        "options": [
+          "quyida",
+          "biri",
+          "mazmuni",
+          "muhim"
+        ],
+        "correctIndex": 3
+      },
+      {
+        "id": 5,
+        "question": "«mavzularidan» so'zining geografik ma'nosi nima?",
+        "questionText": "«mavzularidan» so'zining geografik ma'nosi nima?",
+        "options": [
+          "mazmuni",
+          "batafsil",
+          "quyida",
+          "mavzularidan"
+        ],
+        "correctIndex": 3
+      },
+      {
+        "id": 6,
+        "question": "«1. Yer sayyorasi» mavzusining asosiy tushunchalaridan biri qaysi?",
+        "questionText": "«1. Yer sayyorasi» mavzusining asosiy tushunchalaridan biri qaysi?",
+        "options": [
+          "batafsil",
+          "mazmuni",
+          "yoritiladi",
+          "biri"
+        ],
+        "correctIndex": 3
+      },
+      {
+        "id": 7,
+        "question": "Matndagi «Yerning aylanishi kun va tun almashinishiga sabab Quyosh atrofida ayla» fikriga eng mos kelgan tushuncha qaysi?",
+        "questionText": "Matndagi «Yerning aylanishi kun va tun almashinishiga sabab Quyosh atrofida ayla» fikriga eng mos kelgan tushuncha qaysi?",
+        "options": [
+          "yoritiladi",
+          "quyida",
+          "batafsil",
+          "quyosh"
+        ],
+        "correctIndex": 1
+      },
+      {
+        "id": 8,
+        "question": "Quyidagilardan qaysi biri «1. Yer sayyorasi» bilan bog'liq emas?",
+        "questionText": "Quyidagilardan qaysi biri «1. Yer sayyorasi» bilan bog'liq emas?",
+        "options": [
+          "tizimidagi",
+          "quyosh",
+          "yoritiladi",
+          "mazmuni"
+        ],
+        "correctIndex": 3
+      },
+      {
+        "id": 9,
+        "question": "«batafsil» qanday geografik obyekt yoki hodisa hisoblanadi?",
+        "questionText": "«batafsil» qanday geografik obyekt yoki hodisa hisoblanadi?",
+        "options": [
+          "uchinchi",
+          "tizimidagi",
+          "quyosh",
+          "batafsil"
+        ],
+        "correctIndex": 3
+      },
+      {
+        "id": 10,
+        "question": "Matnga ko'ra «1. Yer sayyorasi» mavzusida nima alohida ta'kidlangan?",
+        "questionText": "Matnga ko'ra «1. Yer sayyorasi» mavzusida nima alohida ta'kidlangan?",
+        "options": [
+          "yoritiladi",
+          "tizimidagi",
+          "sayyora",
+          "uchinchi"
+        ],
+        "correctIndex": 0
+      },
+      {
+        "id": 11,
+        "question": "«1. Yer sayyorasi»ni o'rganishda qaysi tushuncha kalit hisoblanadi?",
+        "questionText": "«1. Yer sayyorasi»ni o'rganishda qaysi tushuncha kalit hisoblanadi?",
+        "options": [
+          "uchinchi",
+          "quyosh",
+          "ushbu",
+          "sayyora"
+        ],
+        "correctIndex": 1
+      },
+      {
+        "id": 12,
+        "question": "«Yerning aylanishi kun va tun «sayyorasi» tushunchasi mavzuda markaziy o'rin tutadi va unin» — bu jumla qaysi tushuncha haqida?",
+        "questionText": "«Yerning aylanishi kun va tun «sayyorasi» tushunchasi mavzuda markaziy o'rin tutadi va unin» — bu jumla qaysi tushuncha haqida?",
+        "options": [
+          "sayyora",
+          "tizimidagi",
+          "ushbu",
+          "doirasida"
+        ],
+        "correctIndex": 1
+      },
+      {
+        "id": 13,
+        "question": "Geografiya nuqtai nazaridan «uchinchi» nimani bildiradi?",
+        "questionText": "Geografiya nuqtai nazaridan «uchinchi» nimani bildiradi?",
+        "options": [
+          "ushbu",
+          "doirasida",
+          "uchinchi",
+          "o'quvchilar"
+        ],
+        "correctIndex": 2
+      },
+      {
+        "id": 14,
+        "question": "«1. Yer sayyorasi» mavzusi doirasida qaysi atama keng yoritilgan?",
+        "questionText": "«1. Yer sayyorasi» mavzusi doirasida qaysi atama keng yoritilgan?",
+        "options": [
+          "o'quvchilar",
+          "sayyora",
+          "bog'liq",
+          "doirasida"
+        ],
+        "correctIndex": 1
+      },
+      {
+        "id": 15,
+        "question": "Berilgan matnda qaysi tushuncha asosiy o'rin tutadi?",
+        "questionText": "Berilgan matnda qaysi tushuncha asosiy o'rin tutadi?",
+        "options": [
+          "bog'liq",
+          "tushunchalar",
+          "ushbu",
+          "o'quvchilar"
+        ],
+        "correctIndex": 2
+      }
+    ],
+    "closedTests": [
+      {
+        "id": 1,
+        "question": "«1. Yer sayyorasi» mavzusida «sayyorasi» tushunchasi nimani anglatadi va matnda qanday yoritilgan?",
+        "questionText": "«1. Yer sayyorasi» mavzusida «sayyorasi» tushunchasi nimani anglatadi va matnda qanday yoritilgan?"
+      },
+      {
+        "id": 2,
+        "question": "«geografiya» atamasi geografiyada qanday ma'noga ega? Misol bilan tushuntiring.",
+        "questionText": "«geografiya» atamasi geografiyada qanday ma'noga ega? Misol bilan tushuntiring."
+      },
+      {
+        "id": 3,
+        "question": "1. Yer sayyorasi mavzusining asosiy g'oyalarini o'z so'zingiz bilan bayon qiling.",
+        "questionText": "1. Yer sayyorasi mavzusining asosiy g'oyalarini o'z so'zingiz bilan bayon qiling."
+      },
+      {
+        "id": 4,
+        "question": "Matnga ko'ra «muhim» qanday xususiyatlarga ega?",
+        "questionText": "Matnga ko'ra «muhim» qanday xususiyatlarga ega?"
+      },
+      {
+        "id": 5,
+        "question": "«1. Yer sayyorasi» mavzusi qaysi tabiiy yoki ijtimoiy hodisalar bilan bog'liq?",
+        "questionText": "«1. Yer sayyorasi» mavzusi qaysi tabiiy yoki ijtimoiy hodisalar bilan bog'liq?"
+      },
+      {
+        "id": 6,
+        "question": "Quyidagi jumlani izohlang: «Yerning shakli geoidga yaqin bo‘lib, o‘z o‘qi atrofida va Quyosh atrofida harakat qiladi.»",
+        "questionText": "Quyidagi jumlani izohlang: «Yerning shakli geoidga yaqin bo‘lib, o‘z o‘qi atrofida va Quyosh atrofida harakat qiladi.»"
+      },
+      {
+        "id": 7,
+        "question": "«quyida» va «1. Yer sayyorasi» o'rtasidagi bog'liqlikni izohlang.",
+        "questionText": "«quyida» va «1. Yer sayyorasi» o'rtasidagi bog'liqlikni izohlang."
+      },
+      {
+        "id": 8,
+        "question": "1. Yer sayyorasi mavzusini o'rganish kundalik hayotda nima uchun zarur?",
+        "questionText": "1. Yer sayyorasi mavzusini o'rganish kundalik hayotda nima uchun zarur?"
+      },
+      {
+        "id": 9,
+        "question": "Matndan «batafsil» bilan bog'liq misol keltiring va tahlil qiling.",
+        "questionText": "Matndan «batafsil» bilan bog'liq misol keltiring va tahlil qiling."
+      },
+      {
+        "id": 10,
+        "question": "«1. Yer sayyorasi» mavzusida qaysi geografik qonuniyatlar uchraydi?",
+        "questionText": "«1. Yer sayyorasi» mavzusida qaysi geografik qonuniyatlar uchraydi?"
+      },
+      {
+        "id": 11,
+        "question": "«quyosh» tushunchasining kelib chiqishi va rivojlanishini bayon qiling.",
+        "questionText": "«quyosh» tushunchasining kelib chiqishi va rivojlanishini bayon qiling."
+      },
+      {
+        "id": 12,
+        "question": "«Yerning aylanishi kun va tun «sayyorasi» tushunchasi mavzuda markaziy o'rin tutadi va uning ma'nosini bilish bilimni mus» — bu fikrga qanday qo'shimcha izoh berish mumkin?",
+        "questionText": "«Yerning aylanishi kun va tun «sayyorasi» tushunchasi mavzuda markaziy o'rin tutadi va uning ma'nosini bilish bilimni mus» — bu fikrga qanday qo'shimcha izoh berish mumkin?"
+      },
+      {
+        "id": 13,
+        "question": "1. Yer sayyorasi mavzusining inson hayotidagi amaliy ahamiyati nimada?",
+        "questionText": "1. Yer sayyorasi mavzusining inson hayotidagi amaliy ahamiyati nimada?"
+      },
+      {
+        "id": 14,
+        "question": "«sayyora» bilan bog'liq qiziqarli geografik fakt keltiring.",
+        "questionText": "«sayyora» bilan bog'liq qiziqarli geografik fakt keltiring."
+      },
+      {
+        "id": 15,
+        "question": "1. Yer sayyorasi mavzusini o'rganishdan keyin qanday xulosa chiqarish mumkin?",
+        "questionText": "1. Yer sayyorasi mavzusini o'rganishdan keyin qanday xulosa chiqarish mumkin?"
+      }
+    ]
+  },
+  {
+    "id": 2,
+    "createdAt": "2026-06-19T10:30:47.846Z",
+    "tests": [
+      {
+        "id": 1,
+        "question": "Bo'sh joyni to'ldiring: «_____ va okeanlar — geografiya darsining muhim mavzularidan biri bo'lib, quyida uning asosiy mazmuni batafsil yoritiladi.»",
+        "questionText": "Bo'sh joyni to'ldiring: «_____ va okeanlar — geografiya darsining muhim mavzularidan biri bo'lib, quyida uning asosiy mazmuni batafsil yoritiladi.»",
+        "options": [
+          "darsining",
+          "muhim",
+          "materiklar",
+          "geografiya"
+        ],
+        "correctIndex": 2
+      },
+      {
+        "id": 2,
+        "question": "«2. Materiklar va okeanlar» mavzusida «okeanlar» tushunchasi nimani anglatadi?",
+        "questionText": "«2. Materiklar va okeanlar» mavzusida «okeanlar» tushunchasi nimani anglatadi?",
+        "options": [
+          "muhim",
+          "okeanlar",
+          "mavzularidan",
+          "darsining"
+        ],
+        "correctIndex": 1
+      },
+      {
+        "id": 3,
+        "question": "Quyidagi atamalardan qaysi biri «2. Materiklar va okeanlar» mavzusiga bevosita aloqador?",
+        "questionText": "Quyidagi atamalardan qaysi biri «2. Materiklar va okeanlar» mavzusiga bevosita aloqador?",
+        "options": [
+          "mavzularidan",
+          "geografiya",
+          "muhim",
+          "biri"
+        ],
+        "correctIndex": 1
+      },
+      {
+        "id": 4,
+        "question": "Matnda «Shuningdek, Tinch, Atlantika, Hind, Shimoliy Muz va Janubiy okeanlar mavjud....» — bu fikr nima haqida?",
+        "questionText": "Matnda «Shuningdek, Tinch, Atlantika, Hind, Shimoliy Muz va Janubiy okeanlar mavjud....» — bu fikr nima haqida?",
+        "options": [
+          "biri",
+          "darsining",
+          "mavzularidan",
+          "quyida"
+        ],
+        "correctIndex": 1
+      },
+      {
+        "id": 5,
+        "question": "«muhim» so'zining geografik ma'nosi nima?",
+        "questionText": "«muhim» so'zining geografik ma'nosi nima?",
+        "options": [
+          "quyida",
+          "biri",
+          "mazmuni",
+          "muhim"
+        ],
+        "correctIndex": 3
+      },
+      {
+        "id": 6,
+        "question": "«2. Materiklar va okeanlar» mavzusining asosiy tushunchalaridan biri qaysi?",
+        "questionText": "«2. Materiklar va okeanlar» mavzusining asosiy tushunchalaridan biri qaysi?",
+        "options": [
+          "mazmuni",
+          "batafsil",
+          "quyida",
+          "mavzularidan"
+        ],
+        "correctIndex": 3
+      },
+      {
+        "id": 7,
+        "question": "Matndagi «okeanlar Yer yuzasining asosiy qismlarini tashkil qiladi.» fikriga eng mos kelgan tushuncha qaysi?",
+        "questionText": "Matndagi «okeanlar Yer yuzasining asosiy qismlarini tashkil qiladi.» fikriga eng mos kelgan tushuncha qaysi?",
+        "options": [
+          "batafsil",
+          "mazmuni",
+          "yoritiladi",
+          "biri"
+        ],
+        "correctIndex": 3
+      },
+      {
+        "id": 8,
+        "question": "Quyidagilardan qaysi biri «2. Materiklar va okeanlar» bilan bog'liq emas?",
+        "questionText": "Quyidagilardan qaysi biri «2. Materiklar va okeanlar» bilan bog'liq emas?",
+        "options": [
+          "yoritiladi",
+          "quyida",
+          "batafsil",
+          "dunyoda"
+        ],
+        "correctIndex": 1
+      },
+      {
+        "id": 9,
+        "question": "«mazmuni» qanday geografik obyekt yoki hodisa hisoblanadi?",
+        "questionText": "«mazmuni» qanday geografik obyekt yoki hodisa hisoblanadi?",
+        "options": [
+          "dunyoda",
+          "yoritiladi",
+          "oltita",
+          "mazmuni"
+        ],
+        "correctIndex": 3
+      },
+      {
+        "id": 10,
+        "question": "Matnga ko'ra «2. Materiklar va okeanlar» mavzusida nima alohida ta'kidlangan?",
+        "questionText": "Matnga ko'ra «2. Materiklar va okeanlar» mavzusida nima alohida ta'kidlangan?",
+        "options": [
+          "oltita",
+          "materik",
+          "dunyoda",
+          "batafsil"
+        ],
+        "correctIndex": 3
+      },
+      {
+        "id": 11,
+        "question": "«2. Materiklar va okeanlar»ni o'rganishda qaysi tushuncha kalit hisoblanadi?",
+        "questionText": "«2. Materiklar va okeanlar»ni o'rganishda qaysi tushuncha kalit hisoblanadi?",
+        "options": [
+          "yoritiladi",
+          "materik",
+          "mavjud",
+          "oltita"
+        ],
+        "correctIndex": 0
+      },
+      {
+        "id": 12,
+        "question": "««dunyoda» kabi atamalar geografik ma'lumotlarni tizimli o'rganishda alohida ahamiyatga ega» — bu jumla qaysi tushuncha haqida?",
+        "questionText": "««dunyoda» kabi atamalar geografik ma'lumotlarni tizimli o'rganishda alohida ahamiyatga ega» — bu jumla qaysi tushuncha haqida?",
+        "options": [
+          "mavjud",
+          "dunyoda",
+          "materik",
+          "yevrosiyo"
+        ],
+        "correctIndex": 1
+      },
+      {
+        "id": 13,
+        "question": "Geografiya nuqtai nazaridan «oltita» nimani bildiradi?",
+        "questionText": "Geografiya nuqtai nazaridan «oltita» nimani bildiradi?",
+        "options": [
+          "oltita",
+          "yevrosiyo",
+          "mavjud",
+          "afrika"
+        ],
+        "correctIndex": 0
+      },
+      {
+        "id": 14,
+        "question": "«2. Materiklar va okeanlar» mavzusi doirasida qaysi atama keng yoritilgan?",
+        "questionText": "«2. Materiklar va okeanlar» mavzusi doirasida qaysi atama keng yoritilgan?",
+        "options": [
+          "shimoliy",
+          "yevrosiyo",
+          "materik",
+          "afrika"
+        ],
+        "correctIndex": 2
+      },
+      {
+        "id": 15,
+        "question": "Berilgan matnda qaysi tushuncha asosiy o'rin tutadi?",
+        "questionText": "Berilgan matnda qaysi tushuncha asosiy o'rin tutadi?",
+        "options": [
+          "afrika",
+          "amerika",
+          "shimoliy",
+          "mavjud"
+        ],
+        "correctIndex": 3
+      }
+    ],
+    "lessonId": 1,
+    "title": "2. Materiklar va okeanlar",
+    "content": "2. Materiklar va okeanlar — geografiya darsining muhim mavzularidan biri bo'lib, quyida uning asosiy mazmuni batafsil yoritiladi. Dunyoda oltita materik mavjud: Yevrosiyo, Afrika, Shimoliy Amerika, Janubiy Amerika, Avstraliya va Ushbu mavzu doirasida o'quvchilar 2. materiklar va okeanlar bilan bog'liq asosiy tushunchalar, ta'riflar va qonuniyatlar bilan tanishadilar. Shuningdek, Tinch, Atlantika, Hind, Shimoliy Muz va Janubiy okeanlar mavjud. Materiklar va okeanlar Yer yuzasining asosiy qismlarini tashkil qiladi. Ular iqlim, o‘simlik va hayvonot dunyosi hamda aholining joylashuviga katta ta’sir ko‘rsatadi.Dunyoda oltita materik mavjud: Yevrosiyo, Afrika, Shimoliy Amerika, Janubiy Amerika, Avstraliya va Antarktida. okeanlar Yer yuzasining asosiy qismlarini tashkil qiladi. Ular iqlim, o‘simlik va hayvonot dunyosi hamda aholining joylashuviga katta ta’sir ko‘rsatadi.Dunyoda oltita materik mavjud: Yevrosiyo, Afrika, Shimoliy Amerika, Janubiy Amerika, Avstraliya va Antarktida. Shuningdek, Tinch, Atlantika, Hind, Shimoliy Muz va Janubiy okeanlar mavjud. Materiklar va okeanlar Yer yuzasining asosiy «materiklar» tushunchasi mavzuda markaziy o'rin tutadi va uning ma'nosini bilish bilimni mustahkamlaydi. «okeanlar» bilan bog'liq jihatlar mavzuni chuqurroq anglashga yordam beradi. «dunyoda» kabi atamalar geografik ma'lumotlarni tizimli o'rganishda alohida ahamiyatga ega. 2. Materiklar va okeanlar tabiat, jamiyat va inson faoliyati o'rtasidagi o'zaro aloqalarni ko'rsatib beradi.",
+    "openTests": [
+      {
+        "id": 1,
+        "question": "Bo'sh joyni to'ldiring: «_____ va okeanlar — geografiya darsining muhim mavzularidan biri bo'lib, quyida uning asosiy mazmuni batafsil yoritiladi.»",
+        "questionText": "Bo'sh joyni to'ldiring: «_____ va okeanlar — geografiya darsining muhim mavzularidan biri bo'lib, quyida uning asosiy mazmuni batafsil yoritiladi.»",
+        "options": [
+          "darsining",
+          "muhim",
+          "materiklar",
+          "geografiya"
+        ],
+        "correctIndex": 2
+      },
+      {
+        "id": 2,
+        "question": "«2. Materiklar va okeanlar» mavzusida «okeanlar» tushunchasi nimani anglatadi?",
+        "questionText": "«2. Materiklar va okeanlar» mavzusida «okeanlar» tushunchasi nimani anglatadi?",
+        "options": [
+          "muhim",
+          "okeanlar",
+          "mavzularidan",
+          "darsining"
+        ],
+        "correctIndex": 1
+      },
+      {
+        "id": 3,
+        "question": "Quyidagi atamalardan qaysi biri «2. Materiklar va okeanlar» mavzusiga bevosita aloqador?",
+        "questionText": "Quyidagi atamalardan qaysi biri «2. Materiklar va okeanlar» mavzusiga bevosita aloqador?",
+        "options": [
+          "mavzularidan",
+          "geografiya",
+          "muhim",
+          "biri"
+        ],
+        "correctIndex": 1
+      },
+      {
+        "id": 4,
+        "question": "Matnda «Shuningdek, Tinch, Atlantika, Hind, Shimoliy Muz va Janubiy okeanlar mavjud....» — bu fikr nima haqida?",
+        "questionText": "Matnda «Shuningdek, Tinch, Atlantika, Hind, Shimoliy Muz va Janubiy okeanlar mavjud....» — bu fikr nima haqida?",
+        "options": [
+          "biri",
+          "darsining",
+          "mavzularidan",
+          "quyida"
+        ],
+        "correctIndex": 1
+      },
+      {
+        "id": 5,
+        "question": "«muhim» so'zining geografik ma'nosi nima?",
+        "questionText": "«muhim» so'zining geografik ma'nosi nima?",
+        "options": [
+          "quyida",
+          "biri",
+          "mazmuni",
+          "muhim"
+        ],
+        "correctIndex": 3
+      },
+      {
+        "id": 6,
+        "question": "«2. Materiklar va okeanlar» mavzusining asosiy tushunchalaridan biri qaysi?",
+        "questionText": "«2. Materiklar va okeanlar» mavzusining asosiy tushunchalaridan biri qaysi?",
+        "options": [
+          "mazmuni",
+          "batafsil",
+          "quyida",
+          "mavzularidan"
+        ],
+        "correctIndex": 3
+      },
+      {
+        "id": 7,
+        "question": "Matndagi «okeanlar Yer yuzasining asosiy qismlarini tashkil qiladi.» fikriga eng mos kelgan tushuncha qaysi?",
+        "questionText": "Matndagi «okeanlar Yer yuzasining asosiy qismlarini tashkil qiladi.» fikriga eng mos kelgan tushuncha qaysi?",
+        "options": [
+          "batafsil",
+          "mazmuni",
+          "yoritiladi",
+          "biri"
+        ],
+        "correctIndex": 3
+      },
+      {
+        "id": 8,
+        "question": "Quyidagilardan qaysi biri «2. Materiklar va okeanlar» bilan bog'liq emas?",
+        "questionText": "Quyidagilardan qaysi biri «2. Materiklar va okeanlar» bilan bog'liq emas?",
+        "options": [
+          "yoritiladi",
+          "quyida",
+          "batafsil",
+          "dunyoda"
+        ],
+        "correctIndex": 1
+      },
+      {
+        "id": 9,
+        "question": "«mazmuni» qanday geografik obyekt yoki hodisa hisoblanadi?",
+        "questionText": "«mazmuni» qanday geografik obyekt yoki hodisa hisoblanadi?",
+        "options": [
+          "dunyoda",
+          "yoritiladi",
+          "oltita",
+          "mazmuni"
+        ],
+        "correctIndex": 3
+      },
+      {
+        "id": 10,
+        "question": "Matnga ko'ra «2. Materiklar va okeanlar» mavzusida nima alohida ta'kidlangan?",
+        "questionText": "Matnga ko'ra «2. Materiklar va okeanlar» mavzusida nima alohida ta'kidlangan?",
+        "options": [
+          "oltita",
+          "materik",
+          "dunyoda",
+          "batafsil"
+        ],
+        "correctIndex": 3
+      },
+      {
+        "id": 11,
+        "question": "«2. Materiklar va okeanlar»ni o'rganishda qaysi tushuncha kalit hisoblanadi?",
+        "questionText": "«2. Materiklar va okeanlar»ni o'rganishda qaysi tushuncha kalit hisoblanadi?",
+        "options": [
+          "yoritiladi",
+          "materik",
+          "mavjud",
+          "oltita"
+        ],
+        "correctIndex": 0
+      },
+      {
+        "id": 12,
+        "question": "««dunyoda» kabi atamalar geografik ma'lumotlarni tizimli o'rganishda alohida ahamiyatga ega» — bu jumla qaysi tushuncha haqida?",
+        "questionText": "««dunyoda» kabi atamalar geografik ma'lumotlarni tizimli o'rganishda alohida ahamiyatga ega» — bu jumla qaysi tushuncha haqida?",
+        "options": [
+          "mavjud",
+          "dunyoda",
+          "materik",
+          "yevrosiyo"
+        ],
+        "correctIndex": 1
+      },
+      {
+        "id": 13,
+        "question": "Geografiya nuqtai nazaridan «oltita» nimani bildiradi?",
+        "questionText": "Geografiya nuqtai nazaridan «oltita» nimani bildiradi?",
+        "options": [
+          "oltita",
+          "yevrosiyo",
+          "mavjud",
+          "afrika"
+        ],
+        "correctIndex": 0
+      },
+      {
+        "id": 14,
+        "question": "«2. Materiklar va okeanlar» mavzusi doirasida qaysi atama keng yoritilgan?",
+        "questionText": "«2. Materiklar va okeanlar» mavzusi doirasida qaysi atama keng yoritilgan?",
+        "options": [
+          "shimoliy",
+          "yevrosiyo",
+          "materik",
+          "afrika"
+        ],
+        "correctIndex": 2
+      },
+      {
+        "id": 15,
+        "question": "Berilgan matnda qaysi tushuncha asosiy o'rin tutadi?",
+        "questionText": "Berilgan matnda qaysi tushuncha asosiy o'rin tutadi?",
+        "options": [
+          "afrika",
+          "amerika",
+          "shimoliy",
+          "mavjud"
+        ],
+        "correctIndex": 3
+      }
+    ],
+    "closedTests": [
+      {
+        "id": 1,
+        "question": "«2. Materiklar va okeanlar» mavzusida «materiklar» tushunchasi nimani anglatadi va matnda qanday yoritilgan?",
+        "questionText": "«2. Materiklar va okeanlar» mavzusida «materiklar» tushunchasi nimani anglatadi va matnda qanday yoritilgan?"
+      },
+      {
+        "id": 2,
+        "question": "«okeanlar» atamasi geografiyada qanday ma'noga ega? Misol bilan tushuntiring.",
+        "questionText": "«okeanlar» atamasi geografiyada qanday ma'noga ega? Misol bilan tushuntiring."
+      },
+      {
+        "id": 3,
+        "question": "2. Materiklar va okeanlar mavzusining asosiy g'oyalarini o'z so'zingiz bilan bayon qiling.",
+        "questionText": "2. Materiklar va okeanlar mavzusining asosiy g'oyalarini o'z so'zingiz bilan bayon qiling."
+      },
+      {
+        "id": 4,
+        "question": "Matnga ko'ra «darsining» qanday xususiyatlarga ega?",
+        "questionText": "Matnga ko'ra «darsining» qanday xususiyatlarga ega?"
+      },
+      {
+        "id": 5,
+        "question": "«2. Materiklar va okeanlar» mavzusi qaysi tabiiy yoki ijtimoiy hodisalar bilan bog'liq?",
+        "questionText": "«2. Materiklar va okeanlar» mavzusi qaysi tabiiy yoki ijtimoiy hodisalar bilan bog'liq?"
+      },
+      {
+        "id": 6,
+        "question": "Quyidagi jumlani izohlang: «Ular iqlim, o‘simlik va hayvonot dunyosi hamda aholining joylashuviga katta ta’sir ko‘rsatadi.Dunyoda oltita materik mavjud: Yevrosiyo, Afri»",
+        "questionText": "Quyidagi jumlani izohlang: «Ular iqlim, o‘simlik va hayvonot dunyosi hamda aholining joylashuviga katta ta’sir ko‘rsatadi.Dunyoda oltita materik mavjud: Yevrosiyo, Afri»"
+      },
+      {
+        "id": 7,
+        "question": "«biri» va «2. Materiklar va okeanlar» o'rtasidagi bog'liqlikni izohlang.",
+        "questionText": "«biri» va «2. Materiklar va okeanlar» o'rtasidagi bog'liqlikni izohlang."
+      },
+      {
+        "id": 8,
+        "question": "2. Materiklar va okeanlar mavzusini o'rganish kundalik hayotda nima uchun zarur?",
+        "questionText": "2. Materiklar va okeanlar mavzusini o'rganish kundalik hayotda nima uchun zarur?"
+      },
+      {
+        "id": 9,
+        "question": "Matndan «mazmuni» bilan bog'liq misol keltiring va tahlil qiling.",
+        "questionText": "Matndan «mazmuni» bilan bog'liq misol keltiring va tahlil qiling."
+      },
+      {
+        "id": 10,
+        "question": "«2. Materiklar va okeanlar» mavzusida qaysi geografik qonuniyatlar uchraydi?",
+        "questionText": "«2. Materiklar va okeanlar» mavzusida qaysi geografik qonuniyatlar uchraydi?"
+      },
+      {
+        "id": 11,
+        "question": "«yoritiladi» tushunchasining kelib chiqishi va rivojlanishini bayon qiling.",
+        "questionText": "«yoritiladi» tushunchasining kelib chiqishi va rivojlanishini bayon qiling."
+      },
+      {
+        "id": 12,
+        "question": "««dunyoda» kabi atamalar geografik ma'lumotlarni tizimli o'rganishda alohida ahamiyatga ega.» — bu fikrga qanday qo'shimcha izoh berish mumkin?",
+        "questionText": "««dunyoda» kabi atamalar geografik ma'lumotlarni tizimli o'rganishda alohida ahamiyatga ega.» — bu fikrga qanday qo'shimcha izoh berish mumkin?"
+      },
+      {
+        "id": 13,
+        "question": "2. Materiklar va okeanlar mavzusining inson hayotidagi amaliy ahamiyati nimada?",
+        "questionText": "2. Materiklar va okeanlar mavzusining inson hayotidagi amaliy ahamiyati nimada?"
+      },
+      {
+        "id": 14,
+        "question": "«materik» bilan bog'liq qiziqarli geografik fakt keltiring.",
+        "questionText": "«materik» bilan bog'liq qiziqarli geografik fakt keltiring."
+      },
+      {
+        "id": 15,
+        "question": "2. Materiklar va okeanlar mavzusini o'rganishdan keyin qanday xulosa chiqarish mumkin?",
+        "questionText": "2. Materiklar va okeanlar mavzusini o'rganishdan keyin qanday xulosa chiqarish mumkin?"
+      }
+    ]
+  },
+  {
+    "id": 3,
+    "createdAt": "2026-06-19T10:30:47.851Z",
+    "tests": [
+      {
+        "id": 1,
+        "question": "Bo'sh joyni to'ldiring: «_____ — geografiya darsining muhim mavzularidan biri bo'lib, quyida uning asosiy mazmuni batafsil yoritiladi.»",
+        "questionText": "Bo'sh joyni to'ldiring: «_____ — geografiya darsining muhim mavzularidan biri bo'lib, quyida uning asosiy mazmuni batafsil yoritiladi.»",
+        "options": [
+          "muhim",
+          "mavzularidan",
+          "darsining",
+          "atmosfera"
+        ],
+        "correctIndex": 3
+      },
+      {
+        "id": 2,
+        "question": "«3. Atmosfera» mavzusida «geografiya» tushunchasi nimani anglatadi?",
+        "questionText": "«3. Atmosfera» mavzusida «geografiya» tushunchasi nimani anglatadi?",
+        "options": [
+          "mavzularidan",
+          "geografiya",
+          "muhim",
+          "biri"
+        ],
+        "correctIndex": 1
+      },
+      {
+        "id": 3,
+        "question": "Quyidagi atamalardan qaysi biri «3. Atmosfera» mavzusiga bevosita aloqador?",
+        "questionText": "Quyidagi atamalardan qaysi biri «3. Atmosfera» mavzusiga bevosita aloqador?",
+        "options": [
+          "biri",
+          "darsining",
+          "mavzularidan",
+          "quyida"
+        ],
+        "correctIndex": 1
+      },
+      {
+        "id": 4,
+        "question": "Matnda «atmosfera bilan bog'liq asosiy tushunchalar, ta'riflar va qonuniyatlar bilan tan...» — bu fikr nima haqida?",
+        "questionText": "Matnda «atmosfera bilan bog'liq asosiy tushunchalar, ta'riflar va qonuniyatlar bilan tan...» — bu fikr nima haqida?",
+        "options": [
+          "quyida",
+          "biri",
+          "mazmuni",
+          "muhim"
+        ],
+        "correctIndex": 3
+      },
+      {
+        "id": 5,
+        "question": "«mavzularidan» so'zining geografik ma'nosi nima?",
+        "questionText": "«mavzularidan» so'zining geografik ma'nosi nima?",
+        "options": [
+          "mazmuni",
+          "batafsil",
+          "quyida",
+          "mavzularidan"
+        ],
+        "correctIndex": 3
+      },
+      {
+        "id": 6,
+        "question": "«3. Atmosfera» mavzusining asosiy tushunchalaridan biri qaysi?",
+        "questionText": "«3. Atmosfera» mavzusining asosiy tushunchalaridan biri qaysi?",
+        "options": [
+          "batafsil",
+          "mazmuni",
+          "yoritiladi",
+          "biri"
+        ],
+        "correctIndex": 3
+      },
+      {
+        "id": 7,
+        "question": "Matndagi ««atmosfera» tushunchasi mavzuda markaziy o'rin tutadi va uning ma'nosi» fikriga eng mos kelgan tushuncha qaysi?",
+        "questionText": "Matndagi ««atmosfera» tushunchasi mavzuda markaziy o'rin tutadi va uning ma'nosi» fikriga eng mos kelgan tushuncha qaysi?",
+        "options": [
+          "yoritiladi",
+          "quyida",
+          "batafsil",
+          "yerning"
+        ],
+        "correctIndex": 1
+      },
+      {
+        "id": 8,
+        "question": "Quyidagilardan qaysi biri «3. Atmosfera» bilan bog'liq emas?",
+        "questionText": "Quyidagilardan qaysi biri «3. Atmosfera» bilan bog'liq emas?",
+        "options": [
+          "yerning",
+          "yoritiladi",
+          "mazmuni",
+          "qobig'i"
+        ],
+        "correctIndex": 2
+      },
+      {
+        "id": 9,
+        "question": "«batafsil» qanday geografik obyekt yoki hodisa hisoblanadi?",
+        "questionText": "«batafsil» qanday geografik obyekt yoki hodisa hisoblanadi?",
+        "options": [
+          "qobig'i",
+          "yerning",
+          "necha",
+          "batafsil"
+        ],
+        "correctIndex": 3
+      },
+      {
+        "id": 10,
+        "question": "Matnga ko'ra «3. Atmosfera» mavzusida nima alohida ta'kidlangan?",
+        "questionText": "Matnga ko'ra «3. Atmosfera» mavzusida nima alohida ta'kidlangan?",
+        "options": [
+          "yoritiladi",
+          "necha",
+          "qobig'i",
+          "qatlamlardan"
+        ],
+        "correctIndex": 0
+      },
+      {
+        "id": 11,
+        "question": "«3. Atmosfera»ni o'rganishda qaysi tushuncha kalit hisoblanadi?",
+        "questionText": "«3. Atmosfera»ni o'rganishda qaysi tushuncha kalit hisoblanadi?",
+        "options": [
+          "yerning",
+          "tashkil",
+          "qatlamlardan",
+          "necha"
+        ],
+        "correctIndex": 0
+      },
+      {
+        "id": 12,
+        "question": "«Geografik xaritalar, statistik ma'lumotlar va tabiiy hodisalarni tahlil qilish ushbu mavzu» — bu jumla qaysi tushuncha haqida?",
+        "questionText": "«Geografik xaritalar, statistik ma'lumotlar va tabiiy hodisalarni tahlil qilish ushbu mavzu» — bu jumla qaysi tushuncha haqida?",
+        "options": [
+          "topgan",
+          "qobig'i",
+          "tashkil",
+          "qatlamlardan"
+        ],
+        "correctIndex": 1
+      },
+      {
+        "id": 13,
+        "question": "Geografiya nuqtai nazaridan «necha» nimani bildiradi?",
+        "questionText": "Geografiya nuqtai nazaridan «necha» nimani bildiradi?",
+        "options": [
+          "necha",
+          "tashkil",
+          "ushbu",
+          "topgan"
+        ],
+        "correctIndex": 0
+      },
+      {
+        "id": 14,
+        "question": "«3. Atmosfera» mavzusi doirasida qaysi atama keng yoritilgan?",
+        "questionText": "«3. Atmosfera» mavzusi doirasida qaysi atama keng yoritilgan?",
+        "options": [
+          "topgan",
+          "qatlamlardan",
+          "ushbu",
+          "doirasida"
+        ],
+        "correctIndex": 1
+      },
+      {
+        "id": 15,
+        "question": "Berilgan matnda qaysi tushuncha asosiy o'rin tutadi?",
+        "questionText": "Berilgan matnda qaysi tushuncha asosiy o'rin tutadi?",
+        "options": [
+          "ushbu",
+          "doirasida",
+          "tashkil",
+          "o'quvchilar"
+        ],
+        "correctIndex": 2
+      }
+    ],
+    "lessonId": 1,
+    "title": "3. Atmosfera",
+    "content": "3. Atmosfera — geografiya darsining muhim mavzularidan biri bo'lib, quyida uning asosiy mazmuni batafsil yoritiladi. Atmosfera Yerning gaz qobig‘i bo‘lib, u bir necha qatlamlardan tashkil topgan. Ushbu mavzu doirasida o'quvchilar 3. atmosfera bilan bog'liq asosiy tushunchalar, ta'riflar va qonuniyatlar bilan tanishadilar. qatlam bo‘lib, ob-havo hodisalari aynan shu yerda yuz beradi. Atmosfera Quyoshning zararli nurlaridan himoya qiladi, issiqlikni saqlaydi va tirik mavjudotlar uchun zarur sharoit yaratadi. «atmosfera» tushunchasi mavzuda markaziy o'rin tutadi va uning ma'nosini bilish bilimni mustahkamlaydi. «yerning» bilan bog'liq jihatlar mavzuni chuqurroq anglashga yordam beradi. «qobig'i» kabi atamalar geografik ma'lumotlarni tizimli o'rganishda alohida ahamiyatga ega. 3. Atmosfera tabiat, jamiyat va inson faoliyati o'rtasidagi o'zaro aloqalarni ko'rsatib beradi. Mavzu doirasida keltirilgan misollar nazariy bilimlarni amaliyot bilan bog'lashga xizmat qiladi. Geografik xaritalar, statistik ma'lumotlar va tabiiy hodisalarni tahlil qilish ushbu mavzuni o'zlashtirishni osonlashtiradi. Mavzuni o'rganish o'quvchilarda kuzatish, taqqoslash va xulosa chiqarish ko'nikmalarini shakllantiradi. «necha» va «qatlamlardan» tushunchalari mavzu mazmunini kengaytiradi va yangi qirralarini ochib beradi. Bu mavzudan olingan bilimlar kundalik hayotda, sayohatlarda va atrof-muhitni anglashda foydali bo'ladi. 3. Atmosferani o'rganish geografiya fani bo'yicha umumiy savodxonlikni va dunyoqarashni boyitadi. Mavzu yakunida o'quvchilar olgan bilimlarini misollar va vazifalar orqali mustahkamlaydi.",
+    "openTests": [
+      {
+        "id": 1,
+        "question": "Bo'sh joyni to'ldiring: «_____ — geografiya darsining muhim mavzularidan biri bo'lib, quyida uning asosiy mazmuni batafsil yoritiladi.»",
+        "questionText": "Bo'sh joyni to'ldiring: «_____ — geografiya darsining muhim mavzularidan biri bo'lib, quyida uning asosiy mazmuni batafsil yoritiladi.»",
+        "options": [
+          "muhim",
+          "mavzularidan",
+          "darsining",
+          "atmosfera"
+        ],
+        "correctIndex": 3
+      },
+      {
+        "id": 2,
+        "question": "«3. Atmosfera» mavzusida «geografiya» tushunchasi nimani anglatadi?",
+        "questionText": "«3. Atmosfera» mavzusida «geografiya» tushunchasi nimani anglatadi?",
+        "options": [
+          "mavzularidan",
+          "geografiya",
+          "muhim",
+          "biri"
+        ],
+        "correctIndex": 1
+      },
+      {
+        "id": 3,
+        "question": "Quyidagi atamalardan qaysi biri «3. Atmosfera» mavzusiga bevosita aloqador?",
+        "questionText": "Quyidagi atamalardan qaysi biri «3. Atmosfera» mavzusiga bevosita aloqador?",
+        "options": [
+          "biri",
+          "darsining",
+          "mavzularidan",
+          "quyida"
+        ],
+        "correctIndex": 1
+      },
+      {
+        "id": 4,
+        "question": "Matnda «atmosfera bilan bog'liq asosiy tushunchalar, ta'riflar va qonuniyatlar bilan tan...» — bu fikr nima haqida?",
+        "questionText": "Matnda «atmosfera bilan bog'liq asosiy tushunchalar, ta'riflar va qonuniyatlar bilan tan...» — bu fikr nima haqida?",
+        "options": [
+          "quyida",
+          "biri",
+          "mazmuni",
+          "muhim"
+        ],
+        "correctIndex": 3
+      },
+      {
+        "id": 5,
+        "question": "«mavzularidan» so'zining geografik ma'nosi nima?",
+        "questionText": "«mavzularidan» so'zining geografik ma'nosi nima?",
+        "options": [
+          "mazmuni",
+          "batafsil",
+          "quyida",
+          "mavzularidan"
+        ],
+        "correctIndex": 3
+      },
+      {
+        "id": 6,
+        "question": "«3. Atmosfera» mavzusining asosiy tushunchalaridan biri qaysi?",
+        "questionText": "«3. Atmosfera» mavzusining asosiy tushunchalaridan biri qaysi?",
+        "options": [
+          "batafsil",
+          "mazmuni",
+          "yoritiladi",
+          "biri"
+        ],
+        "correctIndex": 3
+      },
+      {
+        "id": 7,
+        "question": "Matndagi ««atmosfera» tushunchasi mavzuda markaziy o'rin tutadi va uning ma'nosi» fikriga eng mos kelgan tushuncha qaysi?",
+        "questionText": "Matndagi ««atmosfera» tushunchasi mavzuda markaziy o'rin tutadi va uning ma'nosi» fikriga eng mos kelgan tushuncha qaysi?",
+        "options": [
+          "yoritiladi",
+          "quyida",
+          "batafsil",
+          "yerning"
+        ],
+        "correctIndex": 1
+      },
+      {
+        "id": 8,
+        "question": "Quyidagilardan qaysi biri «3. Atmosfera» bilan bog'liq emas?",
+        "questionText": "Quyidagilardan qaysi biri «3. Atmosfera» bilan bog'liq emas?",
+        "options": [
+          "yerning",
+          "yoritiladi",
+          "mazmuni",
+          "qobig'i"
+        ],
+        "correctIndex": 2
+      },
+      {
+        "id": 9,
+        "question": "«batafsil» qanday geografik obyekt yoki hodisa hisoblanadi?",
+        "questionText": "«batafsil» qanday geografik obyekt yoki hodisa hisoblanadi?",
+        "options": [
+          "qobig'i",
+          "yerning",
+          "necha",
+          "batafsil"
+        ],
+        "correctIndex": 3
+      },
+      {
+        "id": 10,
+        "question": "Matnga ko'ra «3. Atmosfera» mavzusida nima alohida ta'kidlangan?",
+        "questionText": "Matnga ko'ra «3. Atmosfera» mavzusida nima alohida ta'kidlangan?",
+        "options": [
+          "yoritiladi",
+          "necha",
+          "qobig'i",
+          "qatlamlardan"
+        ],
+        "correctIndex": 0
+      },
+      {
+        "id": 11,
+        "question": "«3. Atmosfera»ni o'rganishda qaysi tushuncha kalit hisoblanadi?",
+        "questionText": "«3. Atmosfera»ni o'rganishda qaysi tushuncha kalit hisoblanadi?",
+        "options": [
+          "yerning",
+          "tashkil",
+          "qatlamlardan",
+          "necha"
+        ],
+        "correctIndex": 0
+      },
+      {
+        "id": 12,
+        "question": "«Geografik xaritalar, statistik ma'lumotlar va tabiiy hodisalarni tahlil qilish ushbu mavzu» — bu jumla qaysi tushuncha haqida?",
+        "questionText": "«Geografik xaritalar, statistik ma'lumotlar va tabiiy hodisalarni tahlil qilish ushbu mavzu» — bu jumla qaysi tushuncha haqida?",
+        "options": [
+          "topgan",
+          "qobig'i",
+          "tashkil",
+          "qatlamlardan"
+        ],
+        "correctIndex": 1
+      },
+      {
+        "id": 13,
+        "question": "Geografiya nuqtai nazaridan «necha» nimani bildiradi?",
+        "questionText": "Geografiya nuqtai nazaridan «necha» nimani bildiradi?",
+        "options": [
+          "necha",
+          "tashkil",
+          "ushbu",
+          "topgan"
+        ],
+        "correctIndex": 0
+      },
+      {
+        "id": 14,
+        "question": "«3. Atmosfera» mavzusi doirasida qaysi atama keng yoritilgan?",
+        "questionText": "«3. Atmosfera» mavzusi doirasida qaysi atama keng yoritilgan?",
+        "options": [
+          "topgan",
+          "qatlamlardan",
+          "ushbu",
+          "doirasida"
+        ],
+        "correctIndex": 1
+      },
+      {
+        "id": 15,
+        "question": "Berilgan matnda qaysi tushuncha asosiy o'rin tutadi?",
+        "questionText": "Berilgan matnda qaysi tushuncha asosiy o'rin tutadi?",
+        "options": [
+          "ushbu",
+          "doirasida",
+          "tashkil",
+          "o'quvchilar"
+        ],
+        "correctIndex": 2
+      }
+    ],
+    "closedTests": [
+      {
+        "id": 1,
+        "question": "«3. Atmosfera» mavzusida «atmosfera» tushunchasi nimani anglatadi va matnda qanday yoritilgan?",
+        "questionText": "«3. Atmosfera» mavzusida «atmosfera» tushunchasi nimani anglatadi va matnda qanday yoritilgan?"
+      },
+      {
+        "id": 2,
+        "question": "«geografiya» atamasi geografiyada qanday ma'noga ega? Misol bilan tushuntiring.",
+        "questionText": "«geografiya» atamasi geografiyada qanday ma'noga ega? Misol bilan tushuntiring."
+      },
+      {
+        "id": 3,
+        "question": "3. Atmosfera mavzusining asosiy g'oyalarini o'z so'zingiz bilan bayon qiling.",
+        "questionText": "3. Atmosfera mavzusining asosiy g'oyalarini o'z so'zingiz bilan bayon qiling."
+      },
+      {
+        "id": 4,
+        "question": "Matnga ko'ra «muhim» qanday xususiyatlarga ega?",
+        "questionText": "Matnga ko'ra «muhim» qanday xususiyatlarga ega?"
+      },
+      {
+        "id": 5,
+        "question": "«3. Atmosfera» mavzusi qaysi tabiiy yoki ijtimoiy hodisalar bilan bog'liq?",
+        "questionText": "«3. Atmosfera» mavzusi qaysi tabiiy yoki ijtimoiy hodisalar bilan bog'liq?"
+      },
+      {
+        "id": 6,
+        "question": "Quyidagi jumlani izohlang: «Atmosfera Quyoshning zararli nurlaridan himoya qiladi, issiqlikni saqlaydi va tirik mavjudotlar uchun zarur sharoit yaratadi.»",
+        "questionText": "Quyidagi jumlani izohlang: «Atmosfera Quyoshning zararli nurlaridan himoya qiladi, issiqlikni saqlaydi va tirik mavjudotlar uchun zarur sharoit yaratadi.»"
+      },
+      {
+        "id": 7,
+        "question": "«quyida» va «3. Atmosfera» o'rtasidagi bog'liqlikni izohlang.",
+        "questionText": "«quyida» va «3. Atmosfera» o'rtasidagi bog'liqlikni izohlang."
+      },
+      {
+        "id": 8,
+        "question": "3. Atmosfera mavzusini o'rganish kundalik hayotda nima uchun zarur?",
+        "questionText": "3. Atmosfera mavzusini o'rganish kundalik hayotda nima uchun zarur?"
+      },
+      {
+        "id": 9,
+        "question": "Matndan «batafsil» bilan bog'liq misol keltiring va tahlil qiling.",
+        "questionText": "Matndan «batafsil» bilan bog'liq misol keltiring va tahlil qiling."
+      },
+      {
+        "id": 10,
+        "question": "«3. Atmosfera» mavzusida qaysi geografik qonuniyatlar uchraydi?",
+        "questionText": "«3. Atmosfera» mavzusida qaysi geografik qonuniyatlar uchraydi?"
+      },
+      {
+        "id": 11,
+        "question": "«yerning» tushunchasining kelib chiqishi va rivojlanishini bayon qiling.",
+        "questionText": "«yerning» tushunchasining kelib chiqishi va rivojlanishini bayon qiling."
+      },
+      {
+        "id": 12,
+        "question": "«Geografik xaritalar, statistik ma'lumotlar va tabiiy hodisalarni tahlil qilish ushbu mavzuni o'zlashtirishni osonlashtir» — bu fikrga qanday qo'shimcha izoh berish mumkin?",
+        "questionText": "«Geografik xaritalar, statistik ma'lumotlar va tabiiy hodisalarni tahlil qilish ushbu mavzuni o'zlashtirishni osonlashtir» — bu fikrga qanday qo'shimcha izoh berish mumkin?"
+      },
+      {
+        "id": 13,
+        "question": "3. Atmosfera mavzusining inson hayotidagi amaliy ahamiyati nimada?",
+        "questionText": "3. Atmosfera mavzusining inson hayotidagi amaliy ahamiyati nimada?"
+      },
+      {
+        "id": 14,
+        "question": "«qatlamlardan» bilan bog'liq qiziqarli geografik fakt keltiring.",
+        "questionText": "«qatlamlardan» bilan bog'liq qiziqarli geografik fakt keltiring."
+      },
+      {
+        "id": 15,
+        "question": "3. Atmosfera mavzusini o'rganishdan keyin qanday xulosa chiqarish mumkin?",
+        "questionText": "3. Atmosfera mavzusini o'rganishdan keyin qanday xulosa chiqarish mumkin?"
+      }
+    ]
+  },
+  {
+    "id": 4,
+    "createdAt": "2026-06-19T10:30:47.853Z",
+    "tests": [
+      {
+        "id": 1,
+        "question": "Bo'sh joyni to'ldiring: «_____, yog‘ingarchilik va bulutlar atmosfera bilan bog‘liq hodisalardir.Atmosfera Yerning gaz — geografiya darsining muhim mavzularidan biri bo'lib, quyida uning asosiy mazmuni batafsil yoritiladi.»",
+        "questionText": "Bo'sh joyni to'ldiring: «_____, yog‘ingarchilik va bulutlar atmosfera bilan bog‘liq hodisalardir.Atmosfera Yerning gaz — geografiya darsining muhim mavzularidan biri bo'lib, quyida uning asosiy mazmuni batafsil yoritiladi.»",
+        "options": [
+          "shamol",
+          "bulutlar",
+          "bog'liq",
+          "atmosfera"
+        ],
+        "correctIndex": 0
+      },
+      {
+        "id": 2,
+        "question": "«Shamol, yog‘ingarchilik va bulutlar atmosfera bilan bog‘liq hodisalardir.Atmosfera Yerning gaz» mavzusida «yog'ingarchilik» tushunchasi nimani anglatadi?",
+        "questionText": "«Shamol, yog‘ingarchilik va bulutlar atmosfera bilan bog‘liq hodisalardir.Atmosfera Yerning gaz» mavzusida «yog'ingarchilik» tushunchasi nimani anglatadi?",
+        "options": [
+          "yog'ingarchilik",
+          "bog'liq",
+          "hodisalardir",
+          "atmosfera"
+        ],
+        "correctIndex": 0
+      },
+      {
+        "id": 3,
+        "question": "Quyidagi atamalardan qaysi biri «Shamol, yog‘ingarchilik va bulutlar atmosfera bilan bog‘liq hodisalardir.Atmosfera Yerning gaz» mavzusiga bevosita aloqador?",
+        "questionText": "Quyidagi atamalardan qaysi biri «Shamol, yog‘ingarchilik va bulutlar atmosfera bilan bog‘liq hodisalardir.Atmosfera Yerning gaz» mavzusiga bevosita aloqador?",
+        "options": [
+          "bog'liq",
+          "hodisalardir",
+          "yerning",
+          "bulutlar"
+        ],
+        "correctIndex": 3
+      },
+      {
+        "id": 4,
+        "question": "Matnda «Troposfera eng quyi qatlam bo‘lib, ob-havo hodisalari aynan shu yerda yuz beradi...» — bu fikr nima haqida?",
+        "questionText": "Matnda «Troposfera eng quyi qatlam bo‘lib, ob-havo hodisalari aynan shu yerda yuz beradi...» — bu fikr nima haqida?",
+        "options": [
+          "hodisalardir",
+          "geografiya",
+          "yerning",
+          "atmosfera"
+        ],
+        "correctIndex": 3
+      },
+      {
+        "id": 5,
+        "question": "«bog'liq» so'zining geografik ma'nosi nima?",
+        "questionText": "«bog'liq» so'zining geografik ma'nosi nima?",
+        "options": [
+          "geografiya",
+          "yerning",
+          "darsining",
+          "bog'liq"
+        ],
+        "correctIndex": 3
+      },
+      {
+        "id": 6,
+        "question": "«Shamol, yog‘ingarchilik va bulutlar atmosfera bilan bog‘liq hodisalardir.Atmosfera Yerning gaz» mavzusining asosiy tushunchalaridan biri qaysi?",
+        "questionText": "«Shamol, yog‘ingarchilik va bulutlar atmosfera bilan bog‘liq hodisalardir.Atmosfera Yerning gaz» mavzusining asosiy tushunchalaridan biri qaysi?",
+        "options": [
+          "darsining",
+          "hodisalardir",
+          "muhim",
+          "geografiya"
+        ],
+        "correctIndex": 1
+      },
+      {
+        "id": 7,
+        "question": "Matndagi «Troposfera eng quyi qatlam bo‘lib, ob-havo hodisalari aynan shu yerda » fikriga eng mos kelgan tushuncha qaysi?",
+        "questionText": "Matndagi «Troposfera eng quyi qatlam bo‘lib, ob-havo hodisalari aynan shu yerda » fikriga eng mos kelgan tushuncha qaysi?",
+        "options": [
+          "yerning",
+          "muhim",
+          "mavzularidan",
+          "darsining"
+        ],
+        "correctIndex": 0
+      },
+      {
+        "id": 8,
+        "question": "Quyidagilardan qaysi biri «Shamol, yog‘ingarchilik va bulutlar atmosfera bilan bog‘liq hodisalardir.Atmosfera Yerning gaz» bilan bog'liq emas?",
+        "questionText": "Quyidagilardan qaysi biri «Shamol, yog‘ingarchilik va bulutlar atmosfera bilan bog‘liq hodisalardir.Atmosfera Yerning gaz» bilan bog'liq emas?",
+        "options": [
+          "mavzularidan",
+          "geografiya",
+          "muhim",
+          "biri"
+        ],
+        "correctIndex": 1
+      },
+      {
+        "id": 9,
+        "question": "«darsining» qanday geografik obyekt yoki hodisa hisoblanadi?",
+        "questionText": "«darsining» qanday geografik obyekt yoki hodisa hisoblanadi?",
+        "options": [
+          "biri",
+          "darsining",
+          "mavzularidan",
+          "quyida"
+        ],
+        "correctIndex": 1
+      },
+      {
+        "id": 10,
+        "question": "Matnga ko'ra «Shamol, yog‘ingarchilik va bulutlar atmosfera bilan bog‘liq hodisalardir.Atmosfera Yerning gaz» mavzusida nima alohida ta'kidlangan?",
+        "questionText": "Matnga ko'ra «Shamol, yog‘ingarchilik va bulutlar atmosfera bilan bog‘liq hodisalardir.Atmosfera Yerning gaz» mavzusida nima alohida ta'kidlangan?",
+        "options": [
+          "quyida",
+          "biri",
+          "mazmuni",
+          "muhim"
+        ],
+        "correctIndex": 3
+      },
+      {
+        "id": 11,
+        "question": "«Shamol, yog‘ingarchilik va bulutlar atmosfera bilan bog‘liq hodisalardir.Atmosfera Yerning gaz»ni o'rganishda qaysi tushuncha kalit hisoblanadi?",
+        "questionText": "«Shamol, yog‘ingarchilik va bulutlar atmosfera bilan bog‘liq hodisalardir.Atmosfera Yerning gaz»ni o'rganishda qaysi tushuncha kalit hisoblanadi?",
+        "options": [
+          "mazmuni",
+          "batafsil",
+          "quyida",
+          "mavzularidan"
+        ],
+        "correctIndex": 3
+      },
+      {
+        "id": 12,
+        "question": "«Geografik xaritalar, statistik ma'lumotlar va tabiiy hodisalarni tahlil qilish ushbu mavzu» — bu jumla qaysi tushuncha haqida?",
+        "questionText": "«Geografik xaritalar, statistik ma'lumotlar va tabiiy hodisalarni tahlil qilish ushbu mavzu» — bu jumla qaysi tushuncha haqida?",
+        "options": [
+          "batafsil",
+          "mazmuni",
+          "yoritiladi",
+          "biri"
+        ],
+        "correctIndex": 3
+      },
+      {
+        "id": 13,
+        "question": "Geografiya nuqtai nazaridan «quyida» nimani bildiradi?",
+        "questionText": "Geografiya nuqtai nazaridan «quyida» nimani bildiradi?",
+        "options": [
+          "yoritiladi",
+          "quyida",
+          "batafsil",
+          "qobig'i"
+        ],
+        "correctIndex": 1
+      },
+      {
+        "id": 14,
+        "question": "«Shamol, yog‘ingarchilik va bulutlar atmosfera bilan bog‘liq hodisalardir.Atmosfera Yerning gaz» mavzusi doirasida qaysi atama keng yoritilgan?",
+        "questionText": "«Shamol, yog‘ingarchilik va bulutlar atmosfera bilan bog‘liq hodisalardir.Atmosfera Yerning gaz» mavzusi doirasida qaysi atama keng yoritilgan?",
+        "options": [
+          "qobig'i",
+          "yoritiladi",
+          "necha",
+          "mazmuni"
+        ],
+        "correctIndex": 3
+      },
+      {
+        "id": 15,
+        "question": "Berilgan matnda qaysi tushuncha asosiy o'rin tutadi?",
+        "questionText": "Berilgan matnda qaysi tushuncha asosiy o'rin tutadi?",
+        "options": [
+          "necha",
+          "qobig'i",
+          "batafsil",
+          "qatlamlardan"
+        ],
+        "correctIndex": 2
+      }
+    ],
+    "lessonId": 1,
+    "title": "Shamol, yog‘ingarchilik va bulutlar atmosfera bilan bog‘liq hodisalardir.Atmosfera Yerning gaz",
+    "content": "Shamol, yog‘ingarchilik va bulutlar atmosfera bilan bog‘liq hodisalardir.Atmosfera Yerning gaz — geografiya darsining muhim mavzularidan biri bo'lib, quyida uning asosiy mazmuni batafsil yoritiladi. qobig‘i bo‘lib, u bir necha qatlamlardan tashkil topgan. Ushbu mavzu doirasida o'quvchilar shamol, yog‘ingarchilik va bulutlar atmosfera bilan bog‘liq hodisalardir.atmosfera yerning gaz bilan bog'liq asosiy tushunchalar, ta'riflar va qonuniyatlar bilan tanishadilar. Troposfera eng quyi qatlam bo‘lib, ob-havo hodisalari aynan shu yerda yuz beradi. Atmosfera Quyoshning zararli nurlaridan himoya qiladi, issiqlikni saqlaydi va tirik mavjudotlar uchun zarur sharoit yaratadi. Shamol, yog‘ingarchilik va bulutlar atmosfera bilan bog‘liq hodisalardir.Atmosfera Yerning gaz qobig‘i bo‘lib, u bir necha qatlamlardan tashkil topgan. Troposfera eng quyi qatlam bo‘lib, ob-havo hodisalari aynan shu yerda mavjudotlar uchun zarur sharoit yaratadi. «shamol» tushunchasi mavzuda markaziy o'rin tutadi va uning ma'nosini bilish bilimni mustahkamlaydi. «yog'ingarchilik» bilan bog'liq jihatlar mavzuni chuqurroq anglashga yordam beradi. «bulutlar» kabi atamalar geografik ma'lumotlarni tizimli o'rganishda alohida ahamiyatga ega. Mavzu doirasida keltirilgan misollar nazariy bilimlarni amaliyot bilan bog'lashga xizmat qiladi. Geografik xaritalar, statistik ma'lumotlar va tabiiy hodisalarni tahlil qilish ushbu mavzuni o'zlashtirishni osonlashtiradi.",
+    "openTests": [
+      {
+        "id": 1,
+        "question": "Bo'sh joyni to'ldiring: «_____, yog‘ingarchilik va bulutlar atmosfera bilan bog‘liq hodisalardir.Atmosfera Yerning gaz — geografiya darsining muhim mavzularidan biri bo'lib, quyida uning asosiy mazmuni batafsil yoritiladi.»",
+        "questionText": "Bo'sh joyni to'ldiring: «_____, yog‘ingarchilik va bulutlar atmosfera bilan bog‘liq hodisalardir.Atmosfera Yerning gaz — geografiya darsining muhim mavzularidan biri bo'lib, quyida uning asosiy mazmuni batafsil yoritiladi.»",
+        "options": [
+          "shamol",
+          "bulutlar",
+          "bog'liq",
+          "atmosfera"
+        ],
+        "correctIndex": 0
+      },
+      {
+        "id": 2,
+        "question": "«Shamol, yog‘ingarchilik va bulutlar atmosfera bilan bog‘liq hodisalardir.Atmosfera Yerning gaz» mavzusida «yog'ingarchilik» tushunchasi nimani anglatadi?",
+        "questionText": "«Shamol, yog‘ingarchilik va bulutlar atmosfera bilan bog‘liq hodisalardir.Atmosfera Yerning gaz» mavzusida «yog'ingarchilik» tushunchasi nimani anglatadi?",
+        "options": [
+          "yog'ingarchilik",
+          "bog'liq",
+          "hodisalardir",
+          "atmosfera"
+        ],
+        "correctIndex": 0
+      },
+      {
+        "id": 3,
+        "question": "Quyidagi atamalardan qaysi biri «Shamol, yog‘ingarchilik va bulutlar atmosfera bilan bog‘liq hodisalardir.Atmosfera Yerning gaz» mavzusiga bevosita aloqador?",
+        "questionText": "Quyidagi atamalardan qaysi biri «Shamol, yog‘ingarchilik va bulutlar atmosfera bilan bog‘liq hodisalardir.Atmosfera Yerning gaz» mavzusiga bevosita aloqador?",
+        "options": [
+          "bog'liq",
+          "hodisalardir",
+          "yerning",
+          "bulutlar"
+        ],
+        "correctIndex": 3
+      },
+      {
+        "id": 4,
+        "question": "Matnda «Troposfera eng quyi qatlam bo‘lib, ob-havo hodisalari aynan shu yerda yuz beradi...» — bu fikr nima haqida?",
+        "questionText": "Matnda «Troposfera eng quyi qatlam bo‘lib, ob-havo hodisalari aynan shu yerda yuz beradi...» — bu fikr nima haqida?",
+        "options": [
+          "hodisalardir",
+          "geografiya",
+          "yerning",
+          "atmosfera"
+        ],
+        "correctIndex": 3
+      },
+      {
+        "id": 5,
+        "question": "«bog'liq» so'zining geografik ma'nosi nima?",
+        "questionText": "«bog'liq» so'zining geografik ma'nosi nima?",
+        "options": [
+          "geografiya",
+          "yerning",
+          "darsining",
+          "bog'liq"
+        ],
+        "correctIndex": 3
+      },
+      {
+        "id": 6,
+        "question": "«Shamol, yog‘ingarchilik va bulutlar atmosfera bilan bog‘liq hodisalardir.Atmosfera Yerning gaz» mavzusining asosiy tushunchalaridan biri qaysi?",
+        "questionText": "«Shamol, yog‘ingarchilik va bulutlar atmosfera bilan bog‘liq hodisalardir.Atmosfera Yerning gaz» mavzusining asosiy tushunchalaridan biri qaysi?",
+        "options": [
+          "darsining",
+          "hodisalardir",
+          "muhim",
+          "geografiya"
+        ],
+        "correctIndex": 1
+      },
+      {
+        "id": 7,
+        "question": "Matndagi «Troposfera eng quyi qatlam bo‘lib, ob-havo hodisalari aynan shu yerda » fikriga eng mos kelgan tushuncha qaysi?",
+        "questionText": "Matndagi «Troposfera eng quyi qatlam bo‘lib, ob-havo hodisalari aynan shu yerda » fikriga eng mos kelgan tushuncha qaysi?",
+        "options": [
+          "yerning",
+          "muhim",
+          "mavzularidan",
+          "darsining"
+        ],
+        "correctIndex": 0
+      },
+      {
+        "id": 8,
+        "question": "Quyidagilardan qaysi biri «Shamol, yog‘ingarchilik va bulutlar atmosfera bilan bog‘liq hodisalardir.Atmosfera Yerning gaz» bilan bog'liq emas?",
+        "questionText": "Quyidagilardan qaysi biri «Shamol, yog‘ingarchilik va bulutlar atmosfera bilan bog‘liq hodisalardir.Atmosfera Yerning gaz» bilan bog'liq emas?",
+        "options": [
+          "mavzularidan",
+          "geografiya",
+          "muhim",
+          "biri"
+        ],
+        "correctIndex": 1
+      },
+      {
+        "id": 9,
+        "question": "«darsining» qanday geografik obyekt yoki hodisa hisoblanadi?",
+        "questionText": "«darsining» qanday geografik obyekt yoki hodisa hisoblanadi?",
+        "options": [
+          "biri",
+          "darsining",
+          "mavzularidan",
+          "quyida"
+        ],
+        "correctIndex": 1
+      },
+      {
+        "id": 10,
+        "question": "Matnga ko'ra «Shamol, yog‘ingarchilik va bulutlar atmosfera bilan bog‘liq hodisalardir.Atmosfera Yerning gaz» mavzusida nima alohida ta'kidlangan?",
+        "questionText": "Matnga ko'ra «Shamol, yog‘ingarchilik va bulutlar atmosfera bilan bog‘liq hodisalardir.Atmosfera Yerning gaz» mavzusida nima alohida ta'kidlangan?",
+        "options": [
+          "quyida",
+          "biri",
+          "mazmuni",
+          "muhim"
+        ],
+        "correctIndex": 3
+      },
+      {
+        "id": 11,
+        "question": "«Shamol, yog‘ingarchilik va bulutlar atmosfera bilan bog‘liq hodisalardir.Atmosfera Yerning gaz»ni o'rganishda qaysi tushuncha kalit hisoblanadi?",
+        "questionText": "«Shamol, yog‘ingarchilik va bulutlar atmosfera bilan bog‘liq hodisalardir.Atmosfera Yerning gaz»ni o'rganishda qaysi tushuncha kalit hisoblanadi?",
+        "options": [
+          "mazmuni",
+          "batafsil",
+          "quyida",
+          "mavzularidan"
+        ],
+        "correctIndex": 3
+      },
+      {
+        "id": 12,
+        "question": "«Geografik xaritalar, statistik ma'lumotlar va tabiiy hodisalarni tahlil qilish ushbu mavzu» — bu jumla qaysi tushuncha haqida?",
+        "questionText": "«Geografik xaritalar, statistik ma'lumotlar va tabiiy hodisalarni tahlil qilish ushbu mavzu» — bu jumla qaysi tushuncha haqida?",
+        "options": [
+          "batafsil",
+          "mazmuni",
+          "yoritiladi",
+          "biri"
+        ],
+        "correctIndex": 3
+      },
+      {
+        "id": 13,
+        "question": "Geografiya nuqtai nazaridan «quyida» nimani bildiradi?",
+        "questionText": "Geografiya nuqtai nazaridan «quyida» nimani bildiradi?",
+        "options": [
+          "yoritiladi",
+          "quyida",
+          "batafsil",
+          "qobig'i"
+        ],
+        "correctIndex": 1
+      },
+      {
+        "id": 14,
+        "question": "«Shamol, yog‘ingarchilik va bulutlar atmosfera bilan bog‘liq hodisalardir.Atmosfera Yerning gaz» mavzusi doirasida qaysi atama keng yoritilgan?",
+        "questionText": "«Shamol, yog‘ingarchilik va bulutlar atmosfera bilan bog‘liq hodisalardir.Atmosfera Yerning gaz» mavzusi doirasida qaysi atama keng yoritilgan?",
+        "options": [
+          "qobig'i",
+          "yoritiladi",
+          "necha",
+          "mazmuni"
+        ],
+        "correctIndex": 3
+      },
+      {
+        "id": 15,
+        "question": "Berilgan matnda qaysi tushuncha asosiy o'rin tutadi?",
+        "questionText": "Berilgan matnda qaysi tushuncha asosiy o'rin tutadi?",
+        "options": [
+          "necha",
+          "qobig'i",
+          "batafsil",
+          "qatlamlardan"
+        ],
+        "correctIndex": 2
+      }
+    ],
+    "closedTests": [
+      {
+        "id": 1,
+        "question": "«Shamol, yog‘ingarchilik va bulutlar atmosfera bilan bog‘liq hodisalardir.Atmosfera Yerning gaz» mavzusida «shamol» tushunchasi nimani anglatadi va matnda qanday yoritilgan?",
+        "questionText": "«Shamol, yog‘ingarchilik va bulutlar atmosfera bilan bog‘liq hodisalardir.Atmosfera Yerning gaz» mavzusida «shamol» tushunchasi nimani anglatadi va matnda qanday yoritilgan?"
+      },
+      {
+        "id": 2,
+        "question": "«yog'ingarchilik» atamasi geografiyada qanday ma'noga ega? Misol bilan tushuntiring.",
+        "questionText": "«yog'ingarchilik» atamasi geografiyada qanday ma'noga ega? Misol bilan tushuntiring."
+      },
+      {
+        "id": 3,
+        "question": "Shamol, yog‘ingarchilik va bulutlar atmosfera bilan bog‘liq hodisalardir.Atmosfera Yerning gaz mavzusining asosiy g'oyalarini o'z so'zingiz bilan bayon qiling.",
+        "questionText": "Shamol, yog‘ingarchilik va bulutlar atmosfera bilan bog‘liq hodisalardir.Atmosfera Yerning gaz mavzusining asosiy g'oyalarini o'z so'zingiz bilan bayon qiling."
+      },
+      {
+        "id": 4,
+        "question": "Matnga ko'ra «atmosfera» qanday xususiyatlarga ega?",
+        "questionText": "Matnga ko'ra «atmosfera» qanday xususiyatlarga ega?"
+      },
+      {
+        "id": 5,
+        "question": "Quyidagi jumlani izohlang: «Shamol, yog‘ingarchilik va bulutlar atmosfera bilan bog‘liq hodisalardir.Atmosfera Yerning gaz qobig‘i bo‘lib, u bir necha qatlamlardan tash»",
+        "questionText": "Quyidagi jumlani izohlang: «Shamol, yog‘ingarchilik va bulutlar atmosfera bilan bog‘liq hodisalardir.Atmosfera Yerning gaz qobig‘i bo‘lib, u bir necha qatlamlardan tash»"
+      },
+      {
+        "id": 6,
+        "question": "«yerning» va «Shamol, yog‘ingarchilik va bulutlar atmosfera bilan bog‘liq hodisalardir.Atmosfera Yerning gaz» o'rtasidagi bog'liqlikni izohlang.",
+        "questionText": "«yerning» va «Shamol, yog‘ingarchilik va bulutlar atmosfera bilan bog‘liq hodisalardir.Atmosfera Yerning gaz» o'rtasidagi bog'liqlikni izohlang."
+      },
+      {
+        "id": 7,
+        "question": "Matndan «darsining» bilan bog'liq misol keltiring va tahlil qiling.",
+        "questionText": "Matndan «darsining» bilan bog'liq misol keltiring va tahlil qiling."
+      },
+      {
+        "id": 8,
+        "question": "«mavzularidan» tushunchasining kelib chiqishi va rivojlanishini bayon qiling.",
+        "questionText": "«mavzularidan» tushunchasining kelib chiqishi va rivojlanishini bayon qiling."
+      },
+      {
+        "id": 9,
+        "question": "«Geografik xaritalar, statistik ma'lumotlar va tabiiy hodisalarni tahlil qilish ushbu mavzuni o'zlashtirishni osonlashtir» — bu fikrga qanday qo'shimcha izoh berish mumkin?",
+        "questionText": "«Geografik xaritalar, statistik ma'lumotlar va tabiiy hodisalarni tahlil qilish ushbu mavzuni o'zlashtirishni osonlashtir» — bu fikrga qanday qo'shimcha izoh berish mumkin?"
+      },
+      {
+        "id": 10,
+        "question": "«mazmuni» bilan bog'liq qiziqarli geografik fakt keltiring.",
+        "questionText": "«mazmuni» bilan bog'liq qiziqarli geografik fakt keltiring."
+      },
+      {
+        "id": 11,
+        "question": "Shamol, yog‘ingarchilik va bulutlar atmosfera bilan bog‘liq hodisalardir.Atmosfera Yerning gaz mavzusi bo'yicha 11-savol: matndan kelib chiqib o'z fikringizni bayon qiling.",
+        "questionText": "Shamol, yog‘ingarchilik va bulutlar atmosfera bilan bog‘liq hodisalardir.Atmosfera Yerning gaz mavzusi bo'yicha 11-savol: matndan kelib chiqib o'z fikringizni bayon qiling."
+      },
+      {
+        "id": 12,
+        "question": "Shamol, yog‘ingarchilik va bulutlar atmosfera bilan bog‘liq hodisalardir.Atmosfera Yerning gaz mavzusi bo'yicha 12-savol: matndan kelib chiqib o'z fikringizni bayon qiling.",
+        "questionText": "Shamol, yog‘ingarchilik va bulutlar atmosfera bilan bog‘liq hodisalardir.Atmosfera Yerning gaz mavzusi bo'yicha 12-savol: matndan kelib chiqib o'z fikringizni bayon qiling."
+      },
+      {
+        "id": 13,
+        "question": "Shamol, yog‘ingarchilik va bulutlar atmosfera bilan bog‘liq hodisalardir.Atmosfera Yerning gaz mavzusi bo'yicha 13-savol: matndan kelib chiqib o'z fikringizni bayon qiling.",
+        "questionText": "Shamol, yog‘ingarchilik va bulutlar atmosfera bilan bog‘liq hodisalardir.Atmosfera Yerning gaz mavzusi bo'yicha 13-savol: matndan kelib chiqib o'z fikringizni bayon qiling."
+      },
+      {
+        "id": 14,
+        "question": "Shamol, yog‘ingarchilik va bulutlar atmosfera bilan bog‘liq hodisalardir.Atmosfera Yerning gaz mavzusi bo'yicha 14-savol: matndan kelib chiqib o'z fikringizni bayon qiling.",
+        "questionText": "Shamol, yog‘ingarchilik va bulutlar atmosfera bilan bog‘liq hodisalardir.Atmosfera Yerning gaz mavzusi bo'yicha 14-savol: matndan kelib chiqib o'z fikringizni bayon qiling."
+      },
+      {
+        "id": 15,
+        "question": "Shamol, yog‘ingarchilik va bulutlar atmosfera bilan bog‘liq hodisalardir.Atmosfera Yerning gaz mavzusi bo'yicha 15-savol: matndan kelib chiqib o'z fikringizni bayon qiling.",
+        "questionText": "Shamol, yog‘ingarchilik va bulutlar atmosfera bilan bog‘liq hodisalardir.Atmosfera Yerning gaz mavzusi bo'yicha 15-savol: matndan kelib chiqib o'z fikringizni bayon qiling."
+      }
+    ]
+  },
+  {
+    "id": 5,
+    "createdAt": "2026-06-19T10:30:47.855Z",
+    "tests": [
+      {
+        "id": 1,
+        "question": "Bo'sh joyni to'ldiring: «_____ — geografiya darsining muhim mavzularidan biri bo'lib, quyida uning asosiy mazmuni batafsil yoritiladi.»",
+        "questionText": "Bo'sh joyni to'ldiring: «_____ — geografiya darsining muhim mavzularidan biri bo'lib, quyida uning asosiy mazmuni batafsil yoritiladi.»",
+        "options": [
+          "muhim",
+          "gidrosfera",
+          "mavzularidan",
+          "darsining"
+        ],
+        "correctIndex": 1
+      },
+      {
+        "id": 2,
+        "question": "«4. Gidrosfera» mavzusida «geografiya» tushunchasi nimani anglatadi?",
+        "questionText": "«4. Gidrosfera» mavzusida «geografiya» tushunchasi nimani anglatadi?",
+        "options": [
+          "mavzularidan",
+          "geografiya",
+          "muhim",
+          "biri"
+        ],
+        "correctIndex": 1
+      },
+      {
+        "id": 3,
+        "question": "Quyidagi atamalardan qaysi biri «4. Gidrosfera» mavzusiga bevosita aloqador?",
+        "questionText": "Quyidagi atamalardan qaysi biri «4. Gidrosfera» mavzusiga bevosita aloqador?",
+        "options": [
+          "biri",
+          "darsining",
+          "mavzularidan",
+          "quyida"
+        ],
+        "correctIndex": 1
+      },
+      {
+        "id": 4,
+        "question": "Matnda «gidrosfera bilan bog'liq asosiy tushunchalar, ta'riflar va qonuniyatlar bilan ta...» — bu fikr nima haqida?",
+        "questionText": "Matnda «gidrosfera bilan bog'liq asosiy tushunchalar, ta'riflar va qonuniyatlar bilan ta...» — bu fikr nima haqida?",
+        "options": [
+          "quyida",
+          "biri",
+          "mazmuni",
+          "muhim"
+        ],
+        "correctIndex": 3
+      },
+      {
+        "id": 5,
+        "question": "«mavzularidan» so'zining geografik ma'nosi nima?",
+        "questionText": "«mavzularidan» so'zining geografik ma'nosi nima?",
+        "options": [
+          "mazmuni",
+          "batafsil",
+          "quyida",
+          "mavzularidan"
+        ],
+        "correctIndex": 3
+      },
+      {
+        "id": 6,
+        "question": "«4. Gidrosfera» mavzusining asosiy tushunchalaridan biri qaysi?",
+        "questionText": "«4. Gidrosfera» mavzusining asosiy tushunchalaridan biri qaysi?",
+        "options": [
+          "batafsil",
+          "mazmuni",
+          "yoritiladi",
+          "biri"
+        ],
+        "correctIndex": 3
+      },
+      {
+        "id": 7,
+        "question": "Matndagi «aylanishi natijasida bug‘lanish, kondensatsiya va yog‘ingarchilik jara» fikriga eng mos kelgan tushuncha qaysi?",
+        "questionText": "Matndagi «aylanishi natijasida bug‘lanish, kondensatsiya va yog‘ingarchilik jara» fikriga eng mos kelgan tushuncha qaysi?",
+        "options": [
+          "yoritiladi",
+          "quyida",
+          "batafsil",
+          "yerning"
+        ],
+        "correctIndex": 1
+      },
+      {
+        "id": 8,
+        "question": "Quyidagilardan qaysi biri «4. Gidrosfera» bilan bog'liq emas?",
+        "questionText": "Quyidagilardan qaysi biri «4. Gidrosfera» bilan bog'liq emas?",
+        "options": [
+          "yerning",
+          "yoritiladi",
+          "barcha",
+          "mazmuni"
+        ],
+        "correctIndex": 3
+      },
+      {
+        "id": 9,
+        "question": "«batafsil» qanday geografik obyekt yoki hodisa hisoblanadi?",
+        "questionText": "«batafsil» qanday geografik obyekt yoki hodisa hisoblanadi?",
+        "options": [
+          "barcha",
+          "suvlarini",
+          "yerning",
+          "batafsil"
+        ],
+        "correctIndex": 3
+      },
+      {
+        "id": 10,
+        "question": "Matnga ko'ra «4. Gidrosfera» mavzusida nima alohida ta'kidlangan?",
+        "questionText": "Matnga ko'ra «4. Gidrosfera» mavzusida nima alohida ta'kidlangan?",
+        "options": [
+          "yoritiladi",
+          "ichiga",
+          "barcha",
+          "suvlarini"
+        ],
+        "correctIndex": 0
+      },
+      {
+        "id": 11,
+        "question": "«4. Gidrosfera»ni o'rganishda qaysi tushuncha kalit hisoblanadi?",
+        "questionText": "«4. Gidrosfera»ni o'rganishda qaysi tushuncha kalit hisoblanadi?",
+        "options": [
+          "yerning",
+          "suvlarini",
+          "ichiga",
+          "oladi"
+        ],
+        "correctIndex": 0
+      },
+      {
+        "id": 12,
+        "question": "«Bunga okeanlar, dengizlar, daryolar, ko‘llar, muzliklar va yer osti suvlari kiradi.» — bu jumla qaysi tushuncha haqida?",
+        "questionText": "«Bunga okeanlar, dengizlar, daryolar, ko‘llar, muzliklar va yer osti suvlari kiradi.» — bu jumla qaysi tushuncha haqida?",
+        "options": [
+          "ichiga",
+          "oladi",
+          "ushbu",
+          "barcha"
+        ],
+        "correctIndex": 3
+      },
+      {
+        "id": 13,
+        "question": "Geografiya nuqtai nazaridan «suvlarini» nimani bildiradi?",
+        "questionText": "Geografiya nuqtai nazaridan «suvlarini» nimani bildiradi?",
+        "options": [
+          "suvlarini",
+          "oladi",
+          "ushbu",
+          "doirasida"
+        ],
+        "correctIndex": 0
+      },
+      {
+        "id": 14,
+        "question": "«4. Gidrosfera» mavzusi doirasida qaysi atama keng yoritilgan?",
+        "questionText": "«4. Gidrosfera» mavzusi doirasida qaysi atama keng yoritilgan?",
+        "options": [
+          "ushbu",
+          "doirasida",
+          "ichiga",
+          "o'quvchilar"
+        ],
+        "correctIndex": 2
+      },
+      {
+        "id": 15,
+        "question": "Berilgan matnda qaysi tushuncha asosiy o'rin tutadi?",
+        "questionText": "Berilgan matnda qaysi tushuncha asosiy o'rin tutadi?",
+        "options": [
+          "oladi",
+          "o'quvchilar",
+          "bog'liq",
+          "doirasida"
+        ],
+        "correctIndex": 0
+      }
+    ],
+    "lessonId": 1,
+    "title": "4. Gidrosfera",
+    "content": "4. Gidrosfera — geografiya darsining muhim mavzularidan biri bo'lib, quyida uning asosiy mazmuni batafsil yoritiladi. Gidrosfera Yerning barcha suvlarini o‘z ichiga oladi. Ushbu mavzu doirasida o'quvchilar 4. gidrosfera bilan bog'liq asosiy tushunchalar, ta'riflar va qonuniyatlar bilan tanishadilar. Bunga okeanlar, dengizlar, daryolar, ko‘llar, muzliklar va yer osti suvlari kiradi. Suv tabiatdagi hayotning asosiy manbalaridan biridir. aylanishi natijasida bug‘lanish, kondensatsiya va yog‘ingarchilik jarayonlari sodir bo‘ladi. iqlimni tartibga solishda muhim ahamiyatga ega.Gidrosfera Yerning barcha suvlarini o‘z ichiga Bunga okeanlar, dengizlar, daryolar, ko‘llar, muzliklar va yer osti suvlari kiradi. hayotning asosiy manbalaridan biridir. Suv aylanishi natijasida bug‘lanish, kondensatsiya va yog‘ingarchilik jarayonlari sodir bo‘ladi. Gidrosfera iqlimni tartibga solishda muhim ahamiyatga ega.Gidrosfera Yerning barcha suvlarini o‘z ichiga oladi. Bunga okeanlar, dengizlar, daryolar, ko‘llar, muzliklar va yer osti suvlari kiradi. «gidrosfera» tushunchasi mavzuda markaziy o'rin tutadi va uning ma'nosini bilish bilimni mustahkamlaydi. «yerning» bilan bog'liq jihatlar mavzuni chuqurroq anglashga yordam beradi. «barcha» kabi atamalar geografik ma'lumotlarni tizimli o'rganishda alohida ahamiyatga ega. 4. Gidrosfera tabiat, jamiyat va inson faoliyati o'rtasidagi o'zaro aloqalarni ko'rsatib beradi.",
+    "openTests": [
+      {
+        "id": 1,
+        "question": "Bo'sh joyni to'ldiring: «_____ — geografiya darsining muhim mavzularidan biri bo'lib, quyida uning asosiy mazmuni batafsil yoritiladi.»",
+        "questionText": "Bo'sh joyni to'ldiring: «_____ — geografiya darsining muhim mavzularidan biri bo'lib, quyida uning asosiy mazmuni batafsil yoritiladi.»",
+        "options": [
+          "muhim",
+          "gidrosfera",
+          "mavzularidan",
+          "darsining"
+        ],
+        "correctIndex": 1
+      },
+      {
+        "id": 2,
+        "question": "«4. Gidrosfera» mavzusida «geografiya» tushunchasi nimani anglatadi?",
+        "questionText": "«4. Gidrosfera» mavzusida «geografiya» tushunchasi nimani anglatadi?",
+        "options": [
+          "mavzularidan",
+          "geografiya",
+          "muhim",
+          "biri"
+        ],
+        "correctIndex": 1
+      },
+      {
+        "id": 3,
+        "question": "Quyidagi atamalardan qaysi biri «4. Gidrosfera» mavzusiga bevosita aloqador?",
+        "questionText": "Quyidagi atamalardan qaysi biri «4. Gidrosfera» mavzusiga bevosita aloqador?",
+        "options": [
+          "biri",
+          "darsining",
+          "mavzularidan",
+          "quyida"
+        ],
+        "correctIndex": 1
+      },
+      {
+        "id": 4,
+        "question": "Matnda «gidrosfera bilan bog'liq asosiy tushunchalar, ta'riflar va qonuniyatlar bilan ta...» — bu fikr nima haqida?",
+        "questionText": "Matnda «gidrosfera bilan bog'liq asosiy tushunchalar, ta'riflar va qonuniyatlar bilan ta...» — bu fikr nima haqida?",
+        "options": [
+          "quyida",
+          "biri",
+          "mazmuni",
+          "muhim"
+        ],
+        "correctIndex": 3
+      },
+      {
+        "id": 5,
+        "question": "«mavzularidan» so'zining geografik ma'nosi nima?",
+        "questionText": "«mavzularidan» so'zining geografik ma'nosi nima?",
+        "options": [
+          "mazmuni",
+          "batafsil",
+          "quyida",
+          "mavzularidan"
+        ],
+        "correctIndex": 3
+      },
+      {
+        "id": 6,
+        "question": "«4. Gidrosfera» mavzusining asosiy tushunchalaridan biri qaysi?",
+        "questionText": "«4. Gidrosfera» mavzusining asosiy tushunchalaridan biri qaysi?",
+        "options": [
+          "batafsil",
+          "mazmuni",
+          "yoritiladi",
+          "biri"
+        ],
+        "correctIndex": 3
+      },
+      {
+        "id": 7,
+        "question": "Matndagi «aylanishi natijasida bug‘lanish, kondensatsiya va yog‘ingarchilik jara» fikriga eng mos kelgan tushuncha qaysi?",
+        "questionText": "Matndagi «aylanishi natijasida bug‘lanish, kondensatsiya va yog‘ingarchilik jara» fikriga eng mos kelgan tushuncha qaysi?",
+        "options": [
+          "yoritiladi",
+          "quyida",
+          "batafsil",
+          "yerning"
+        ],
+        "correctIndex": 1
+      },
+      {
+        "id": 8,
+        "question": "Quyidagilardan qaysi biri «4. Gidrosfera» bilan bog'liq emas?",
+        "questionText": "Quyidagilardan qaysi biri «4. Gidrosfera» bilan bog'liq emas?",
+        "options": [
+          "yerning",
+          "yoritiladi",
+          "barcha",
+          "mazmuni"
+        ],
+        "correctIndex": 3
+      },
+      {
+        "id": 9,
+        "question": "«batafsil» qanday geografik obyekt yoki hodisa hisoblanadi?",
+        "questionText": "«batafsil» qanday geografik obyekt yoki hodisa hisoblanadi?",
+        "options": [
+          "barcha",
+          "suvlarini",
+          "yerning",
+          "batafsil"
+        ],
+        "correctIndex": 3
+      },
+      {
+        "id": 10,
+        "question": "Matnga ko'ra «4. Gidrosfera» mavzusida nima alohida ta'kidlangan?",
+        "questionText": "Matnga ko'ra «4. Gidrosfera» mavzusida nima alohida ta'kidlangan?",
+        "options": [
+          "yoritiladi",
+          "ichiga",
+          "barcha",
+          "suvlarini"
+        ],
+        "correctIndex": 0
+      },
+      {
+        "id": 11,
+        "question": "«4. Gidrosfera»ni o'rganishda qaysi tushuncha kalit hisoblanadi?",
+        "questionText": "«4. Gidrosfera»ni o'rganishda qaysi tushuncha kalit hisoblanadi?",
+        "options": [
+          "yerning",
+          "suvlarini",
+          "ichiga",
+          "oladi"
+        ],
+        "correctIndex": 0
+      },
+      {
+        "id": 12,
+        "question": "«Bunga okeanlar, dengizlar, daryolar, ko‘llar, muzliklar va yer osti suvlari kiradi.» — bu jumla qaysi tushuncha haqida?",
+        "questionText": "«Bunga okeanlar, dengizlar, daryolar, ko‘llar, muzliklar va yer osti suvlari kiradi.» — bu jumla qaysi tushuncha haqida?",
+        "options": [
+          "ichiga",
+          "oladi",
+          "ushbu",
+          "barcha"
+        ],
+        "correctIndex": 3
+      },
+      {
+        "id": 13,
+        "question": "Geografiya nuqtai nazaridan «suvlarini» nimani bildiradi?",
+        "questionText": "Geografiya nuqtai nazaridan «suvlarini» nimani bildiradi?",
+        "options": [
+          "suvlarini",
+          "oladi",
+          "ushbu",
+          "doirasida"
+        ],
+        "correctIndex": 0
+      },
+      {
+        "id": 14,
+        "question": "«4. Gidrosfera» mavzusi doirasida qaysi atama keng yoritilgan?",
+        "questionText": "«4. Gidrosfera» mavzusi doirasida qaysi atama keng yoritilgan?",
+        "options": [
+          "ushbu",
+          "doirasida",
+          "ichiga",
+          "o'quvchilar"
+        ],
+        "correctIndex": 2
+      },
+      {
+        "id": 15,
+        "question": "Berilgan matnda qaysi tushuncha asosiy o'rin tutadi?",
+        "questionText": "Berilgan matnda qaysi tushuncha asosiy o'rin tutadi?",
+        "options": [
+          "oladi",
+          "o'quvchilar",
+          "bog'liq",
+          "doirasida"
+        ],
+        "correctIndex": 0
+      }
+    ],
+    "closedTests": [
+      {
+        "id": 1,
+        "question": "«4. Gidrosfera» mavzusida «gidrosfera» tushunchasi nimani anglatadi va matnda qanday yoritilgan?",
+        "questionText": "«4. Gidrosfera» mavzusida «gidrosfera» tushunchasi nimani anglatadi va matnda qanday yoritilgan?"
+      },
+      {
+        "id": 2,
+        "question": "«geografiya» atamasi geografiyada qanday ma'noga ega? Misol bilan tushuntiring.",
+        "questionText": "«geografiya» atamasi geografiyada qanday ma'noga ega? Misol bilan tushuntiring."
+      },
+      {
+        "id": 3,
+        "question": "4. Gidrosfera mavzusining asosiy g'oyalarini o'z so'zingiz bilan bayon qiling.",
+        "questionText": "4. Gidrosfera mavzusining asosiy g'oyalarini o'z so'zingiz bilan bayon qiling."
+      },
+      {
+        "id": 4,
+        "question": "Matnga ko'ra «muhim» qanday xususiyatlarga ega?",
+        "questionText": "Matnga ko'ra «muhim» qanday xususiyatlarga ega?"
+      },
+      {
+        "id": 5,
+        "question": "«4. Gidrosfera» mavzusi qaysi tabiiy yoki ijtimoiy hodisalar bilan bog'liq?",
+        "questionText": "«4. Gidrosfera» mavzusi qaysi tabiiy yoki ijtimoiy hodisalar bilan bog'liq?"
+      },
+      {
+        "id": 6,
+        "question": "Quyidagi jumlani izohlang: «Suv tabiatdagi hayotning asosiy manbalaridan biridir.»",
+        "questionText": "Quyidagi jumlani izohlang: «Suv tabiatdagi hayotning asosiy manbalaridan biridir.»"
+      },
+      {
+        "id": 7,
+        "question": "«quyida» va «4. Gidrosfera» o'rtasidagi bog'liqlikni izohlang.",
+        "questionText": "«quyida» va «4. Gidrosfera» o'rtasidagi bog'liqlikni izohlang."
+      },
+      {
+        "id": 8,
+        "question": "4. Gidrosfera mavzusini o'rganish kundalik hayotda nima uchun zarur?",
+        "questionText": "4. Gidrosfera mavzusini o'rganish kundalik hayotda nima uchun zarur?"
+      },
+      {
+        "id": 9,
+        "question": "Matndan «batafsil» bilan bog'liq misol keltiring va tahlil qiling.",
+        "questionText": "Matndan «batafsil» bilan bog'liq misol keltiring va tahlil qiling."
+      },
+      {
+        "id": 10,
+        "question": "«4. Gidrosfera» mavzusida qaysi geografik qonuniyatlar uchraydi?",
+        "questionText": "«4. Gidrosfera» mavzusida qaysi geografik qonuniyatlar uchraydi?"
+      },
+      {
+        "id": 11,
+        "question": "«yerning» tushunchasining kelib chiqishi va rivojlanishini bayon qiling.",
+        "questionText": "«yerning» tushunchasining kelib chiqishi va rivojlanishini bayon qiling."
+      },
+      {
+        "id": 12,
+        "question": "«Bunga okeanlar, dengizlar, daryolar, ko‘llar, muzliklar va yer osti suvlari kiradi.» — bu fikrga qanday qo'shimcha izoh berish mumkin?",
+        "questionText": "«Bunga okeanlar, dengizlar, daryolar, ko‘llar, muzliklar va yer osti suvlari kiradi.» — bu fikrga qanday qo'shimcha izoh berish mumkin?"
+      },
+      {
+        "id": 13,
+        "question": "4. Gidrosfera mavzusining inson hayotidagi amaliy ahamiyati nimada?",
+        "questionText": "4. Gidrosfera mavzusining inson hayotidagi amaliy ahamiyati nimada?"
+      },
+      {
+        "id": 14,
+        "question": "«ichiga» bilan bog'liq qiziqarli geografik fakt keltiring.",
+        "questionText": "«ichiga» bilan bog'liq qiziqarli geografik fakt keltiring."
+      },
+      {
+        "id": 15,
+        "question": "4. Gidrosfera mavzusini o'rganishdan keyin qanday xulosa chiqarish mumkin?",
+        "questionText": "4. Gidrosfera mavzusini o'rganishdan keyin qanday xulosa chiqarish mumkin?"
+      }
+    ]
+  },
+  {
+    "id": 6,
+    "createdAt": "2026-06-19T10:30:47.858Z",
+    "tests": [
+      {
+        "id": 1,
+        "question": "Bo'sh joyni to'ldiring: «_____ va ob-havo — geografiya darsining muhim mavzularidan biri bo'lib, quyida uning asosiy mazmuni batafsil yoritiladi.»",
+        "questionText": "Bo'sh joyni to'ldiring: «_____ va ob-havo — geografiya darsining muhim mavzularidan biri bo'lib, quyida uning asosiy mazmuni batafsil yoritiladi.»",
+        "options": [
+          "darsining",
+          "iqlim",
+          "muhim",
+          "geografiya"
+        ],
+        "correctIndex": 1
+      },
+      {
+        "id": 2,
+        "question": "«5. Iqlim va ob-havo» mavzusida «ob-havo» tushunchasi nimani anglatadi?",
+        "questionText": "«5. Iqlim va ob-havo» mavzusida «ob-havo» tushunchasi nimani anglatadi?",
+        "options": [
+          "muhim",
+          "ob-havo",
+          "mavzularidan",
+          "darsining"
+        ],
+        "correctIndex": 1
+      },
+      {
+        "id": 3,
+        "question": "Quyidagi atamalardan qaysi biri «5. Iqlim va ob-havo» mavzusiga bevosita aloqador?",
+        "questionText": "Quyidagi atamalardan qaysi biri «5. Iqlim va ob-havo» mavzusiga bevosita aloqador?",
+        "options": [
+          "mavzularidan",
+          "geografiya",
+          "muhim",
+          "biri"
+        ],
+        "correctIndex": 1
+      },
+      {
+        "id": 4,
+        "question": "Matnda «kuzatiladigan ob-havo xususiyatlarining yig‘indisidir....» — bu fikr nima haqida?",
+        "questionText": "Matnda «kuzatiladigan ob-havo xususiyatlarining yig‘indisidir....» — bu fikr nima haqida?",
+        "options": [
+          "biri",
+          "darsining",
+          "mavzularidan",
+          "quyida"
+        ],
+        "correctIndex": 1
+      },
+      {
+        "id": 5,
+        "question": "«muhim» so'zining geografik ma'nosi nima?",
+        "questionText": "«muhim» so'zining geografik ma'nosi nima?",
+        "options": [
+          "quyida",
+          "biri",
+          "mazmuni",
+          "muhim"
+        ],
+        "correctIndex": 3
+      },
+      {
+        "id": 6,
+        "question": "«5. Iqlim va ob-havo» mavzusining asosiy tushunchalaridan biri qaysi?",
+        "questionText": "«5. Iqlim va ob-havo» mavzusining asosiy tushunchalaridan biri qaysi?",
+        "options": [
+          "mazmuni",
+          "batafsil",
+          "quyida",
+          "mavzularidan"
+        ],
+        "correctIndex": 3
+      },
+      {
+        "id": 7,
+        "question": "Matndagi «insonlarning yashash tarzi va xo‘jalik faoliyatiga ta’sir qiladi.Ob-ha» fikriga eng mos kelgan tushuncha qaysi?",
+        "questionText": "Matndagi «insonlarning yashash tarzi va xo‘jalik faoliyatiga ta’sir qiladi.Ob-ha» fikriga eng mos kelgan tushuncha qaysi?",
+        "options": [
+          "batafsil",
+          "mazmuni",
+          "yoritiladi",
+          "biri"
+        ],
+        "correctIndex": 3
+      },
+      {
+        "id": 8,
+        "question": "Quyidagilardan qaysi biri «5. Iqlim va ob-havo» bilan bog'liq emas?",
+        "questionText": "Quyidagilardan qaysi biri «5. Iqlim va ob-havo» bilan bog'liq emas?",
+        "options": [
+          "yoritiladi",
+          "quyida",
+          "batafsil",
+          "ma'lum"
+        ],
+        "correctIndex": 1
+      },
+      {
+        "id": 9,
+        "question": "«mazmuni» qanday geografik obyekt yoki hodisa hisoblanadi?",
+        "questionText": "«mazmuni» qanday geografik obyekt yoki hodisa hisoblanadi?",
+        "options": [
+          "ma'lum",
+          "joydagi",
+          "yoritiladi",
+          "mazmuni"
+        ],
+        "correctIndex": 3
+      },
+      {
+        "id": 10,
+        "question": "Matnga ko'ra «5. Iqlim va ob-havo» mavzusida nima alohida ta'kidlangan?",
+        "questionText": "Matnga ko'ra «5. Iqlim va ob-havo» mavzusida nima alohida ta'kidlangan?",
+        "options": [
+          "ma'lum",
+          "joydagi",
+          "batafsil",
+          "qisqa"
+        ],
+        "correctIndex": 2
+      },
+      {
+        "id": 11,
+        "question": "«5. Iqlim va ob-havo»ni o'rganishda qaysi tushuncha kalit hisoblanadi?",
+        "questionText": "«5. Iqlim va ob-havo»ni o'rganishda qaysi tushuncha kalit hisoblanadi?",
+        "options": [
+          "yoritiladi",
+          "joydagi",
+          "qisqa",
+          "muddatli"
+        ],
+        "correctIndex": 0
+      },
+      {
+        "id": 12,
+        "question": "«Iqlim va ob-havo tabiat, jamiyat va inson faoliyati o'rtasidagi o'zaro aloqalarni ko'rsati» — bu jumla qaysi tushuncha haqida?",
+        "questionText": "«Iqlim va ob-havo tabiat, jamiyat va inson faoliyati o'rtasidagi o'zaro aloqalarni ko'rsati» — bu jumla qaysi tushuncha haqida?",
+        "options": [
+          "muddatli",
+          "atmosfera",
+          "qisqa",
+          "ma'lum"
+        ],
+        "correctIndex": 3
+      },
+      {
+        "id": 13,
+        "question": "Geografiya nuqtai nazaridan «joydagi» nimani bildiradi?",
+        "questionText": "Geografiya nuqtai nazaridan «joydagi» nimani bildiradi?",
+        "options": [
+          "holati",
+          "muddatli",
+          "joydagi",
+          "atmosfera"
+        ],
+        "correctIndex": 2
+      },
+      {
+        "id": 14,
+        "question": "«5. Iqlim va ob-havo» mavzusi doirasida qaysi atama keng yoritilgan?",
+        "questionText": "«5. Iqlim va ob-havo» mavzusi doirasida qaysi atama keng yoritilgan?",
+        "options": [
+          "qisqa",
+          "atmosfera",
+          "holati",
+          "bo'lsa"
+        ],
+        "correctIndex": 0
+      },
+      {
+        "id": 15,
+        "question": "Berilgan matnda qaysi tushuncha asosiy o'rin tutadi?",
+        "questionText": "Berilgan matnda qaysi tushuncha asosiy o'rin tutadi?",
+        "options": [
+          "holati",
+          "bo'lsa",
+          "uzoq",
+          "muddatli"
+        ],
+        "correctIndex": 3
+      }
+    ],
+    "lessonId": 1,
+    "title": "5. Iqlim va ob-havo",
+    "content": "5. Iqlim va ob-havo — geografiya darsining muhim mavzularidan biri bo'lib, quyida uning asosiy mazmuni batafsil yoritiladi. Ob-havo ma’lum bir joydagi qisqa muddatli atmosfera holati bo‘lsa, iqlim uzoq yillar davomida Ushbu mavzu doirasida o'quvchilar 5. iqlim va ob-havo bilan bog'liq asosiy tushunchalar, ta'riflar va qonuniyatlar bilan tanishadilar. kuzatiladigan ob-havo xususiyatlarining yig‘indisidir. Harorat, bosim, namlik, shamol va yog‘ingarchilik iqlim elementlari hisoblanadi. Turli hududlarda turli xil iqlim shakllangan. insonlarning yashash tarzi va xo‘jalik faoliyatiga ta’sir qiladi.Ob-havo ma’lum bir joydagi qisqa muddatli atmosfera holati bo‘lsa, iqlim uzoq yillar davomida kuzatiladigan ob-havo xususiyatlarining Harorat, bosim, namlik, shamol va yog‘ingarchilik iqlim elementlari hisoblanadi. hududlarda turli xil iqlim shakllangan. Iqlim insonlarning yashash tarzi va xo‘jalik faoliyatiga ta’sir qiladi.Ob-havo ma’lum bir joydagi qisqa muddatli atmosfera holati bo‘lsa, iqlim uzoq yillar davomida «iqlim» tushunchasi mavzuda markaziy o'rin tutadi va uning ma'nosini bilish bilimni mustahkamlaydi. «ob-havo» bilan bog'liq jihatlar mavzuni chuqurroq anglashga yordam beradi. «ma'lum» kabi atamalar geografik ma'lumotlarni tizimli o'rganishda alohida ahamiyatga ega. 5. Iqlim va ob-havo tabiat, jamiyat va inson faoliyati o'rtasidagi o'zaro aloqalarni ko'rsatib beradi.",
+    "openTests": [
+      {
+        "id": 1,
+        "question": "Bo'sh joyni to'ldiring: «_____ va ob-havo — geografiya darsining muhim mavzularidan biri bo'lib, quyida uning asosiy mazmuni batafsil yoritiladi.»",
+        "questionText": "Bo'sh joyni to'ldiring: «_____ va ob-havo — geografiya darsining muhim mavzularidan biri bo'lib, quyida uning asosiy mazmuni batafsil yoritiladi.»",
+        "options": [
+          "darsining",
+          "iqlim",
+          "muhim",
+          "geografiya"
+        ],
+        "correctIndex": 1
+      },
+      {
+        "id": 2,
+        "question": "«5. Iqlim va ob-havo» mavzusida «ob-havo» tushunchasi nimani anglatadi?",
+        "questionText": "«5. Iqlim va ob-havo» mavzusida «ob-havo» tushunchasi nimani anglatadi?",
+        "options": [
+          "muhim",
+          "ob-havo",
+          "mavzularidan",
+          "darsining"
+        ],
+        "correctIndex": 1
+      },
+      {
+        "id": 3,
+        "question": "Quyidagi atamalardan qaysi biri «5. Iqlim va ob-havo» mavzusiga bevosita aloqador?",
+        "questionText": "Quyidagi atamalardan qaysi biri «5. Iqlim va ob-havo» mavzusiga bevosita aloqador?",
+        "options": [
+          "mavzularidan",
+          "geografiya",
+          "muhim",
+          "biri"
+        ],
+        "correctIndex": 1
+      },
+      {
+        "id": 4,
+        "question": "Matnda «kuzatiladigan ob-havo xususiyatlarining yig‘indisidir....» — bu fikr nima haqida?",
+        "questionText": "Matnda «kuzatiladigan ob-havo xususiyatlarining yig‘indisidir....» — bu fikr nima haqida?",
+        "options": [
+          "biri",
+          "darsining",
+          "mavzularidan",
+          "quyida"
+        ],
+        "correctIndex": 1
+      },
+      {
+        "id": 5,
+        "question": "«muhim» so'zining geografik ma'nosi nima?",
+        "questionText": "«muhim» so'zining geografik ma'nosi nima?",
+        "options": [
+          "quyida",
+          "biri",
+          "mazmuni",
+          "muhim"
+        ],
+        "correctIndex": 3
+      },
+      {
+        "id": 6,
+        "question": "«5. Iqlim va ob-havo» mavzusining asosiy tushunchalaridan biri qaysi?",
+        "questionText": "«5. Iqlim va ob-havo» mavzusining asosiy tushunchalaridan biri qaysi?",
+        "options": [
+          "mazmuni",
+          "batafsil",
+          "quyida",
+          "mavzularidan"
+        ],
+        "correctIndex": 3
+      },
+      {
+        "id": 7,
+        "question": "Matndagi «insonlarning yashash tarzi va xo‘jalik faoliyatiga ta’sir qiladi.Ob-ha» fikriga eng mos kelgan tushuncha qaysi?",
+        "questionText": "Matndagi «insonlarning yashash tarzi va xo‘jalik faoliyatiga ta’sir qiladi.Ob-ha» fikriga eng mos kelgan tushuncha qaysi?",
+        "options": [
+          "batafsil",
+          "mazmuni",
+          "yoritiladi",
+          "biri"
+        ],
+        "correctIndex": 3
+      },
+      {
+        "id": 8,
+        "question": "Quyidagilardan qaysi biri «5. Iqlim va ob-havo» bilan bog'liq emas?",
+        "questionText": "Quyidagilardan qaysi biri «5. Iqlim va ob-havo» bilan bog'liq emas?",
+        "options": [
+          "yoritiladi",
+          "quyida",
+          "batafsil",
+          "ma'lum"
+        ],
+        "correctIndex": 1
+      },
+      {
+        "id": 9,
+        "question": "«mazmuni» qanday geografik obyekt yoki hodisa hisoblanadi?",
+        "questionText": "«mazmuni» qanday geografik obyekt yoki hodisa hisoblanadi?",
+        "options": [
+          "ma'lum",
+          "joydagi",
+          "yoritiladi",
+          "mazmuni"
+        ],
+        "correctIndex": 3
+      },
+      {
+        "id": 10,
+        "question": "Matnga ko'ra «5. Iqlim va ob-havo» mavzusida nima alohida ta'kidlangan?",
+        "questionText": "Matnga ko'ra «5. Iqlim va ob-havo» mavzusida nima alohida ta'kidlangan?",
+        "options": [
+          "ma'lum",
+          "joydagi",
+          "batafsil",
+          "qisqa"
+        ],
+        "correctIndex": 2
+      },
+      {
+        "id": 11,
+        "question": "«5. Iqlim va ob-havo»ni o'rganishda qaysi tushuncha kalit hisoblanadi?",
+        "questionText": "«5. Iqlim va ob-havo»ni o'rganishda qaysi tushuncha kalit hisoblanadi?",
+        "options": [
+          "yoritiladi",
+          "joydagi",
+          "qisqa",
+          "muddatli"
+        ],
+        "correctIndex": 0
+      },
+      {
+        "id": 12,
+        "question": "«Iqlim va ob-havo tabiat, jamiyat va inson faoliyati o'rtasidagi o'zaro aloqalarni ko'rsati» — bu jumla qaysi tushuncha haqida?",
+        "questionText": "«Iqlim va ob-havo tabiat, jamiyat va inson faoliyati o'rtasidagi o'zaro aloqalarni ko'rsati» — bu jumla qaysi tushuncha haqida?",
+        "options": [
+          "muddatli",
+          "atmosfera",
+          "qisqa",
+          "ma'lum"
+        ],
+        "correctIndex": 3
+      },
+      {
+        "id": 13,
+        "question": "Geografiya nuqtai nazaridan «joydagi» nimani bildiradi?",
+        "questionText": "Geografiya nuqtai nazaridan «joydagi» nimani bildiradi?",
+        "options": [
+          "holati",
+          "muddatli",
+          "joydagi",
+          "atmosfera"
+        ],
+        "correctIndex": 2
+      },
+      {
+        "id": 14,
+        "question": "«5. Iqlim va ob-havo» mavzusi doirasida qaysi atama keng yoritilgan?",
+        "questionText": "«5. Iqlim va ob-havo» mavzusi doirasida qaysi atama keng yoritilgan?",
+        "options": [
+          "qisqa",
+          "atmosfera",
+          "holati",
+          "bo'lsa"
+        ],
+        "correctIndex": 0
+      },
+      {
+        "id": 15,
+        "question": "Berilgan matnda qaysi tushuncha asosiy o'rin tutadi?",
+        "questionText": "Berilgan matnda qaysi tushuncha asosiy o'rin tutadi?",
+        "options": [
+          "holati",
+          "bo'lsa",
+          "uzoq",
+          "muddatli"
+        ],
+        "correctIndex": 3
+      }
+    ],
+    "closedTests": [
+      {
+        "id": 1,
+        "question": "«5. Iqlim va ob-havo» mavzusida «iqlim» tushunchasi nimani anglatadi va matnda qanday yoritilgan?",
+        "questionText": "«5. Iqlim va ob-havo» mavzusida «iqlim» tushunchasi nimani anglatadi va matnda qanday yoritilgan?"
+      },
+      {
+        "id": 2,
+        "question": "«ob-havo» atamasi geografiyada qanday ma'noga ega? Misol bilan tushuntiring.",
+        "questionText": "«ob-havo» atamasi geografiyada qanday ma'noga ega? Misol bilan tushuntiring."
+      },
+      {
+        "id": 3,
+        "question": "5. Iqlim va ob-havo mavzusining asosiy g'oyalarini o'z so'zingiz bilan bayon qiling.",
+        "questionText": "5. Iqlim va ob-havo mavzusining asosiy g'oyalarini o'z so'zingiz bilan bayon qiling."
+      },
+      {
+        "id": 4,
+        "question": "Matnga ko'ra «darsining» qanday xususiyatlarga ega?",
+        "questionText": "Matnga ko'ra «darsining» qanday xususiyatlarga ega?"
+      },
+      {
+        "id": 5,
+        "question": "«5. Iqlim va ob-havo» mavzusi qaysi tabiiy yoki ijtimoiy hodisalar bilan bog'liq?",
+        "questionText": "«5. Iqlim va ob-havo» mavzusi qaysi tabiiy yoki ijtimoiy hodisalar bilan bog'liq?"
+      },
+      {
+        "id": 6,
+        "question": "Quyidagi jumlani izohlang: «Turli hududlarda turli xil iqlim shakllangan.»",
+        "questionText": "Quyidagi jumlani izohlang: «Turli hududlarda turli xil iqlim shakllangan.»"
+      },
+      {
+        "id": 7,
+        "question": "«biri» va «5. Iqlim va ob-havo» o'rtasidagi bog'liqlikni izohlang.",
+        "questionText": "«biri» va «5. Iqlim va ob-havo» o'rtasidagi bog'liqlikni izohlang."
+      },
+      {
+        "id": 8,
+        "question": "5. Iqlim va ob-havo mavzusini o'rganish kundalik hayotda nima uchun zarur?",
+        "questionText": "5. Iqlim va ob-havo mavzusini o'rganish kundalik hayotda nima uchun zarur?"
+      },
+      {
+        "id": 9,
+        "question": "Matndan «mazmuni» bilan bog'liq misol keltiring va tahlil qiling.",
+        "questionText": "Matndan «mazmuni» bilan bog'liq misol keltiring va tahlil qiling."
+      },
+      {
+        "id": 10,
+        "question": "«5. Iqlim va ob-havo» mavzusida qaysi geografik qonuniyatlar uchraydi?",
+        "questionText": "«5. Iqlim va ob-havo» mavzusida qaysi geografik qonuniyatlar uchraydi?"
+      },
+      {
+        "id": 11,
+        "question": "«yoritiladi» tushunchasining kelib chiqishi va rivojlanishini bayon qiling.",
+        "questionText": "«yoritiladi» tushunchasining kelib chiqishi va rivojlanishini bayon qiling."
+      },
+      {
+        "id": 12,
+        "question": "«Iqlim va ob-havo tabiat, jamiyat va inson faoliyati o'rtasidagi o'zaro aloqalarni ko'rsatib beradi.» — bu fikrga qanday qo'shimcha izoh berish mumkin?",
+        "questionText": "«Iqlim va ob-havo tabiat, jamiyat va inson faoliyati o'rtasidagi o'zaro aloqalarni ko'rsatib beradi.» — bu fikrga qanday qo'shimcha izoh berish mumkin?"
+      },
+      {
+        "id": 13,
+        "question": "5. Iqlim va ob-havo mavzusining inson hayotidagi amaliy ahamiyati nimada?",
+        "questionText": "5. Iqlim va ob-havo mavzusining inson hayotidagi amaliy ahamiyati nimada?"
+      },
+      {
+        "id": 14,
+        "question": "«qisqa» bilan bog'liq qiziqarli geografik fakt keltiring.",
+        "questionText": "«qisqa» bilan bog'liq qiziqarli geografik fakt keltiring."
+      },
+      {
+        "id": 15,
+        "question": "5. Iqlim va ob-havo mavzusini o'rganishdan keyin qanday xulosa chiqarish mumkin?",
+        "questionText": "5. Iqlim va ob-havo mavzusini o'rganishdan keyin qanday xulosa chiqarish mumkin?"
+      }
+    ]
+  },
+  {
+    "id": 7,
+    "createdAt": "2026-06-19T10:30:47.866Z",
+    "tests": [
+      {
+        "id": 1,
+        "question": "«O‘zbekiston Markaziy Osiyoda joylashgan davlatdir. Mamlakat hududining katta qismini tekisliklar» mavzusida «markaziy» tushunchasi nimani anglatadi?",
+        "questionText": "«O‘zbekiston Markaziy Osiyoda joylashgan davlatdir. Mamlakat hududining katta qismini tekisliklar» mavzusida «markaziy» tushunchasi nimani anglatadi?",
+        "options": [
+          "joylashgan",
+          "davlatdir",
+          "mamlakat",
+          "markaziy"
+        ],
+        "correctIndex": 3
+      },
+      {
+        "id": 2,
+        "question": "Quyidagi atamalardan qaysi biri «O‘zbekiston Markaziy Osiyoda joylashgan davlatdir. Mamlakat hududining katta qismini tekisliklar» mavzusiga bevosita aloqador?",
+        "questionText": "Quyidagi atamalardan qaysi biri «O‘zbekiston Markaziy Osiyoda joylashgan davlatdir. Mamlakat hududining katta qismini tekisliklar» mavzusiga bevosita aloqador?",
+        "options": [
+          "mamlakat",
+          "osiyoda",
+          "hududining",
+          "davlatdir"
+        ],
+        "correctIndex": 1
+      },
+      {
+        "id": 3,
+        "question": "Matnda «Ushbu mavzu doirasida o'quvchilar o‘zbekiston markaziy osiyoda joylashgan davlat...» — bu fikr nima haqida?",
+        "questionText": "Matnda «Ushbu mavzu doirasida o'quvchilar o‘zbekiston markaziy osiyoda joylashgan davlat...» — bu fikr nima haqida?",
+        "options": [
+          "katta",
+          "mamlakat",
+          "hududining",
+          "joylashgan"
+        ],
+        "correctIndex": 3
+      },
+      {
+        "id": 4,
+        "question": "«davlatdir» so'zining geografik ma'nosi nima?",
+        "questionText": "«davlatdir» so'zining geografik ma'nosi nima?",
+        "options": [
+          "hududining",
+          "davlatdir",
+          "katta",
+          "qismini"
+        ],
+        "correctIndex": 1
+      },
+      {
+        "id": 5,
+        "question": "«O‘zbekiston Markaziy Osiyoda joylashgan davlatdir. Mamlakat hududining katta qismini tekisliklar» mavzusining asosiy tushunchalaridan biri qaysi?",
+        "questionText": "«O‘zbekiston Markaziy Osiyoda joylashgan davlatdir. Mamlakat hududining katta qismini tekisliklar» mavzusining asosiy tushunchalaridan biri qaysi?",
+        "options": [
+          "tekisliklar",
+          "katta",
+          "qismini",
+          "mamlakat"
+        ],
+        "correctIndex": 3
+      },
+      {
+        "id": 6,
+        "question": "Matndagi «O‘zbekiston boy tabiiy resurslarga ega bo‘lib, qishloq xo‘jaligi va sa» fikriga eng mos kelgan tushuncha qaysi?",
+        "questionText": "Matndagi «O‘zbekiston boy tabiiy resurslarga ega bo‘lib, qishloq xo‘jaligi va sa» fikriga eng mos kelgan tushuncha qaysi?",
+        "options": [
+          "geografiya",
+          "hududining",
+          "tekisliklar",
+          "qismini"
+        ],
+        "correctIndex": 1
+      },
+      {
+        "id": 7,
+        "question": "Quyidagilardan qaysi biri «O‘zbekiston Markaziy Osiyoda joylashgan davlatdir. Mamlakat hududining katta qismini tekisliklar» bilan bog'liq emas?",
+        "questionText": "Quyidagilardan qaysi biri «O‘zbekiston Markaziy Osiyoda joylashgan davlatdir. Mamlakat hududining katta qismini tekisliklar» bilan bog'liq emas?",
+        "options": [
+          "tekisliklar",
+          "geografiya",
+          "katta",
+          "darsining"
+        ],
+        "correctIndex": 2
+      },
+      {
+        "id": 8,
+        "question": "«qismini» qanday geografik obyekt yoki hodisa hisoblanadi?",
+        "questionText": "«qismini» qanday geografik obyekt yoki hodisa hisoblanadi?",
+        "options": [
+          "darsining",
+          "qismini",
+          "muhim",
+          "geografiya"
+        ],
+        "correctIndex": 1
+      },
+      {
+        "id": 9,
+        "question": "Matnga ko'ra «O‘zbekiston Markaziy Osiyoda joylashgan davlatdir. Mamlakat hududining katta qismini tekisliklar» mavzusida nima alohida ta'kidlangan?",
+        "questionText": "Matnga ko'ra «O‘zbekiston Markaziy Osiyoda joylashgan davlatdir. Mamlakat hududining katta qismini tekisliklar» mavzusida nima alohida ta'kidlangan?",
+        "options": [
+          "muhim",
+          "tekisliklar",
+          "mavzularidan",
+          "darsining"
+        ],
+        "correctIndex": 1
+      },
+      {
+        "id": 10,
+        "question": "«O‘zbekiston Markaziy Osiyoda joylashgan davlatdir. Mamlakat hududining katta qismini tekisliklar»ni o'rganishda qaysi tushuncha kalit hisoblanadi?",
+        "questionText": "«O‘zbekiston Markaziy Osiyoda joylashgan davlatdir. Mamlakat hududining katta qismini tekisliklar»ni o'rganishda qaysi tushuncha kalit hisoblanadi?",
+        "options": [
+          "mavzularidan",
+          "geografiya",
+          "muhim",
+          "biri"
+        ],
+        "correctIndex": 1
+      },
+      {
+        "id": 11,
+        "question": "«Mamlakatning geografik o‘rni transport va savdo aloqalarida muhim ahamiyat kasb etadi.O‘zb» — bu jumla qaysi tushuncha haqida?",
+        "questionText": "«Mamlakatning geografik o‘rni transport va savdo aloqalarida muhim ahamiyat kasb etadi.O‘zb» — bu jumla qaysi tushuncha haqida?",
+        "options": [
+          "biri",
+          "darsining",
+          "mavzularidan",
+          "quyida"
+        ],
+        "correctIndex": 1
+      },
+      {
+        "id": 12,
+        "question": "Geografiya nuqtai nazaridan «muhim» nimani bildiradi?",
+        "questionText": "Geografiya nuqtai nazaridan «muhim» nimani bildiradi?",
+        "options": [
+          "quyida",
+          "biri",
+          "mazmuni",
+          "muhim"
+        ],
+        "correctIndex": 3
+      },
+      {
+        "id": 13,
+        "question": "«O‘zbekiston Markaziy Osiyoda joylashgan davlatdir. Mamlakat hududining katta qismini tekisliklar» mavzusi doirasida qaysi atama keng yoritilgan?",
+        "questionText": "«O‘zbekiston Markaziy Osiyoda joylashgan davlatdir. Mamlakat hududining katta qismini tekisliklar» mavzusi doirasida qaysi atama keng yoritilgan?",
+        "options": [
+          "mazmuni",
+          "batafsil",
+          "quyida",
+          "mavzularidan"
+        ],
+        "correctIndex": 3
+      },
+      {
+        "id": 14,
+        "question": "Berilgan matnda qaysi tushuncha asosiy o'rin tutadi?",
+        "questionText": "Berilgan matnda qaysi tushuncha asosiy o'rin tutadi?",
+        "options": [
+          "batafsil",
+          "mazmuni",
+          "yoritiladi",
+          "biri"
+        ],
+        "correctIndex": 3
+      },
+      {
+        "id": 15,
+        "question": "«O‘zbekiston Markaziy Osiyoda joylashgan davlatdir. Mamlakat hududining katta qismini tekisliklar» mavzusida «mazmuni» tushunchasi nimani anglatadi?",
+        "questionText": "«O‘zbekiston Markaziy Osiyoda joylashgan davlatdir. Mamlakat hududining katta qismini tekisliklar» mavzusida «mazmuni» tushunchasi nimani anglatadi?",
+        "options": [
+          "qizilqum",
+          "yoritiladi",
+          "cho'li",
+          "mazmuni"
+        ],
+        "correctIndex": 3
+      }
+    ],
+    "lessonId": 1,
+    "title": "O‘zbekiston Markaziy Osiyoda joylashgan davlatdir. Mamlakat hududining katta qismini tekisliklar",
+    "content": "O‘zbekiston Markaziy Osiyoda joylashgan davlatdir. Mamlakat hududining katta qismini tekisliklar — geografiya darsining muhim mavzularidan biri bo'lib, quyida uning asosiy mazmuni batafsil yoritiladi. Qizilqum cho‘li, Tyanshan va Hisor tog‘ tizmalari muhim geografik obyektlar hisoblanadi. Ushbu mavzu doirasida o'quvchilar o‘zbekiston markaziy osiyoda joylashgan davlatdir. mamlakat hududining katta qismini tekisliklar bilan bog'liq asosiy tushunchalar, ta'riflar va qonuniyatlar bilan tanishadilar. Amudaryo va Sirdaryo yirik daryolardir. O‘zbekiston boy tabiiy resurslarga ega bo‘lib, qishloq xo‘jaligi va sanoat rivojlangan. Mamlakatning geografik o‘rni transport va savdo aloqalarida muhim ahamiyat kasb etadi.O‘zbekiston Markaziy Osiyoda joylashgan davlatdir. katta qismini tekisliklar egallaydi. obyektlar hisoblanadi. O‘zbekiston boy tabiiy resurslarga ega bo‘lib, qishloq xo‘jaligi va sanoat rivojlangan. Mamlakatning geografik o‘rni transport va savdo aloqalarida muhim ahamiyat kasb etadi.O‘zbekiston Markaziy Osiyoda joylashgan davlatdir. «o'zbekiston» tushunchasi mavzuda markaziy o'rin tutadi va uning ma'nosini bilish bilimni mustahkamlaydi. «markaziy» bilan bog'liq jihatlar mavzuni chuqurroq anglashga yordam beradi. «osiyoda» kabi atamalar geografik ma'lumotlarni tizimli o'rganishda alohida ahamiyatga ega.",
+    "openTests": [
+      {
+        "id": 1,
+        "question": "«O‘zbekiston Markaziy Osiyoda joylashgan davlatdir. Mamlakat hududining katta qismini tekisliklar» mavzusida «markaziy» tushunchasi nimani anglatadi?",
+        "questionText": "«O‘zbekiston Markaziy Osiyoda joylashgan davlatdir. Mamlakat hududining katta qismini tekisliklar» mavzusida «markaziy» tushunchasi nimani anglatadi?",
+        "options": [
+          "joylashgan",
+          "davlatdir",
+          "mamlakat",
+          "markaziy"
+        ],
+        "correctIndex": 3
+      },
+      {
+        "id": 2,
+        "question": "Quyidagi atamalardan qaysi biri «O‘zbekiston Markaziy Osiyoda joylashgan davlatdir. Mamlakat hududining katta qismini tekisliklar» mavzusiga bevosita aloqador?",
+        "questionText": "Quyidagi atamalardan qaysi biri «O‘zbekiston Markaziy Osiyoda joylashgan davlatdir. Mamlakat hududining katta qismini tekisliklar» mavzusiga bevosita aloqador?",
+        "options": [
+          "mamlakat",
+          "osiyoda",
+          "hududining",
+          "davlatdir"
+        ],
+        "correctIndex": 1
+      },
+      {
+        "id": 3,
+        "question": "Matnda «Ushbu mavzu doirasida o'quvchilar o‘zbekiston markaziy osiyoda joylashgan davlat...» — bu fikr nima haqida?",
+        "questionText": "Matnda «Ushbu mavzu doirasida o'quvchilar o‘zbekiston markaziy osiyoda joylashgan davlat...» — bu fikr nima haqida?",
+        "options": [
+          "katta",
+          "mamlakat",
+          "hududining",
+          "joylashgan"
+        ],
+        "correctIndex": 3
+      },
+      {
+        "id": 4,
+        "question": "«davlatdir» so'zining geografik ma'nosi nima?",
+        "questionText": "«davlatdir» so'zining geografik ma'nosi nima?",
+        "options": [
+          "hududining",
+          "davlatdir",
+          "katta",
+          "qismini"
+        ],
+        "correctIndex": 1
+      },
+      {
+        "id": 5,
+        "question": "«O‘zbekiston Markaziy Osiyoda joylashgan davlatdir. Mamlakat hududining katta qismini tekisliklar» mavzusining asosiy tushunchalaridan biri qaysi?",
+        "questionText": "«O‘zbekiston Markaziy Osiyoda joylashgan davlatdir. Mamlakat hududining katta qismini tekisliklar» mavzusining asosiy tushunchalaridan biri qaysi?",
+        "options": [
+          "tekisliklar",
+          "katta",
+          "qismini",
+          "mamlakat"
+        ],
+        "correctIndex": 3
+      },
+      {
+        "id": 6,
+        "question": "Matndagi «O‘zbekiston boy tabiiy resurslarga ega bo‘lib, qishloq xo‘jaligi va sa» fikriga eng mos kelgan tushuncha qaysi?",
+        "questionText": "Matndagi «O‘zbekiston boy tabiiy resurslarga ega bo‘lib, qishloq xo‘jaligi va sa» fikriga eng mos kelgan tushuncha qaysi?",
+        "options": [
+          "geografiya",
+          "hududining",
+          "tekisliklar",
+          "qismini"
+        ],
+        "correctIndex": 1
+      },
+      {
+        "id": 7,
+        "question": "Quyidagilardan qaysi biri «O‘zbekiston Markaziy Osiyoda joylashgan davlatdir. Mamlakat hududining katta qismini tekisliklar» bilan bog'liq emas?",
+        "questionText": "Quyidagilardan qaysi biri «O‘zbekiston Markaziy Osiyoda joylashgan davlatdir. Mamlakat hududining katta qismini tekisliklar» bilan bog'liq emas?",
+        "options": [
+          "tekisliklar",
+          "geografiya",
+          "katta",
+          "darsining"
+        ],
+        "correctIndex": 2
+      },
+      {
+        "id": 8,
+        "question": "«qismini» qanday geografik obyekt yoki hodisa hisoblanadi?",
+        "questionText": "«qismini» qanday geografik obyekt yoki hodisa hisoblanadi?",
+        "options": [
+          "darsining",
+          "qismini",
+          "muhim",
+          "geografiya"
+        ],
+        "correctIndex": 1
+      },
+      {
+        "id": 9,
+        "question": "Matnga ko'ra «O‘zbekiston Markaziy Osiyoda joylashgan davlatdir. Mamlakat hududining katta qismini tekisliklar» mavzusida nima alohida ta'kidlangan?",
+        "questionText": "Matnga ko'ra «O‘zbekiston Markaziy Osiyoda joylashgan davlatdir. Mamlakat hududining katta qismini tekisliklar» mavzusida nima alohida ta'kidlangan?",
+        "options": [
+          "muhim",
+          "tekisliklar",
+          "mavzularidan",
+          "darsining"
+        ],
+        "correctIndex": 1
+      },
+      {
+        "id": 10,
+        "question": "«O‘zbekiston Markaziy Osiyoda joylashgan davlatdir. Mamlakat hududining katta qismini tekisliklar»ni o'rganishda qaysi tushuncha kalit hisoblanadi?",
+        "questionText": "«O‘zbekiston Markaziy Osiyoda joylashgan davlatdir. Mamlakat hududining katta qismini tekisliklar»ni o'rganishda qaysi tushuncha kalit hisoblanadi?",
+        "options": [
+          "mavzularidan",
+          "geografiya",
+          "muhim",
+          "biri"
+        ],
+        "correctIndex": 1
+      },
+      {
+        "id": 11,
+        "question": "«Mamlakatning geografik o‘rni transport va savdo aloqalarida muhim ahamiyat kasb etadi.O‘zb» — bu jumla qaysi tushuncha haqida?",
+        "questionText": "«Mamlakatning geografik o‘rni transport va savdo aloqalarida muhim ahamiyat kasb etadi.O‘zb» — bu jumla qaysi tushuncha haqida?",
+        "options": [
+          "biri",
+          "darsining",
+          "mavzularidan",
+          "quyida"
+        ],
+        "correctIndex": 1
+      },
+      {
+        "id": 12,
+        "question": "Geografiya nuqtai nazaridan «muhim» nimani bildiradi?",
+        "questionText": "Geografiya nuqtai nazaridan «muhim» nimani bildiradi?",
+        "options": [
+          "quyida",
+          "biri",
+          "mazmuni",
+          "muhim"
+        ],
+        "correctIndex": 3
+      },
+      {
+        "id": 13,
+        "question": "«O‘zbekiston Markaziy Osiyoda joylashgan davlatdir. Mamlakat hududining katta qismini tekisliklar» mavzusi doirasida qaysi atama keng yoritilgan?",
+        "questionText": "«O‘zbekiston Markaziy Osiyoda joylashgan davlatdir. Mamlakat hududining katta qismini tekisliklar» mavzusi doirasida qaysi atama keng yoritilgan?",
+        "options": [
+          "mazmuni",
+          "batafsil",
+          "quyida",
+          "mavzularidan"
+        ],
+        "correctIndex": 3
+      },
+      {
+        "id": 14,
+        "question": "Berilgan matnda qaysi tushuncha asosiy o'rin tutadi?",
+        "questionText": "Berilgan matnda qaysi tushuncha asosiy o'rin tutadi?",
+        "options": [
+          "batafsil",
+          "mazmuni",
+          "yoritiladi",
+          "biri"
+        ],
+        "correctIndex": 3
+      },
+      {
+        "id": 15,
+        "question": "«O‘zbekiston Markaziy Osiyoda joylashgan davlatdir. Mamlakat hududining katta qismini tekisliklar» mavzusida «mazmuni» tushunchasi nimani anglatadi?",
+        "questionText": "«O‘zbekiston Markaziy Osiyoda joylashgan davlatdir. Mamlakat hududining katta qismini tekisliklar» mavzusida «mazmuni» tushunchasi nimani anglatadi?",
+        "options": [
+          "qizilqum",
+          "yoritiladi",
+          "cho'li",
+          "mazmuni"
+        ],
+        "correctIndex": 3
+      }
+    ],
+    "closedTests": [
+      {
+        "id": 1,
+        "question": "«O‘zbekiston Markaziy Osiyoda joylashgan davlatdir. Mamlakat hududining katta qismini tekisliklar» mavzusida «o'zbekiston» tushunchasi nimani anglatadi va matnda qanday yoritilgan?",
+        "questionText": "«O‘zbekiston Markaziy Osiyoda joylashgan davlatdir. Mamlakat hududining katta qismini tekisliklar» mavzusida «o'zbekiston» tushunchasi nimani anglatadi va matnda qanday yoritilgan?"
+      },
+      {
+        "id": 2,
+        "question": "«markaziy» atamasi geografiyada qanday ma'noga ega? Misol bilan tushuntiring.",
+        "questionText": "«markaziy» atamasi geografiyada qanday ma'noga ega? Misol bilan tushuntiring."
+      },
+      {
+        "id": 3,
+        "question": "O‘zbekiston Markaziy Osiyoda joylashgan davlatdir. Mamlakat hududining katta qismini tekisliklar mavzusining asosiy g'oyalarini o'z so'zingiz bilan bayon qiling.",
+        "questionText": "O‘zbekiston Markaziy Osiyoda joylashgan davlatdir. Mamlakat hududining katta qismini tekisliklar mavzusining asosiy g'oyalarini o'z so'zingiz bilan bayon qiling."
+      },
+      {
+        "id": 4,
+        "question": "Matnga ko'ra «joylashgan» qanday xususiyatlarga ega?",
+        "questionText": "Matnga ko'ra «joylashgan» qanday xususiyatlarga ega?"
+      },
+      {
+        "id": 5,
+        "question": "Quyidagi jumlani izohlang: «Amudaryo va Sirdaryo yirik daryolardir.»",
+        "questionText": "Quyidagi jumlani izohlang: «Amudaryo va Sirdaryo yirik daryolardir.»"
+      },
+      {
+        "id": 6,
+        "question": "«hududining» va «O‘zbekiston Markaziy Osiyoda joylashgan davlatdir. Mamlakat hududining katta qismini tekisliklar» o'rtasidagi bog'liqlikni izohlang.",
+        "questionText": "«hududining» va «O‘zbekiston Markaziy Osiyoda joylashgan davlatdir. Mamlakat hududining katta qismini tekisliklar» o'rtasidagi bog'liqlikni izohlang."
+      },
+      {
+        "id": 7,
+        "question": "Matndan «qismini» bilan bog'liq misol keltiring va tahlil qiling.",
+        "questionText": "Matndan «qismini» bilan bog'liq misol keltiring va tahlil qiling."
+      },
+      {
+        "id": 8,
+        "question": "«geografiya» tushunchasining kelib chiqishi va rivojlanishini bayon qiling.",
+        "questionText": "«geografiya» tushunchasining kelib chiqishi va rivojlanishini bayon qiling."
+      },
+      {
+        "id": 9,
+        "question": "«Mamlakatning geografik o‘rni transport va savdo aloqalarida muhim ahamiyat kasb etadi.O‘zbekiston Markaziy Osiyoda joyla» — bu fikrga qanday qo'shimcha izoh berish mumkin?",
+        "questionText": "«Mamlakatning geografik o‘rni transport va savdo aloqalarida muhim ahamiyat kasb etadi.O‘zbekiston Markaziy Osiyoda joyla» — bu fikrga qanday qo'shimcha izoh berish mumkin?"
+      },
+      {
+        "id": 10,
+        "question": "«mavzularidan» bilan bog'liq qiziqarli geografik fakt keltiring.",
+        "questionText": "«mavzularidan» bilan bog'liq qiziqarli geografik fakt keltiring."
+      },
+      {
+        "id": 11,
+        "question": "O‘zbekiston Markaziy Osiyoda joylashgan davlatdir. Mamlakat hududining katta qismini tekisliklar mavzusi bo'yicha 11-savol: matndan kelib chiqib o'z fikringizni bayon qiling.",
+        "questionText": "O‘zbekiston Markaziy Osiyoda joylashgan davlatdir. Mamlakat hududining katta qismini tekisliklar mavzusi bo'yicha 11-savol: matndan kelib chiqib o'z fikringizni bayon qiling."
+      },
+      {
+        "id": 12,
+        "question": "O‘zbekiston Markaziy Osiyoda joylashgan davlatdir. Mamlakat hududining katta qismini tekisliklar mavzusi bo'yicha 12-savol: matndan kelib chiqib o'z fikringizni bayon qiling.",
+        "questionText": "O‘zbekiston Markaziy Osiyoda joylashgan davlatdir. Mamlakat hududining katta qismini tekisliklar mavzusi bo'yicha 12-savol: matndan kelib chiqib o'z fikringizni bayon qiling."
+      },
+      {
+        "id": 13,
+        "question": "O‘zbekiston Markaziy Osiyoda joylashgan davlatdir. Mamlakat hududining katta qismini tekisliklar mavzusi bo'yicha 13-savol: matndan kelib chiqib o'z fikringizni bayon qiling.",
+        "questionText": "O‘zbekiston Markaziy Osiyoda joylashgan davlatdir. Mamlakat hududining katta qismini tekisliklar mavzusi bo'yicha 13-savol: matndan kelib chiqib o'z fikringizni bayon qiling."
+      },
+      {
+        "id": 14,
+        "question": "O‘zbekiston Markaziy Osiyoda joylashgan davlatdir. Mamlakat hududining katta qismini tekisliklar mavzusi bo'yicha 14-savol: matndan kelib chiqib o'z fikringizni bayon qiling.",
+        "questionText": "O‘zbekiston Markaziy Osiyoda joylashgan davlatdir. Mamlakat hududining katta qismini tekisliklar mavzusi bo'yicha 14-savol: matndan kelib chiqib o'z fikringizni bayon qiling."
+      },
+      {
+        "id": 15,
+        "question": "O‘zbekiston Markaziy Osiyoda joylashgan davlatdir. Mamlakat hududining katta qismini tekisliklar mavzusi bo'yicha 15-savol: matndan kelib chiqib o'z fikringizni bayon qiling.",
+        "questionText": "O‘zbekiston Markaziy Osiyoda joylashgan davlatdir. Mamlakat hududining katta qismini tekisliklar mavzusi bo'yicha 15-savol: matndan kelib chiqib o'z fikringizni bayon qiling."
+      }
+    ]
+  }
+]

@@ -1,0 +1,30 @@
+{
+  "name": "geo-platform",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "vite --host 0.0.0.0",
+    "dev:teacher": "vite --config vite.teacher.config.js --host 0.0.0.0",
+    "dev:student": "vite --config vite.student.config.js --host 0.0.0.0",
+    "dev:all": "concurrently \"npm run dev:teacher\" \"npm run dev:student\"",
+    "build": "vite build",
+    "build:teacher": "vite build --config vite.teacher.config.js",
+    "build:student": "vite build --config vite.student.config.js",
+    "serve": "vite preview --host 0.0.0.0"
+  },
+  "devDependencies": {
+    "@tailwindcss/vite": "^4.1.7",
+    "@vitejs/plugin-vue": "^5.2.3",
+    "concurrently": "^9.0.0",
+    "tailwindcss": "^4.1.7",
+    "vite": "^6.3.5"
+  },
+  "dependencies": {
+    "@vueuse/core": "^13.2.0",
+    "lucide-vue-next": "^0.511.0",
+    "pinia": "^3.0.2",
+    "vue": "^3.5.13",
+    "vue-router": "^4.5.1"
+  }
+}
