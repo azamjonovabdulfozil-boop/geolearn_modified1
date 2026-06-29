@@ -1,7 +1,13 @@
+import { dirname, join } from 'path';
+import { fileURLToPath } from 'url';
+import { createUser, getUserByUsername } from './lib/db.js';
+import { hashPassword } from './lib/auth.js';
+
+import "dotenv/config";
 import express from "express";
 import cors from "cors";
-import { join, dirname } from "path";
-import { fileURLToPath } from "url";
+
+
 
 import authRoutes    from "./routes/auth.js";
 import lessonRoutes  from "./routes/lessons.js";
@@ -10,14 +16,28 @@ import gameRoutes    from "./routes/games.js";
 import ratingRoutes  from "./routes/ratings.js";
 import aiRoutes      from "./routes/ai.js";
 
-import { createUser, getUserByUsername } from "./lib/db.js";
-import { hashPassword } from "./lib/auth.js";
+
+
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const app = express();
 const PORT = Number(process.env.PORT) || 3001;
 
-app.use(cors({ origin: "*" }));
+// ── CORS ────────────────────────────────────────────
+// FRONTEND_URL env orqali Vercel manzili(lari) kiritiladi (vergul bilan
+// bir nechtasi: masalan https://app.vercel.app,https://www.domen.uz).
+// Agar FRONTEND_URL berilmagan bo'lsa, hamma originlarga ruxsat beriladi
+// (lokal ishlab chiqish uchun qulay, lekin productionda FRONTEND_URL ni
+// to'ldirish tavsiya etiladi).
+const allowedOrigins = (process.env.FRONTEND_URL || "")
+  .split(",")
+  .map(o => o.trim())
+  .filter(Boolean);
+
+app.use(cors({
+  origin: allowedOrigins.length === 0 ? true : allowedOrigins,
+  credentials: true,
+}));
 app.use(express.json({ limit: "50mb" }));
 app.use(express.urlencoded({ extended: true, limit: "50mb" }));
 

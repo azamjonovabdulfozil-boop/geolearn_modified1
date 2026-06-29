@@ -133,7 +133,7 @@
 import { ref, onMounted } from "vue";
 import { RouterLink } from "vue-router";
 import { Plus, BookOpen, Trash2, Upload, FileText, Loader2, X } from "lucide-vue-next";
-import { api } from "@/composables/api";
+import { api, resolveUrl } from "@/composables/api";
 
 const lessons = ref([]);
 const loading = ref(true);
@@ -173,7 +173,7 @@ async function uploadPdf(id, e) {
   fd.append("pdf", file);
   const token = localStorage.getItem("geo_token");
   try {
-    const resp = await fetch(`/api/lessons/${id}/pdf`, {
+    const resp = await fetch(resolveUrl(`/api/lessons/${id}/pdf`), {
       method: "POST",
       headers: { Authorization: `Bearer ${token}` },
       body: fd,
@@ -287,7 +287,7 @@ async function uploadPdf(id, e) {
   background: hsl(var(--muted));
   display: flex; align-items: center; justify-content: center;
   margin: 0 auto 14px;
-}
+}   
 .empty-title { font-size: 15px; font-weight: 700; margin-bottom: 4px; }
 .empty-sub { font-size: 13px; color: hsl(var(--muted-fg)); }
 .space-y-3 > * + * { margin-top: 10px; }

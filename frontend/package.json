@@ -11,12 +11,14 @@
     "build": "vite build",
     "build:teacher": "vite build --config vite.teacher.config.js",
     "build:student": "vite build --config vite.student.config.js",
-    "serve": "vite preview --host 0.0.0.0"
+    "serve": "vite preview --host 0.0.0.0",
+    "deploy": "gh-pages -d dist"
   },
   "devDependencies": {
     "@tailwindcss/vite": "^4.1.7",
     "@vitejs/plugin-vue": "^5.2.3",
     "concurrently": "^9.0.0",
+    "gh-pages": "^6.3.0",
     "tailwindcss": "^4.1.7",
     "vite": "^6.3.5"
   },

@@ -1,0 +1,22 @@
+services:
+  - type: web
+    name: geolearn-backend
+    runtime: node
+    rootDir: backend
+    buildCommand: npm install
+    startCommand: npm start
+    envVars:
+      - key: JWT_SECRET
+        sync: false
+      - key: FRONTEND_URL
+        sync: false
+      - key: LOVABLE_API_KEY
+        sync: false
+      - key: OPENAI_API_KEY
+        sync: false
+      - key: HF_TOKEN
+        sync: false
+    disk:
+      name: geolearn-data
+      mountPath: /opt/render/project/src/backend/data
+      sizeGB: 1
