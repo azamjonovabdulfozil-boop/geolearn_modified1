@@ -57,41 +57,42 @@ const router = createRouter({
   ],
 });
 
+// Har bir sayt faqat o'z roliga xizmat qiladi:
+//   teacher sayti (5173) → faqat o'qituvchi,  student sayti (5174) → faqat o'quvchi
+const SITE_ROLE = APP_ROLE === "teacher" || APP_ROLE === "student" ? APP_ROLE : null;
+
+function homeFor(role) {
+  return role === "teacher" ? "/teacher/dashboard" : "/student/dashboard";
+}
+
 router.beforeEach(async (to) => {
   const auth = useAuthStore();
   if (!auth.user && auth.token) await auth.fetchMe();
 
+  // Bu saytga to'g'ri kelmaydigan rol bilan kirilgan bo'lsa — sessiyani tozalaymiz.
+  // (Aks holda /login ↔ /dashboard orasida cheksiz redirect yuzaga keladi.)
+  if (SITE_ROLE && auth.isLoggedIn && auth.user.role !== SITE_ROLE) {
+    auth.logout();
+    return { path: "/login", query: { wrongRole: "1" } };
+  }
+
   if (to.meta.requiresAuth && !auth.isLoggedIn) return "/login";
 
   if (to.meta.guest && auth.isLoggedIn) {
-    if (APP_ROLE === "teacher") return "/teacher/dashboard";
-    if (APP_ROLE === "student") return "/student/dashboard";
-    return auth.isTeacher ? "/teacher/dashboard" : "/student/dashboard";
+    return homeFor(SITE_ROLE ?? auth.user.role);
   }
 
-  // Port-based role enforcement
-  if (APP_ROLE === "teacher") {
-    // Only teachers allowed on port 5173
-    if (to.meta.requiresAuth && auth.user?.role !== "teacher") {
-      return "/login";
-    }
-    // Block student routes on teacher port
-    if (to.meta.role === "student") return "/teacher/dashboard";
+  // Ro'yxatdan o'tish faqat o'quvchi saytida mavjud
+  if (to.path === "/register" && SITE_ROLE === "teacher") return "/login";
+
+  // Sayt roliga tegishli bo'lmagan bo'limlarni bloklaymiz
+  if (SITE_ROLE && to.meta.role && to.meta.role !== SITE_ROLE) {
+    return auth.isLoggedIn ? homeFor(SITE_ROLE) : "/login";
   }
 
-  if (APP_ROLE === "student") {
-    // Only students allowed on port 5174
-    if (to.meta.requiresAuth && auth.user?.role !== "student") {
-      return "/login";
-    }
-    // Block teacher routes on student port
-    if (to.meta.role === "teacher") return "/student/dashboard";
-  }
-
-  // Default behavior (original vite.config.js)
-  if (APP_ROLE === "both") {
-    if (to.meta.role === "teacher" && auth.user?.role !== "teacher") return "/student/dashboard";
-    if (to.meta.role === "student" && auth.user?.role !== "student") return "/teacher/dashboard";
+  // Birlashgan rejim (vite.config.js) — foydalanuvchi roliga qarab
+  if (!SITE_ROLE && auth.isLoggedIn) {
+    if (to.meta.role && to.meta.role !== auth.user.role) return homeFor(auth.user.role);
   }
 });
 

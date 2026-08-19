@@ -1,13 +1,21 @@
+# GeoLearn backend — API xizmati.
+# Frontend ikkita alohida sayt sifatida Vercel'da joylashtiriladi
+# (geolearn-admin → dist-teacher, geolearn → dist-student),
+# ikkalasi ham shu bitta API'ga murojaat qiladi.
 services:
   - type: web
     name: geolearn-backend
     runtime: node
     rootDir: backend
     buildCommand: npm install
-    startCommand: npm start
+    startCommand: npm run start:api
     envVars:
+      - key: SITE
+        value: api
       - key: JWT_SECRET
         sync: false
+      # Ikkala saytning manzili vergul bilan:
+      # https://geolearn-admin.vercel.app,https://geolearn.vercel.app
       - key: FRONTEND_URL
         sync: false
       - key: LOVABLE_API_KEY
@@ -15,6 +23,10 @@ services:
       - key: OPENAI_API_KEY
         sync: false
       - key: HF_TOKEN
+        sync: false
+      - key: GROQ_API_KEY
+        sync: false
+      - key: OPENROUTER_API_KEY
         sync: false
     disk:
       name: geolearn-data

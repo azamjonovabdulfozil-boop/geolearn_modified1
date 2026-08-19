@@ -6,7 +6,10 @@
   "type": "module",
   "scripts": {
     "start": "node src/index.js",
-    "dev": "node --watch src/index.js"
+    "dev": "node --watch src/index.js",
+    "start:teacher": "node src/index.js --site=teacher",
+    "start:student": "node src/index.js --site=student",
+    "start:api": "node src/index.js --site=api"
   },
   "dependencies": {
     "cors": "^2.8.5",

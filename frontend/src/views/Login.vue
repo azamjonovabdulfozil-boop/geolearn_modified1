@@ -60,6 +60,9 @@
           </div>
 
           <p v-if="error" class="error-msg">{{ error }}</p>
+          <a v-if="showOtherPortal && OTHER_PORTAL_URL" :href="OTHER_PORTAL_URL" class="portal-link">
+            {{ otherPortalLabel }} →
+          </a>
 
           <button @click="handleLogin" :disabled="!form.username || !form.password || loading"
             class="geo-btn-primary submit-btn">
@@ -80,19 +83,45 @@
 
 <script setup>
 import { ref } from "vue";
-import { useRouter, RouterLink } from "vue-router";
+import { useRouter, useRoute, RouterLink } from "vue-router";
 import { User, Lock, LogIn, Eye, EyeOff, Loader2, BookOpen, Gamepad2, Trophy } from "lucide-vue-next";
 import { useAuthStore } from "@/stores/auth";
 
 const APP_ROLE = typeof __APP_ROLE__ !== "undefined" ? __APP_ROLE__ : "both";
+// Ikkinchi portalning manzili: build vaqtida VITE_TEACHER_URL / VITE_STUDENT_URL
+// berilgan bo'lsa o'sha, aks holda joriy port bo'yicha avtomatik aniqlanadi.
+const PORT_PAIRS = {
+  "5173": "5174", "5174": "5173",   // dev
+  "4173": "4174", "4174": "4173",   // vite preview
+  "3001": "3002", "3002": "3001",   // node backend
+};
+const OTHER_PORTAL_URL = (() => {
+  const fromEnv = typeof __OTHER_PORTAL_URL__ !== "undefined" ? __OTHER_PORTAL_URL__ : "";
+  if (fromEnv) return fromEnv;
+  const { protocol, hostname, port } = window.location;
+  const other = PORT_PAIRS[port];
+  return other ? `${protocol}//${hostname}:${other}` : "";
+})();
 
 const router = useRouter();
+const route = useRoute();
 const auth = useAuthStore();
 
 const form = ref({ username: "", password: "" });
 const showPw = ref(false);
 const loading = ref(false);
 const error = ref("");
+const showOtherPortal = ref(false);
+
+// Router boshqa rol bilan kirilganini aniqlasa (?wrongRole=1) — xabar ko'rsatamiz
+if (route.query.wrongRole) {
+  error.value = APP_ROLE === "teacher"
+    ? "Bu portal faqat o'qituvchilar uchun."
+    : "Bu portal faqat o'quvchilar uchun.";
+  showOtherPortal.value = true;
+}
+
+const otherPortalLabel = APP_ROLE === "teacher" ? "O'quvchi portaliga o'tish" : "O'qituvchi portaliga o'tish";
 
 const features = [
   { icon: BookOpen, text: "Interaktiv geografiya darslari" },
@@ -107,16 +136,13 @@ async function handleLogin() {
   try {
     const user = await auth.login(form.value.username, form.value.password);
 
-    // Port-based role enforcement
-    if (APP_ROLE === "teacher" && user.role !== "teacher") {
+    // Har bir sayt faqat o'z rolini qabul qiladi
+    if (APP_ROLE !== "both" && user.role !== APP_ROLE) {
       auth.logout();
-      error.value = "Bu portal faqat o'qituvchilar uchun. O'quvchi portaliga o'ting: localhost:5174";
-      loading.value = false;
-      return;
-    }
-    if (APP_ROLE === "student" && user.role !== "student") {
-      auth.logout();
-      error.value = "Bu portal faqat o'quvchilar uchun. O'qituvchi portaliga o'ting: localhost:5173";
+      error.value = APP_ROLE === "teacher"
+        ? "Bu portal faqat o'qituvchilar uchun."
+        : "Bu portal faqat o'quvchilar uchun.";
+      showOtherPortal.value = true;
       loading.value = false;
       return;
     }
@@ -134,6 +160,13 @@ async function handleLogin() {
   min-height: 100vh;
   display: flex;
 }
+.portal-link {
+  display: block; text-align: center;
+  font-size: 13.5px; font-weight: 600;
+  color: hsl(var(--primary)); text-decoration: none;
+  padding: 4px 0;
+}
+.portal-link:hover { text-decoration: underline; }
 
 /* Left panel */
 .auth-left {
