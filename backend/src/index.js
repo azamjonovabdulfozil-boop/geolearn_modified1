@@ -16,7 +16,7 @@ import ratingRoutes  from "./routes/ratings.js";
 import aiRoutes      from "./routes/ai.js";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
-const FRONTEND_DIR = join(__dirname, "../../frontend");
+const REPO_ROOT = join(__dirname, "../..");
 
 // ── Saytlar ───────────────────────────────────────────────────────────────
 // SITE=both     → ikkala sayt alohida portlarda (default, lokal ish uchun)
@@ -29,9 +29,9 @@ const TEACHER_PORT = Number(process.env.PORT) || 3001;
 const STUDENT_PORT = Number(process.env.STUDENT_PORT) || TEACHER_PORT + 1;
 
 const SITES = {
-  teacher: { label: "O'qituvchi (admin) sayti", dist: join(FRONTEND_DIR, "dist-teacher"), buildCmd: "npm run build:teacher" },
-  student: { label: "O'quvchi sayti",           dist: join(FRONTEND_DIR, "dist-student"), buildCmd: "npm run build:student" },
-  api:     { label: "API",                      dist: null,                               buildCmd: null },
+  teacher: { label: "Admin (o'qituvchi) sayti", dist: join(REPO_ROOT, "admin", "dist"), buildCmd: "npm run build:admin" },
+  student: { label: "User (o'quvchi) sayti",    dist: join(REPO_ROOT, "user", "dist"),  buildCmd: "npm run build:user" },
+  api:     { label: "API",                      dist: null,                             buildCmd: null },
 };
 
 // ── CORS ──────────────────────────────────────────────────────────────────
@@ -76,7 +76,7 @@ function createApp(siteKey) {
     app.get("*", (req, res) => res.status(200).json({
       status: "GeoLearn API ishlayapti",
       site: siteKey,
-      ...(site.buildCmd ? { hint: `Frontend hali qurilmagan. frontend/ papkasida: ${site.buildCmd}` } : {}),
+      ...(site.buildCmd ? { hint: `Sayt hali qurilmagan. Repo ildizida: ${site.buildCmd}` } : {}),
     }));
   }
 

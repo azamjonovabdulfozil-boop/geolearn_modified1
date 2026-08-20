@@ -1,0 +1,40 @@
+{
+  "name": "geolearn",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "GeoLearn — admin/ va user/ saytlari + backend API",
+  "scripts": {
+    "install:all": "npm install && npm --prefix backend install",
+
+    "dev": "concurrently -n backend,admin,user -c yellow,cyan,green \"npm:dev:backend\" \"npm:dev:admin\" \"npm:dev:user\"",
+    "dev:admin": "vite --config admin/vite.config.js --host 0.0.0.0",
+    "dev:user": "vite --config user/vite.config.js --host 0.0.0.0",
+    "dev:sites": "concurrently -n admin,user -c cyan,green \"npm:dev:admin\" \"npm:dev:user\"",
+    "dev:backend": "npm --prefix backend run dev",
+
+    "build": "npm run build:admin && npm run build:user",
+    "build:admin": "vite build --config admin/vite.config.js",
+    "build:user": "vite build --config user/vite.config.js",
+
+    "preview:admin": "vite preview --config admin/vite.config.js --host 0.0.0.0",
+    "preview:user": "vite preview --config user/vite.config.js --host 0.0.0.0",
+    "preview": "concurrently -n admin,user -c cyan,green \"npm:preview:admin\" \"npm:preview:user\"",
+
+    "start": "npm --prefix backend start"
+  },
+  "devDependencies": {
+    "@tailwindcss/vite": "^4.1.7",
+    "@vitejs/plugin-vue": "^5.2.3",
+    "concurrently": "^9.0.0",
+    "tailwindcss": "^4.1.7",
+    "vite": "^6.3.5"
+  },
+  "dependencies": {
+    "@vueuse/core": "^13.2.0",
+    "lucide-vue-next": "^0.511.0",
+    "pinia": "^3.0.2",
+    "vue": "^3.5.13",
+    "vue-router": "^4.5.1"
+  }
+}
