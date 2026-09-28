@@ -1,0 +1,34 @@
+[
+  {
+    "id": 1,
+    "createdAt": "2026-09-18T10:08:51.527Z",
+    "studentIds": [],
+    "title": "Materiklar nechta",
+    "description": "Nechtaligini yodlab kelish",
+    "grade": 8,
+    "className": "8-B",
+    "section": "ru",
+    "group": null,
+    "dueDate": "2026-09-19T10:08:00.000Z",
+    "lessonId": null,
+    "attachmentUrl": null,
+    "teacherId": 1,
+    "teacherName": "Administrator"
+  },
+  {
+    "id": 2,
+    "createdAt": "2026-09-18T10:10:14.170Z",
+    "studentIds": [],
+    "title": "Yodlab kelish",
+    "description": "So'zlash",
+    "grade": 10,
+    "className": "10-V",
+    "section": "uz",
+    "group": null,
+    "dueDate": "2026-09-20T10:09:00.000Z",
+    "lessonId": 1,
+    "attachmentUrl": null,
+    "teacherId": 1,
+    "teacherName": "Administrator"
+  }
+]

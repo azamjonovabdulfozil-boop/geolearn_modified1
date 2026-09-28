@@ -28,6 +28,7 @@ export function listChats(userId) {
       createdAt: c.createdAt,
       updatedAt: c.updatedAt,
       messageCount: c.messages?.length ?? 0,
+      locked: Boolean(c.locked),
       lastMessage: c.messages?.length ? c.messages[c.messages.length - 1].content.slice(0, 120) : "",
     }));
 }
@@ -102,6 +103,34 @@ export function deleteChat(userId, id) {
   return true;
 }
 
+/** O'quvchi o'zi o'chirganda — admin bloklagan suhbatlar qoladi. */
 export function deleteAllChats(userId) {
-  saveAll(all().filter(c => c.userId !== userId));
+  saveAll(all().filter(c => c.userId !== userId || c.locked));
+}
+
+// ── Admin (o'qituvchi) uchun ──────────────────────────────────────────────
+export function getChatById(id) {
+  return all().find(c => c.id === Number(id)) ?? null;
+}
+export function setChatLocked(id, locked) {
+  const list = all();
+  const chat = list.find(c => c.id === Number(id));
+  if (!chat) return null;
+  chat.locked = Boolean(locked);
+  chat.lockedAt = locked ? new Date().toISOString() : null;
+  saveAll(list);
+  return chat;
+}
+export function removeChatAdmin(id) {
+  const list = all();
+  const next = list.filter(c => c.id !== Number(id));
+  if (next.length === list.length) return false;
+  saveAll(next);
+  return true;
+}
+export function removeUserChatsAdmin(userId) {
+  const list = all();
+  const next = list.filter(c => c.userId !== userId);
+  saveAll(next);
+  return list.length - next.length;
 }

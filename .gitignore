@@ -1,0 +1,31 @@
+# ── Bog'liqliklar ──
+node_modules/
+
+# ── Build natijalari ──
+dist/
+admin/dist/
+user/dist/
+
+# ── Maxfiy sozlamalar (HECH QACHON git'ga tushmasin) ──
+.env
+.env.local
+.env.*.local
+.env.production
+backend/.env
+backend/.env.local
+
+# ── Ish vaqtida yaratiladigan ma'lumotlar ──
+# Foydalanuvchilar (parol xeshlari, avatarlar), natijalar, o'yinlar, AI tarixi.
+# lessons.json va topics.json esa repo'da qoladi — ular boshlang'ich kontent.
+backend/data/users.json
+backend/data/activity.json
+backend/data/games.json
+backend/data/ai_chats.json
+backend/data/ai_logs.json
+backend/uploads/
+
+# ── Boshqalar ──
+*.log
+.DS_Store
+.vscode/
+.idea/

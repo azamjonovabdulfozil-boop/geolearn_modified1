@@ -1,0 +1,4 @@
+# Vercel faqat frontend'ni quradi — backend Render'da.
+backend/
+scripts/dev-backend.js
+DEPLOY.md

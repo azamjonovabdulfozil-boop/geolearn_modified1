@@ -1,0 +1,61 @@
+# ══ RENDER BLUEPRINT — GeoLearn backend (API) ══
+#
+# Bu fayl repo ILDIZIDA turishi shart — Render "Blueprint" faqat shu yerdan
+# o'qiydi. Frontend bu yerda yo'q: admin va user saytlari Vercel'da,
+# ikkalasi ham shu bitta API'ga murojaat qiladi.
+#
+# Render'da: New → Blueprint → repo'ni tanlang → Apply.
+# So'ng sync:false bo'lgan qiymatlarni Dashboard → Environment da to'ldirasiz.
+
+services:
+  - type: web
+    name: geolearn-backend
+    runtime: node
+    plan: free                 # pullik rejaga o'tsangiz: starter
+    rootDir: backend
+    buildCommand: npm ci
+    startCommand: npm run start:api
+    healthCheckPath: /api/site
+
+    envVars:
+      # Faqat API — statik saytlarsiz (ularni Vercel beradi)
+      - key: SITE
+        value: api
+
+      # PORT ni QO'LDA QO'YMANG — Render uni o'zi beradi.
+
+      # ── Dashboard'da to'ldiriladigan maxfiy qiymatlar ──
+      # JWT_SECRET ni Render o'zi tasodifiy yaratadi (qo'lda kiritish shart emas).
+      - key: JWT_SECRET
+        generateValue: true
+
+      # Vercel'dagi ikkala saytning manzili, vergul bilan, / belgisiz.
+      # Masalan: https://geolearn-admin.vercel.app,https://geolearn.vercel.app
+      - key: FRONTEND_URL
+        sync: false
+
+      # ── AI yordamchisi (ixtiyoriy — bo'sh qolsa AI o'chiq bo'ladi) ──
+      - key: OPENAI_API_KEY
+        sync: false
+      - key: OPENROUTER_API_KEY
+        sync: false
+      - key: GROQ_API_KEY
+        sync: false
+      - key: HF_TOKEN
+        sync: false
+      - key: LOVABLE_API_KEY
+        sync: false
+
+    # ── DIQQAT: ma'lumotlar saqlanishi ──────────────────────────────────
+    # Backend ma'lumotlarni backend/data/*.json fayllarida saqlaydi.
+    # Render'ning BEPUL rejasida disk yo'q va fayl tizimi vaqtinchalik:
+    # har bir deploy yoki qayta ishga tushishda o'quvchilar, darslar va
+    # natijalar YO'QOLADI.
+    #
+    # Ma'lumot saqlanishi kerak bo'lsa — pullik rejaga o'ting (starter)
+    # va quyidagi 4 qatorni izohdan chiqaring:
+    #
+    # disk:
+    #   name: geolearn-data
+    #   mountPath: /opt/render/project/src/backend/data
+    #   sizeGB: 1

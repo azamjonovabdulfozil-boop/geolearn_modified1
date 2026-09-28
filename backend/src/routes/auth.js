@@ -2,29 +2,41 @@ import { Router } from "express";
 import {
   getUsers, getUserByUsername, getUserById,
   createUser, updateUser, deleteUser,
+  parseClassName, findClassByName, isGradeOpen,
 } from "../lib/db.js";
 import { hashPassword, generateToken, requireAuth, userToJson } from "../lib/auth.js";
+import { MIN_GRADE, MAX_GRADE, isValidGrade } from "../lib/constants.js";
 
 const router = Router();
 
 // POST /api/auth/register
 router.post("/auth/register", (req, res) => {
-  const { name, username, password, grade } = req.body;
-  if (!name || !username || !password) {
+  const { name, username, password, className } = req.body;
+  if (!name || !username || !password || !className) {
     return res.status(400).json({ error: "Barcha maydonlarni to'ldiring" });
   }
-  const gradeNum = Number(grade);
-  if (!grade || gradeNum < 6 || gradeNum > 11) {
-    return res.status(400).json({ error: "Sinfni tanlang (6-11)" });
+  // O'quvchi sinfini o'zi yozadi: "7-A", "7-B" ...
+  const cls = parseClassName(className);
+  if (!cls || !cls.letter) {
+    return res.status(400).json({ error: "Sinfni to'g'ri yozing, masalan: 7-A yoki 7-B" });
+  }
+  if (!isValidGrade(cls.grade)) {
+    return res.status(400).json({ error: `Sinf raqami ${MIN_GRADE} dan ${MAX_GRADE} gacha bo'lsin` });
+  }
+  if (!isGradeOpen(cls.grade)) {
+    return res.status(400).json({ error: `${cls.grade}-sinf hozircha yopiq` });
   }
   if (getUserByUsername(username)) {
     return res.status(400).json({ error: "Bu username band" });
   }
+  // Admin yaratgan sinf bo'lsa — yozilishini o'shanga moslaymiz (7-А / 7-A)
+  const known = findClassByName(cls.name);
   const user = createUser({
-    name, username,
+    name: String(name).trim(), username,
     passwordHash: hashPassword(password),
     role: "student",
-    grade: gradeNum,
+    grade: cls.grade,
+    className: known?.name ?? cls.name,
     totalScore: 0,
     theme: "light",
     language: "uz",

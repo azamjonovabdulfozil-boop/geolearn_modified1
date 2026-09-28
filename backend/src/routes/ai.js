@@ -1,11 +1,13 @@
 import { Router } from "express";
 import { requireAuth } from "../lib/auth.js";
-import { read, write } from "../lib/db.js";
+import { read, write, userClassName, getUserById, updateUser } from "../lib/db.js";
+import { findProfanity, maskWord } from "../lib/profanity.js";
 import { askAI, aiProviderStatus } from "../lib/ai.js";
 import { detectLanguage, buildMessages } from "../lib/aiPrompt.js";
 import {
   listChats, getChat, createChat, appendMessages,
   renameChat, deleteChat, deleteAllChats,
+  getChatById, setChatLocked, removeChatAdmin, removeUserChatsAdmin,
 } from "../lib/chats.js";
 
 const router = Router();
@@ -68,6 +70,69 @@ function writeLog(entry) {
   return item;
 }
 
+// ── So'kinish: ogohlantirish + o'qituvchiga xabar ─────────────────────────
+function warningText(n, language) {
+  if (language === "ru") {
+    return n === 1
+      ? "⚠️ **Предупреждение.** Пожалуйста, пишите вежливо — оскорбления и нецензурные слова запрещены. Об этом сообщено вашему учителю. Задайте вопрос корректно, и я обязательно помогу."
+      : `⚠️ **Предупреждение №${n}.** Вы снова использовали нецензурные слова. Учитель уже уведомлён. Пожалуйста, соблюдайте правила общения.`;
+  }
+  return n === 1
+    ? "⚠️ **Ogohlantirish.** Iltimos, odob bilan yozing — haqoratli va so'kinish so'zlarini ishlatish taqiqlanadi. Bu haqda o'qituvchingizga xabar yuborildi. Savolingizni odobli shaklda qayta yozing, men albatta yordam beraman."
+    : `⚠️ **${n}-ogohlantirish.** Siz yana haqoratli so'z ishlatdingiz. Bu holat o'qituvchingizga yetkazildi. Iltimos, muloqot qoidalariga rioya qiling.`;
+}
+
+const AI_FLAG = /\[\[\s*HAQORAT\s*\]\]/i;
+
+/**
+ * So'kinishni qayd qiladi: o'quvchiga ogohlantirish, suhbatga yozish,
+ * o'qituvchi uchun log (admin panelda darhol xabar chiqadi).
+ * @param detectedBy "filter" (so'zlar ro'yxati) yoki AI provayder nomi
+ */
+function flagProfanity(user, question, language, existing, badWords, detectedBy) {
+  const warnings = (getUserById(user.id)?.aiWarnings ?? 0) + 1;
+  updateUser(user.id, { aiWarnings: warnings });
+  const answer = warningText(warnings, language);
+  const chat = appendMessages(user.id, existing?.id ?? null, [
+    { role: "user", content: maskText(question) },
+    { role: "assistant", content: answer, meta: { provider: "moderation", warning: true } },
+  ]);
+  writeLog({
+    userId: user.id, userName: user.name, role: user.role,
+    question, answer, success: false, provider: "moderation", chatId: chat.id,
+    flagged: true, badWords, warningNo: warnings, reviewed: false,
+    detectedBy: detectedBy === "filter" ? "filter" : "ai",
+  });
+  return { answer, reply: answer, warning: true, warnings, provider: "moderation", chatId: chat.id, chatTitle: chat.title };
+}
+
+/** Suhbat tarixida so'kinishlarni yulduzcha bilan yopadi. */
+function maskText(text) {
+  return text.split(/(\s+)/).map(part => (findProfanity(part).length ? maskWord(part) : part)).join("");
+}
+
+/**
+ * Filtr qo'shilishidan (yoki so'zlar ro'yxati kengayishidan) oldin yozilgan
+ * savollarni ham tekshiradi — o'qituvchi ularni ham ko'rsin.
+ * Server ishga tushganda bir marta bajariladi.
+ */
+function flagPastLogs() {
+  const logs = read("ai_logs");
+  let changed = 0;
+  for (const l of logs) {
+    if (l.flagged || l.role !== "student") continue;
+    const bad = findProfanity(l.question);
+    if (!bad.length) continue;
+    Object.assign(l, { flagged: true, retro: true, reviewed: false, badWords: bad.map(maskWord) });
+    changed++;
+  }
+  if (changed) {
+    write("ai_logs", logs);
+    console.log(`🛡  AI loglarda ${changed} ta avval o'tib ketgan so'kinish belgilandi`);
+  }
+}
+flagPastLogs();
+
 // ── POST /api/ai/ask & /api/ai/chat — savol berish ────────────────────────
 router.post(["/ai/ask", "/ai/chat"], requireAuth, async (req, res) => {
   const question = (req.body?.question ?? req.body?.message ?? "").toString().trim();
@@ -79,12 +144,33 @@ router.post(["/ai/ask", "/ai/chat"], requireAuth, async (req, res) => {
 
   const language = detectLanguage(question, fallbackLang);
 
+  // Admin bloklagan bo'lsa — AI dan foydalanib bo'lmaydi
+  if (req.user.aiBlocked) {
+    return res.status(403).json({ error: "AI yordamchi siz uchun o'qituvchi tomonidan bloklangan", blocked: true });
+  }
+
   // Suhbat tarixini kontekst sifatida yuklaymiz
   const existing = chatId ? getChat(req.user.id, chatId) : null;
   const history = existing?.messages ?? [];
+  if (existing?.locked) {
+    return res.status(403).json({ error: "Bu suhbat o'qituvchi tomonidan bloklangan. Yangi suhbat boshlang.", locked: true });
+  }
+
+  // O'quvchi so'kinib yozsa — AI ga yubormaymiz: ogohlantiramiz va o'qituvchiga xabar beramiz
+  const badWords = req.user.role === "student" ? findProfanity(question) : [];
+  if (badWords.length) {
+    return res.json(flagProfanity(req.user, question, language, existing, badWords.map(maskWord), "filter"));
+  }
 
   try {
     const result = await askAI(buildMessages(history, question, language));
+    // 2-himoya: ro'yxatda yo'q so'kinishni AI o'zi aniqlasa — [[HAQORAT]] belgisini qaytaradi
+    if (result?.answer && AI_FLAG.test(result.answer)) {
+      if (req.user.role === "student") {
+        return res.json(flagProfanity(req.user, question, language, existing, ["AI aniqladi"], result.provider));
+      }
+      result.answer = language === "ru" ? "Пожалуйста, пишите корректно." : "Iltimos, odob bilan yozing.";
+    }
     const offline = !result;
     const answer = result?.answer ?? localGeoAnswer(question, language);
 
@@ -142,6 +228,9 @@ router.patch("/ai/chats/:id", requireAuth, (req, res) => {
 });
 
 router.delete("/ai/chats/:id", requireAuth, (req, res) => {
+  if (getChat(req.user.id, req.params.id)?.locked) {
+    return res.status(403).json({ error: "Bu suhbat o'qituvchi tomonidan bloklangan — uni o'chirib bo'lmaydi" });
+  }
   if (!deleteChat(req.user.id, req.params.id)) {
     return res.status(404).json({ error: "Suhbat topilmadi" });
   }
@@ -162,7 +251,131 @@ router.get("/ai/status", requireAuth, (req, res) => {
 // ── GET /api/ai/logs — faqat teacher ──────────────────────────────────────
 router.get("/ai/logs", requireAuth, (req, res) => {
   if (req.user.role !== "teacher") return res.status(403).json({ error: "Ruxsat yo'q" });
-  res.json(read("ai_logs").reverse());
+  const users = new Map(read("users").map(u => [u.id, u]));
+  res.json(read("ai_logs").reverse().map(l => withUser(l, users)));
+});
+
+// ── So'kinish haqidagi xabarlar (faqat teacher) ───────────────────────────
+function withUser(l, users) {
+  const u = users.get(l.userId);
+  return {
+    ...l, className: u ? userClassName(u) : null, grade: u?.grade ?? null, avatarUrl: u?.avatarUrl ?? null,
+    aiWarnings: u?.aiWarnings ?? 0, aiBlocked: Boolean(u?.aiBlocked),
+  };
+}
+
+// ── Admin: o'quvchi chatlarini boshqarish ─────────────────────────────────
+function teacherOnly(req, res) {
+  if (req.user.role === "teacher") return true;
+  res.status(403).json({ error: "Ruxsat yo'q" });
+  return false;
+}
+const removeLogs = (pred) => {
+  const logs = read("ai_logs");
+  const next = logs.filter(l => !pred(l));
+  if (next.length !== logs.length) write("ai_logs", next);
+  return logs.length - next.length;
+};
+
+// GET /api/ai/admin/users/:userId/chats — o'quvchining suhbatlari va AI holati
+router.get("/ai/admin/users/:userId/chats", requireAuth, (req, res) => {
+  if (!teacherOnly(req, res)) return;
+  const userId = Number(req.params.userId);
+  const u = getUserById(userId);
+  if (!u) return res.status(404).json({ error: "Foydalanuvchi topilmadi" });
+  const flagged = new Map();
+  for (const l of read("ai_logs")) if (l.userId === userId && l.flagged) flagged.set(l.chatId, (flagged.get(l.chatId) || 0) + 1);
+  res.json({
+    user: { id: u.id, name: u.name, aiBlocked: Boolean(u.aiBlocked), aiWarnings: u.aiWarnings ?? 0 },
+    chats: listChats(userId).map(c => ({ ...c, flagged: flagged.get(c.id) ?? 0 })),
+  });
+});
+
+// GET /api/ai/admin/chats/:id — suhbatning to'liq matni
+router.get("/ai/admin/chats/:id", requireAuth, (req, res) => {
+  if (!teacherOnly(req, res)) return;
+  const chat = getChatById(req.params.id);
+  if (!chat) return res.status(404).json({ error: "Suhbat topilmadi" });
+  res.json(chat);
+});
+
+// PUT /api/ai/admin/chats/:id/lock { locked } — suhbatni bloklash / ochish
+router.put("/ai/admin/chats/:id/lock", requireAuth, (req, res) => {
+  if (!teacherOnly(req, res)) return;
+  const chat = setChatLocked(req.params.id, req.body?.locked !== false);
+  if (!chat) return res.status(404).json({ error: "Suhbat topilmadi" });
+  res.json({ success: true, locked: chat.locked });
+});
+
+// DELETE /api/ai/admin/chats/:id — suhbat va uning loglarini o'chirish
+router.delete("/ai/admin/chats/:id", requireAuth, (req, res) => {
+  if (!teacherOnly(req, res)) return;
+  const id = Number(req.params.id);
+  if (!removeChatAdmin(id)) return res.status(404).json({ error: "Suhbat topilmadi" });
+  removeLogs(l => l.chatId === id);
+  res.json({ success: true });
+});
+
+// DELETE /api/ai/admin/users/:userId/chats — o'quvchining barcha suhbatlari va loglari
+router.delete("/ai/admin/users/:userId/chats", requireAuth, (req, res) => {
+  if (!teacherOnly(req, res)) return;
+  const userId = Number(req.params.userId);
+  const chats = removeUserChatsAdmin(userId);
+  const logs = removeLogs(l => l.userId === userId);
+  res.json({ success: true, chats, logs });
+});
+
+// PUT /api/ai/admin/users/:userId/block { blocked } — o'quvchiga AI ni yopish / ochish
+router.put("/ai/admin/users/:userId/block", requireAuth, (req, res) => {
+  if (!teacherOnly(req, res)) return;
+  const u = getUserById(Number(req.params.userId));
+  if (!u || u.role !== "student") return res.status(404).json({ error: "O'quvchi topilmadi" });
+  const blocked = req.body?.blocked !== false;
+  updateUser(u.id, { aiBlocked: blocked, aiBlockedAt: blocked ? new Date().toISOString() : null });
+  res.json({ success: true, blocked });
+});
+
+// DELETE /api/ai/logs/:id — bitta savolni o'chirish (suhbatdan ham olib tashlanadi)
+router.delete("/ai/logs/:id", requireAuth, (req, res) => {
+  if (!teacherOnly(req, res)) return;
+  const id = Number(req.params.id);
+  const log = read("ai_logs").find(l => l.id === id);
+  if (!log) return res.status(404).json({ error: "Topilmadi" });
+  removeLogs(l => l.id === id);
+  // Suhbatdan shu savol va unga berilgan javobni ham olib tashlaymiz
+  const chats = read("ai_chats");
+  const chat = chats.find(c => c.id === log.chatId);
+  if (chat) {
+    const i = chat.messages.findIndex((m, k) => m.role === "user" && chat.messages[k + 1]?.role === "assistant"
+      && chat.messages[k + 1].content === log.answer);
+    if (i !== -1) {
+      chat.messages.splice(i, 2);
+      write("ai_chats", chat.messages.length ? chats : chats.filter(c => c.id !== chat.id));
+    }
+  }
+  res.json({ success: true });
+});
+
+// GET /api/ai/alerts → { unread, items } — yangilari birinchi
+router.get("/ai/alerts", requireAuth, (req, res) => {
+  if (req.user.role !== "teacher") return res.status(403).json({ error: "Ruxsat yo'q" });
+  const users = new Map(read("users").map(u => [u.id, u]));
+  const items = read("ai_logs").filter(l => l.flagged).reverse().map(l => withUser(l, users));
+  res.json({ unread: items.filter(l => !l.reviewed).length, items });
+});
+
+// PUT /api/ai/alerts/:id/review  yoki  /api/ai/alerts/all/review — "ko'rildi"
+router.put("/ai/alerts/:id/review", requireAuth, (req, res) => {
+  if (req.user.role !== "teacher") return res.status(403).json({ error: "Ruxsat yo'q" });
+  const all = req.params.id === "all";
+  const id = Number(req.params.id);
+  const logs = read("ai_logs");
+  let changed = 0;
+  for (const l of logs) {
+    if (l.flagged && !l.reviewed && (all || l.id === id)) { l.reviewed = true; l.reviewedAt = new Date().toISOString(); changed++; }
+  }
+  if (changed) write("ai_logs", logs);
+  res.json({ success: true, changed });
 });
 
 router.delete("/ai/logs", requireAuth, (req, res) => {

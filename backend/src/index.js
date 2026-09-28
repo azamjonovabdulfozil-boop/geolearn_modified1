@@ -1,22 +1,32 @@
+// DIQQAT: dotenv eng birinchi bo'lishi SHART. ES modullar e'lon tartibida
+// yuklanadi, shuning uchun .env dan keyin import qilingan modullargina
+// process.env qiymatlarini ko'ra oladi (masalan auth.js dagi JWT_SECRET).
+import "dotenv/config";
+
 import { dirname, join } from "path";
 import { fileURLToPath } from "url";
 import { existsSync } from "fs";
-import { createUser, getUserByUsername } from "./lib/db.js";
-import { hashPassword } from "./lib/auth.js";
-
-import "dotenv/config";
 import express from "express";
 import cors from "cors";
+
+import { createUser, getUserByUsername } from "./lib/db.js";
+import { hashPassword } from "./lib/auth.js";
+import { findForeignServer, reportConflict } from "./lib/port.js";
+import { eventsHandler } from "./lib/events.js";
 
 import authRoutes    from "./routes/auth.js";
 import lessonRoutes  from "./routes/lessons.js";
 import videoRoutes   from "./routes/videos.js";
 import gameRoutes    from "./routes/games.js";
 import ratingRoutes  from "./routes/ratings.js";
+import homeworkRoutes from "./routes/homework.js";
 import aiRoutes      from "./routes/ai.js";
+import analyticsRoutes from "./routes/analytics.js";
+import classRoutes   from "./routes/classes.js";
+import gradeRoutes   from "./routes/grades.js";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
-const FRONTEND_DIR = join(__dirname, "../../frontend");
+const REPO_ROOT = join(__dirname, "../..");
 
 // ── Saytlar ───────────────────────────────────────────────────────────────
 // SITE=both     → ikkala sayt alohida portlarda (default, lokal ish uchun)
@@ -25,13 +35,15 @@ const FRONTEND_DIR = join(__dirname, "../../frontend");
 // SITE=api      → faqat API (statik fayllarsiz) — Render/Vercel uchun
 const siteArg = process.argv.find(a => a.startsWith("--site="))?.slice(7);
 const SITE = (siteArg || process.env.SITE || "both").toLowerCase();
-const TEACHER_PORT = Number(process.env.PORT) || 3001;
+// API_ONLY=1 → statik fayllar berilmaydi, faqat API (dev rejim uchun)
+const API_ONLY = process.env.API_ONLY === "1";
+const TEACHER_PORT = Number(process.env.PORT) || 3000;
 const STUDENT_PORT = Number(process.env.STUDENT_PORT) || TEACHER_PORT + 1;
 
 const SITES = {
-  teacher: { label: "O'qituvchi (admin) sayti", dist: join(FRONTEND_DIR, "dist-teacher"), buildCmd: "npm run build:teacher" },
-  student: { label: "O'quvchi sayti",           dist: join(FRONTEND_DIR, "dist-student"), buildCmd: "npm run build:student" },
-  api:     { label: "API",                      dist: null,                               buildCmd: null },
+  teacher: { label: "Admin (o'qituvchi) sayti", apiLabel: "API — admin",  dist: join(REPO_ROOT, "admin", "dist"), buildCmd: "npm run build:admin" },
+  student: { label: "User (o'quvchi) sayti",    apiLabel: "API — user",   dist: join(REPO_ROOT, "user", "dist"),  buildCmd: "npm run build:user" },
+  api:     { label: "API",                      apiLabel: "API",          dist: null,                             buildCmd: null },
 };
 
 // ── CORS ──────────────────────────────────────────────────────────────────
@@ -58,17 +70,24 @@ function createApp(siteKey) {
   // Har bir sayt qaysi roldaligini bilish uchun (frontend ixtiyoriy ishlatadi)
   app.get("/api/site", (req, res) => res.json({ site: siteKey, label: site.label }));
 
+  // Real vaqt yangilanishlari (SSE)
+  app.get("/api/events", eventsHandler);
+
   app.use("/api", authRoutes);
   app.use("/api", lessonRoutes);
   app.use("/api", videoRoutes);
   app.use("/api", gameRoutes);
   app.use("/api", ratingRoutes);
+  app.use("/api", homeworkRoutes);
   app.use("/api", aiRoutes);
+  app.use("/api", analyticsRoutes);
+  app.use("/api", classRoutes);
+  app.use("/api", gradeRoutes);
 
   // Noma'lum /api yo'llari SPA fallback'ga tushib qolmasligi kerak
   app.use("/api", (req, res) => res.status(404).json({ error: "API yo'li topilmadi" }));
 
-  const hasBuild = Boolean(site.dist) && existsSync(join(site.dist, "index.html"));
+  const hasBuild = !API_ONLY && Boolean(site.dist) && existsSync(join(site.dist, "index.html"));
   if (hasBuild) {
     app.use(express.static(site.dist));
     app.get("*", (req, res) => res.sendFile(join(site.dist, "index.html")));
@@ -76,7 +95,7 @@ function createApp(siteKey) {
     app.get("*", (req, res) => res.status(200).json({
       status: "GeoLearn API ishlayapti",
       site: siteKey,
-      ...(site.buildCmd ? { hint: `Frontend hali qurilmagan. frontend/ papkasida: ${site.buildCmd}` } : {}),
+      ...(site.buildCmd ? { hint: `Sayt hali qurilmagan. Repo ildizida: ${site.buildCmd}` } : {}),
     }));
   }
 
@@ -88,7 +107,8 @@ function start(siteKey, port) {
   const { app, hasBuild } = createApp(siteKey);
 
   const server = app.listen(port, () => {
-    console.log(`${hasBuild ? "🌐" : "🔌"} ${site.label.padEnd(26)} → http://localhost:${port}${hasBuild ? "" : "  (faqat API)"}`);
+    const name = hasBuild ? site.label : site.apiLabel;
+    console.log(`${hasBuild ? "🌐" : "🔌"} ${name.padEnd(26)} → http://localhost:${port}${hasBuild ? "" : "  (faqat API)"}`);
   });
 
   server.on("error", (err) => {
@@ -121,7 +141,21 @@ if (!getUserByUsername("admin")) {
 // ── Ishga tushirish ───────────────────────────────────────────────────────
 console.log("🌍 GeoLearn ishga tushmoqda...\n");
 
-if (SITE === "teacher" || SITE === "student" || SITE === "api") {
+// Portni boshqa loyihaning serveri band qilgan bo'lsa — jimgina yarim portga
+// bog'lanib qolmaymiz (lib/port.js dagi izohga qarang), balki aniq xato beramiz.
+const ports = SITE === "teacher" || SITE === "student" || SITE === "api"
+  ? [TEACHER_PORT]
+  : [TEACHER_PORT, STUDENT_PORT];
+
+for (const port of ports) {
+  const foreign = await findForeignServer(port);
+  if (foreign) {
+    reportConflict(port, foreign.host);
+    process.exit(1);
+  }
+}
+
+if (ports.length === 1) {
   start(SITE, TEACHER_PORT);
 } else {
   start("teacher", TEACHER_PORT);

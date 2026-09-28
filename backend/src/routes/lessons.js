@@ -3,37 +3,20 @@ import multer from "multer";
 import {
   getLessons, getLessonById, createLesson, deleteLesson,
   getTopicsByLesson, getTopicById, createTopic, updateTopic, deleteTopic,
-  updateUser, createActivity,
+  updateUser, createActivity, createVariant, getVariant, updateVariant,
 } from "../lib/db.js";
 import { requireAuth } from "../lib/auth.js";
+import { pickSection } from "../lib/scope.js";
+import { readPdf, analyzePdf, cleanText } from "../lib/pdfTopics.js";
+import { buildQuestionPool, buildWrittenPool, pickVariant } from "../lib/testGen.js";
 
 const router = Router();
 const upload = multer({ storage: multer.memoryStorage(), limits: { fileSize: 30 * 1024 * 1024 } });
 
-const TESTS_PER_TOPIC = 15;
-const CLOSED_TESTS_PER_TOPIC = 15;
+const TESTS_PER_ATTEMPT = 15;   // o'quvchi bir urinishda ko'radigan savollar
+const TEST_POOL_SIZE = 40;      // mavzu uchun saqlanadigan savollar zaxirasi
+const AI_TESTS_REQUEST = 20;    // AI dan so'raladigan savollar soni
 const LOVABLE_MODEL = "google/gemini-3-flash-preview";
-
-function cleanText(text = "") {
-  return text
-    .replace(/\r/g, "\n")
-    .replace(/[ \t]+/g, " ")
-    .replace(/\n{3,}/g, "\n\n")
-    .trim();
-}
-
-async function extractPdfText(buffer) {
-  try {
-    const { PDFParse } = await import("pdf-parse");
-    const parser = new PDFParse({ data: new Uint8Array(buffer) });
-    const result = await parser.getText();
-    await parser.destroy();
-    return cleanText(result?.text || "");
-  } catch (e) {
-    console.log("pdf-parse xato, fallback:", e.message);
-    return cleanText(buffer.toString("utf8").replace(/[^\p{L}\p{N}\s.,:;!?()\-–—'"/%§]/gu, " "));
-  }
-}
 
 function getJsonArray(raw) {
   if (!raw) return null;
@@ -98,78 +81,6 @@ function splitSentences(text = "") {
     .filter(s => s.length >= 20 && s.length <= 320);
 }
 
-function isLikelyHeading(line) {
-  const l = line.trim();
-  if (l.length < 4 || l.length > 120) return false;
-  if (/^(\d+(\.\d+)*[.)]?|[IVXLC]+[.)]?|§\s*\d+|mavzu\s*\d*|bob\s*\d*|bo['‘’`]?lim\s*\d*)\s+/iu.test(l)) return true;
-  if (/\b(mavzu|bob|bo['‘’`]?lim|paragraf|amaliy|laboratoriya|xulosa|kirish)\b/iu.test(l) && l.length < 95) return true;
-  const words = l.split(/\s+/);
-  return words.length >= 2 && words.length <= 10 && !/[.!?,;:]$/.test(l) && /^[\p{Lu}\d§]/u.test(l);
-}
-
-function titleFromText(text, fallback) {
-  const first = cleanText(text).split(/\n|[.!?]/)[0]?.trim() || fallback;
-  return first.replace(/^\d+(\.\d+)*[.)]?\s*/, "").slice(0, 90) || fallback;
-}
-
-function splitPdfIntoTopics(pdfText, lessonTitle) {
-  const lines = cleanText(pdfText).split(/\n+/).map(l => l.trim()).filter(Boolean);
-  const sections = [];
-  let current = null;
-
-  for (const line of lines) {
-    if (isLikelyHeading(line)) {
-      if (current && current.content.length > 80) sections.push(current);
-      current = { title: line, content: "" };
-    } else if (current) {
-      current.content += (current.content ? "\n" : "") + line;
-    } else {
-      current = { title: titleFromText(line, lessonTitle), content: line };
-    }
-  }
-  if (current && current.content.length > 40) sections.push(current);
-
-  // If headings produced <2 sections OR most content lives in one section, force chunking
-  const tooFew = sections.length < 2;
-  const oneFat = sections.length >= 1 && sections[0].content.length > 2500;
-  if (tooFew || oneFat) {
-    const fullText = cleanText(pdfText);
-    const paragraphs = fullText.split(/\n\s*\n/).map(p => p.trim()).filter(p => p.length > 40);
-    const source = paragraphs.length >= 3 ? paragraphs : splitSentences(fullText);
-    const CHUNK = 1400;
-    const chunked = [];
-    let buf = "";
-    for (const p of source) {
-      if ((buf + " " + p).length > CHUNK && buf.length > 400) {
-        chunked.push(buf);
-        buf = p;
-      } else {
-        buf += (buf ? " " : "") + p;
-      }
-    }
-    if (buf.length > 80) chunked.push(buf);
-    if (chunked.length >= 2) {
-      return chunked.map((c, i) => ({
-        title: `${lessonTitle} — ${i + 1}-qism: ${titleFromText(c, "")}`.slice(0, 110),
-        content: c,
-      }));
-    }
-  }
-
-  const seen = new Set();
-  return sections
-    .map((s, i) => ({
-      title: cleanText(s.title).replace(/^[#\-–—\s]+/, "").slice(0, 110) || `${lessonTitle} — ${i + 1}-mavzu`,
-      content: cleanText(s.content || s.title),
-    }))
-    .filter(s => {
-      const key = s.title.toLowerCase();
-      if (seen.has(key) || s.content.length < 40) return false;
-      seen.add(key);
-      return true;
-    });
-}
-
 const STOP = new Set(["bilan", "uchun", "yoki", "hamda", "qaysi", "mavzu", "haqida", "bo'yicha", "bo‘yicha", "asosiy", "matnda", "hisoblanadi", "bo'lgan", "bo‘lgan", "uning", "ularning", "shuningdek", "lekin", "ammo", "bo'lib", "edi", "kabi", "qilib", "ko'p"]);
 
 function keywords(text = "") {
@@ -178,149 +89,88 @@ function keywords(text = "") {
     .filter(w => !STOP.has(w)))].slice(0, 60);
 }
 
-function shuffleOptions(options) {
-  const unique = [...new Set(options.filter(Boolean).map(o => String(o).trim()).filter(o => o.length > 1))].slice(0, 4);
-  while (unique.length < 4) unique.push(["tabiiy hodisa", "jarayon", "geografik obyekt", "hudud"][unique.length]);
-  const correct = unique[0];
-  const mixed = unique.map((v, i) => ({ v, sort: (v.charCodeAt(0) + i * 17) % 11 })).sort((a, b) => a.sort - b.sort).map(x => x.v);
-  return { options: mixed, correctIndex: mixed.indexOf(correct) };
-}
+// ── Testlar: faqat mavzu matnidan (testGen.js) ───────────────────────────
+// Har bir mavzuda katta savollar to'plami (pool) saqlanadi; o'quvchiga
+// har urinishda undan tasodifiy TESTS_PER_ATTEMPT ta savol beriladi.
 
-function escapeRegex(text) { return text.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"); }
-
-// ── Varied local OPEN tests (with 4 options) ─────────────────────────────
-function localTests(topicTitle, topicContent) {
-  const sentences = splitSentences(topicContent);
-  const terms = keywords(`${topicTitle} ${topicContent}`);
-  const tests = [];
-  const used = new Set();
-
-  const patterns = [
-    (s, t) => s && s.toLowerCase().includes(t.toLowerCase())
-      ? { q: `Bo'sh joyni to'ldiring: «${s.replace(new RegExp(escapeRegex(t), "iu"), "_____")}»`, correct: t }
-      : null,
-    (s, t) => ({ q: `«${topicTitle}» mavzusida «${t}» tushunchasi nimani anglatadi?`, correct: t }),
-    (s, t) => ({ q: `Quyidagi atamalardan qaysi biri «${topicTitle}» mavzusiga bevosita aloqador?`, correct: t }),
-    (s, t) => s ? { q: `Matnda «${s.slice(0, 80)}...» — bu fikr nima haqida?`, correct: t } : null,
-    (s, t) => ({ q: `«${t}» so'zining geografik ma'nosi nima?`, correct: t }),
-    (s, t) => ({ q: `«${topicTitle}» mavzusining asosiy tushunchalaridan biri qaysi?`, correct: t }),
-    (s, t) => s ? { q: `Matndagi «${s.slice(0, 70)}» fikriga eng mos kelgan tushuncha qaysi?`, correct: t } : null,
-    (s, t) => ({ q: `Quyidagilardan qaysi biri «${topicTitle}» bilan bog'liq emas?`, correct: t, invert: true }),
-    (s, t) => ({ q: `«${t}» qanday geografik obyekt yoki hodisa hisoblanadi?`, correct: t }),
-    (s, t) => ({ q: `Matnga ko'ra «${topicTitle}» mavzusida nima alohida ta'kidlangan?`, correct: t }),
-    (s, t) => ({ q: `«${topicTitle}»ni o'rganishda qaysi tushuncha kalit hisoblanadi?`, correct: t }),
-    (s, t) => s ? { q: `«${s.slice(0, 90)}» — bu jumla qaysi tushuncha haqida?`, correct: t } : null,
-    (s, t) => ({ q: `Geografiya nuqtai nazaridan «${t}» nimani bildiradi?`, correct: t }),
-    (s, t) => ({ q: `«${topicTitle}» mavzusi doirasida qaysi atama keng yoritilgan?`, correct: t }),
-    (s, t) => ({ q: `Berilgan matnda qaysi tushuncha asosiy o'rin tutadi?`, correct: t }),
-  ];
-
-  let pi = 0, si = 0, ti = 0;
-  while (tests.length < TESTS_PER_TOPIC && pi < patterns.length * 4) {
-    const pattern = patterns[pi % patterns.length];
-    const sentence = sentences[si % Math.max(sentences.length, 1)] || "";
-    const term = terms[ti % Math.max(terms.length, 1)] || topicTitle.split(/\s+/)[0] || "mavzu";
-    const out = pattern(sentence, term);
-    pi++; si++; ti++;
-    if (!out || used.has(out.q)) continue;
-    used.add(out.q);
-    const distractors = terms.filter(t => t !== out.correct).slice(ti, ti + 3);
-    const filler = ["tabiat", "iqlim", "relyef", "aholi", "xarita", "okean", "qit'a", "harorat"];
-    while (distractors.length < 3) {
-      const f = filler[(distractors.length + ti) % filler.length];
-      if (f !== out.correct && !distractors.includes(f)) distractors.push(f);
-    }
-    const { options, correctIndex } = shuffleOptions([out.correct, ...distractors]);
-    tests.push({ id: tests.length + 1, question: out.q, questionText: out.q, options, correctIndex });
-  }
-  // Final padding if still short
-  while (tests.length < TESTS_PER_TOPIC) {
-    const i = tests.length;
-    const term = terms[i % Math.max(terms.length, 1)] || "tushuncha";
-    const q = `${topicTitle} mavzusida ${i + 1}-savol: qaysi tushuncha matnda muhim deb belgilangan?`;
-    const { options, correctIndex } = shuffleOptions([term, "boshqa hodisa", "tasodifiy element", "ortiqcha ma'lumot"]);
-    tests.push({ id: i + 1, question: q, questionText: q, options, correctIndex });
-  }
-  return tests.slice(0, TESTS_PER_TOPIC).map((t, i) => ({ ...t, id: i + 1 }));
-}
-
-function normalizeTests(raw, topicTitle, topicContent) {
-  const aiTests = Array.isArray(raw) ? raw : [];
-  const fallback = localTests(topicTitle, topicContent);
-  const normalized = aiTests.map((q, i) => {
-    const question = (q.question || q.questionText || "").toString().trim();
-    const options = Array.isArray(q.options) ? q.options.map(o => String(o).trim()).filter(Boolean) : [];
-    const correctIndex = Number.isInteger(q.correctIndex) && q.correctIndex >= 0 && q.correctIndex < 4 ? q.correctIndex : 0;
-    if (!question || options.length !== 4) return null;
-    return { id: i + 1, question, questionText: question, options, correctIndex };
-  }).filter(Boolean);
-  const merged = [...normalized, ...fallback].slice(0, TESTS_PER_TOPIC);
-  return merged.map((q, i) => ({ ...q, id: i + 1, questionText: q.questionText || q.question }));
-}
-
-// ── Varied local CLOSED tests (question only) ────────────────────────────
-function localClosedTests(topicTitle, topicContent) {
-  const sentences = splitSentences(topicContent);
-  const terms = keywords(`${topicTitle} ${topicContent}`);
-  const templates = [
-    (t, s) => `«${topicTitle}» mavzusida «${t}» tushunchasi nimani anglatadi va matnda qanday yoritilgan?`,
-    (t, s) => `«${t}» atamasi geografiyada qanday ma'noga ega? Misol bilan tushuntiring.`,
-    (t, s) => `${topicTitle} mavzusining asosiy g'oyalarini o'z so'zingiz bilan bayon qiling.`,
-    (t, s) => `Matnga ko'ra «${t}» qanday xususiyatlarga ega?`,
-    (t, s) => `«${topicTitle}» mavzusi qaysi tabiiy yoki ijtimoiy hodisalar bilan bog'liq?`,
-    (t, s) => s ? `Quyidagi jumlani izohlang: «${s.slice(0, 140)}»` : `«${topicTitle}» mavzusining ahamiyatini tushuntiring.`,
-    (t, s) => `«${t}» va «${topicTitle}» o'rtasidagi bog'liqlikni izohlang.`,
-    (t, s) => `${topicTitle} mavzusini o'rganish kundalik hayotda nima uchun zarur?`,
-    (t, s) => `Matndan «${t}» bilan bog'liq misol keltiring va tahlil qiling.`,
-    (t, s) => `«${topicTitle}» mavzusida qaysi geografik qonuniyatlar uchraydi?`,
-    (t, s) => `«${t}» tushunchasining kelib chiqishi va rivojlanishini bayon qiling.`,
-    (t, s) => s ? `«${s.slice(0, 120)}» — bu fikrga qanday qo'shimcha izoh berish mumkin?` : `${topicTitle} bo'yicha xulosa yozing.`,
-    (t, s) => `${topicTitle} mavzusining inson hayotidagi amaliy ahamiyati nimada?`,
-    (t, s) => `«${t}» bilan bog'liq qiziqarli geografik fakt keltiring.`,
-    (t, s) => `${topicTitle} mavzusini o'rganishdan keyin qanday xulosa chiqarish mumkin?`,
-  ];
+/** Bir nechta ro'yxatni takrorlarsiz birlashtiradi. */
+function mergeQuestions(lists, limit, alreadyHave = []) {
+  const key = q => q.questionText.toLowerCase().replace(/\s+/g, " ").slice(0, 80);
+  const seen = new Set(alreadyHave.map(key));
   const out = [];
-  const used = new Set();
-  for (let i = 0; i < CLOSED_TESTS_PER_TOPIC; i++) {
-    const term = terms[i % Math.max(terms.length, 1)] || topicTitle.split(/\s+/)[0] || "mavzu";
-    const sentence = sentences[i % Math.max(sentences.length, 1)] || "";
-    let q = templates[i % templates.length](term, sentence);
-    let guard = 0;
-    while (used.has(q) && guard < templates.length) {
-      guard++;
-      q = templates[(i + guard) % templates.length](terms[(i + guard) % Math.max(terms.length, 1)] || term, sentence);
+  for (const list of lists) {
+    for (const q of list) {
+      if (out.length >= limit) return out;
+      const k = key(q);
+      if (seen.has(k)) continue;
+      seen.add(k);
+      out.push(q);
     }
-    used.add(q);
-    out.push({ id: i + 1, question: q, questionText: q });
   }
   return out;
 }
 
-function normalizeClosedTests(raw, topicTitle, topicContent) {
-  const aiTests = Array.isArray(raw) ? raw : [];
-  const normalized = aiTests
-    .map((q, i) => {
-      const question = (q.question || q.questionText || (typeof q === "string" ? q : "")).toString().trim();
-      if (!question) return null;
-      return { id: i + 1, question, questionText: question };
-    })
-    .filter(Boolean);
-  const fallback = localClosedTests(topicTitle, topicContent);
-  // De-duplicate
-  const seen = new Set();
-  const merged = [...normalized, ...fallback].filter(q => {
-    const k = q.question.toLowerCase().slice(0, 60);
-    if (seen.has(k)) return false;
-    seen.add(k); return true;
-  }).slice(0, CLOSED_TESTS_PER_TOPIC);
-  // Pad if still short
-  while (merged.length < CLOSED_TESTS_PER_TOPIC) {
-    const i = merged.length;
-    const q = `${topicTitle} mavzusi bo'yicha ${i + 1}-savol: matndan kelib chiqib o'z fikringizni bayon qiling.`;
-    merged.push({ id: i + 1, question: q, questionText: q });
+/**
+ * Zaxirani kamida TESTS_PER_ATTEMPT tagacha to'ldiradi.
+ * `build` har chaqirilganda savollarni qaytadan (tasodifiy) yasaydi —
+ * shuning uchun bir necha urinish yangi savollar qo'shadi.
+ */
+function fillPool(pool, build, maxRounds = 12) {
+  let idle = 0;
+  for (let i = 0; i < maxRounds && pool.length < TESTS_PER_ATTEMPT; i++) {
+    const before = pool.length;
+    pool.push(...mergeQuestions([build()], TEST_POOL_SIZE - pool.length, pool));
+    // Generator tasodifiy, shuning uchun bo'sh urinish bo'lishi normal —
+    // ketma-ket uch marta yangi savol chiqmasa, zaxira tugagan deb bilamiz.
+    idle = pool.length === before ? idle + 1 : 0;
+    if (idle >= 3) break;
   }
-  return merged.map((q, i) => ({ ...q, id: i + 1, questionText: q.questionText || q.question }));
+  return pool;
 }
+
+/** AI savollarini tekshirib, mavzu matnidan yasalgan savollar bilan to'ldiradi. */
+function normalizeTests(raw, topicTitle, topicContent, sourceText = "") {
+  const aiTests = (Array.isArray(raw) ? raw : []).map(q => {
+    const question = (q?.question || q?.questionText || "").toString().trim();
+    const options = Array.isArray(q?.options)
+      ? [...new Set(q.options.map(o => String(o).trim()).filter(Boolean))]
+      : [];
+    const correctIndex = Number.isInteger(q?.correctIndex) ? q.correctIndex : 0;
+    if (!question || options.length !== 4) return null;
+    if (correctIndex < 0 || correctIndex > 3) return null;
+    return { question, questionText: question, options, correctIndex };
+  }).filter(Boolean);
+
+  // Avval PDF ning o'z matnidan va AI dan — bular darslikdagi haqiqiy
+  // ma'lumotga tayanadi. Kengaytirilgan matn faqat savol yetmasa qo'shiladi.
+  const fromSource = sourceText ? buildQuestionPool(topicTitle, sourceText, TEST_POOL_SIZE) : [];
+  const merged = mergeQuestions([fromSource, aiTests], TEST_POOL_SIZE);
+
+  // Generator har safar savollarni tasodifiy tanlaydi, shuning uchun matni
+  // qisqa mavzularda bitta urinish 15 tagacha yetmasligi mumkin. Yangi
+  // savol qo'shilmay qolgunicha yoki chegaraga yetgunicha takrorlaymiz.
+  fillPool(merged, () => buildQuestionPool(topicTitle, topicContent, TEST_POOL_SIZE));
+  if (sourceText) fillPool(merged, () => buildQuestionPool(topicTitle, sourceText, TEST_POOL_SIZE));
+
+  return merged.map((q, i) => ({ ...q, id: i + 1 }));
+}
+
+/** Yozma savollar to'plami — AI + mavzu matnidan yasalganlari. */
+function normalizeClosedTests(raw, topicTitle, topicContent, sourceText = "") {
+  const aiTests = (Array.isArray(raw) ? raw : [])
+    .map(q => (q?.question || q?.questionText || (typeof q === "string" ? q : "")).toString().trim())
+    .filter(Boolean)
+    .map(question => ({ question, questionText: question }));
+
+  const fromSource = sourceText ? buildWrittenPool(topicTitle, sourceText, TEST_POOL_SIZE) : [];
+  const merged = mergeQuestions([fromSource, aiTests], TEST_POOL_SIZE);
+
+  fillPool(merged, () => buildWrittenPool(topicTitle, topicContent, TEST_POOL_SIZE));
+  if (sourceText) fillPool(merged, () => buildWrittenPool(topicTitle, sourceText, TEST_POOL_SIZE));
+
+  return merged.map((q, i) => ({ ...q, id: i + 1 }));
+}
+
 
 // ── Rich, NON-repetitive content synthesis ───────────────────────────────
 function synthesizeRichContent(topicTitle, baseContent) {
@@ -380,89 +230,93 @@ ${String(baseContent).slice(0, 3500)}`;
   return synthesizeRichContent(topicTitle, baseContent);
 }
 
-// ── Routes ───────────────────────────────────────────────────────────────
-router.get("/lessons", requireAuth, (req, res) => {
-  const lessons = getLessons().map(l => ({ ...l, topics: getTopicsByLesson(l.id) }));
-  res.json(lessons);
-});
+const MAX_PDF_TOPICS = 40;      // bitta PDF dan chiqadigan mavzular chegarasi
+const MAX_TOPIC_CHARS = 20000;  // bitta mavzu matnining chegarasi
 
-router.post("/lessons", requireAuth, (req, res) => {
-  if (req.user.role !== "teacher") return res.status(403).json({ error: "Faqat o'qituvchilar" });
-  const { title, description, grade } = req.body;
-  if (!title || !grade) return res.status(400).json({ error: "Sarlavha va sinf kerak" });
-  const lesson = createLesson({ title, description: description || "", grade: Number(grade), teacherId: req.user.id });
-  res.status(201).json(lesson);
-});
+/** Matnni belgilangan uzunlikda, gap oxiridan kesadi. */
+function trimToSentence(text, max) {
+  if (text.length <= max) return text;
+  const cut = text.slice(0, max);
+  const stop = Math.max(cut.lastIndexOf(". "), cut.lastIndexOf("! "), cut.lastIndexOf("? "));
+  return (stop > max * 0.5 ? cut.slice(0, stop + 1) : cut).trim();
+}
+const AI_BATCH = 3;          // bir vaqtda nechta mavzu AI bilan tayyorlanadi
 
-router.get("/lessons/:id", requireAuth, (req, res) => {
-  const lesson = getLessonById(Number(req.params.id));
-  if (!lesson) return res.status(404).json({ error: "Topilmadi" });
-  res.json({ ...lesson, topics: getTopicsByLesson(lesson.id) });
-});
+/** Uzun matnni AI ga yuborish uchun oynalarga bo'ladi (butun hujjat qamraladi). */
+function textWindows(text, size = 12000, max = 6) {
+  const out = [];
+  const step = Math.max(size, Math.ceil(text.length / max));
+  for (let i = 0; i < text.length && out.length < max; i += step) {
+    out.push(text.slice(i, i + step));
+  }
+  return out;
+}
 
-router.delete("/lessons/:id", requireAuth, (req, res) => {
-  if (req.user.role !== "teacher") return res.status(403).json({ error: "Faqat o'qituvchilar" });
-  deleteLesson(Number(req.params.id));
-  res.json({ success: true });
-});
-
-router.post("/lessons/:id/pdf", requireAuth, upload.single("pdf"), async (req, res) => {
-  if (req.user.role !== "teacher") return res.status(403).json({ error: "Faqat o'qituvchilar" });
-  const lessonId = Number(req.params.id);
-  const lesson = getLessonById(lessonId);
-  if (!lesson) return res.status(404).json({ error: "Topilmadi" });
-  if (!req.file) return res.status(400).json({ error: "PDF fayl kerak" });
-
-  try {
-    const pdfText = await extractPdfText(req.file.buffer);
-    if (!pdfText || pdfText.length < 30) {
-      return res.status(400).json({ error: "PDF dan matn o'qib bo'lmadi. Skaner qilingan PDF bo'lishi mumkin." });
-    }
-
-    const discovered = splitPdfIntoTopics(pdfText, lesson.title);
-    const topicPrompt = `Quyidagi PDF matnidan barcha asosiy mavzularni ajrat.
+/**
+ * PDF da aniq sarlavhalar bo'lmasa — mavzularni AI ajratadi.
+ * Butun matn bo'ylab yuriladi, faqat birinchi sahifalar emas.
+ */
+async function aiSplitTopics(pdfText, lessonTitle) {
+  const found = [];
+  for (const part of textWindows(pdfText)) {
+    const prompt = `Quyida darslik PDF sining bir qismi berilgan. Undagi ASOSIY MAVZULARNI ajrat.
 Qoidalar:
-- Hamma asosiy bo'limlar ko'rinsin (3 tadan kam bo'lmasin, agar matn katta bo'lsa 5-12 ta mavzu chiqar).
-- Har bir mavzu boshqalaridan farqli bo'lsin.
-- Har bir content KAMIDA 17-18 ta to'liq gap bo'lsin (ta'rif, misollar, faktlar, ahamiyati).
-- Faqat o'zbek tilida, faqat JSON array qaytar.
+- Mavzu nomlari matnning o'zidan olinsin, o'ylab topilmasin.
+- Har bir mavzu boshqasidan farq qilsin, takrorlanmasin.
+- content — o'sha mavzuga oid matnning mazmuni (kamida 5 ta gap).
+- Matn qaysi tilda bo'lsa, mavzu nomi ham o'sha tilda bo'lsin.
+- Faqat JSON array qaytar, boshqa hech narsa yozma.
 
 Matn:
-${pdfText.slice(0, 16000)}
+${part}
 
 Format:
-[{"title":"Mavzu nomi","content":"17-18 gapdan iborat batafsil mazmun"}]`;
+[{"title":"Mavzu nomi","content":"Mavzu mazmuni"}]`;
+    const arr = await callAiJson(prompt, 6000);
+    if (!Array.isArray(arr)) continue;
+    for (const t of arr) {
+      const title = cleanText(t?.title || "").slice(0, 110);
+      const content = cleanText(t?.content || "");
+      if (title.length < 3 || title.length > 110) continue;
+      if (content.length < 80) continue;
+      found.push({ title, content, source: "ai" });
+    }
+  }
+  const seen = new Set();
+  return found.filter(t => {
+    const key = t.title.toLowerCase();
+    if (seen.has(key)) return false;
+    seen.add(key);
+    return true;
+  });
+}
 
-    const aiTopics = await callAiJson(topicPrompt, 8000);
-    const topics = (Array.isArray(aiTopics) && aiTopics.length >= 1 ? aiTopics : discovered)
-      .map((t, i) => ({
-        title: cleanText(t.title || `${lesson.title} — ${i + 1}-mavzu`).slice(0, 110),
-        content: cleanText(t.content || discovered[i]?.content || t.title || pdfText.slice(i * 1200, (i + 1) * 1200)),
-      }))
-      .filter(t => t.title && t.content)
-      .slice(0, 20);
+/** Bitta mavzu uchun matn + testlarni tayyorlab, bazaga yozadi. */
+async function buildTopicRecord(lessonId, topic, order) {
+  const topicTitle = topic.title;
+  const sourceText = cleanText(topic.content || "");   // PDF dagi asl matn
+  let topicContent = sourceText || topicTitle;
 
-    const createdTopics = [];
-    let totalTests = 0;
+  // PDF dagi matn yetarlicha to'liq bo'lsa — uni o'zgartirmaymiz.
+  // Faqat qisqa bo'lsa AI (yoki mahalliy sintez) bilan kengaytiramiz.
+  const sentenceCount = (topicContent.match(/[.!?]+/g) || []).length;
+  if (sentenceCount < 12) {
+    try {
+      topicContent = await expandTopicContent(topicTitle, topicContent);
+    } catch {
+      topicContent = synthesizeRichContent(topicTitle, topicContent);
+    }
+  }
+  if (!topicContent || topicContent.length < 120) {
+    topicContent = synthesizeRichContent(topicTitle, topic.content || topicTitle);
+  }
 
-    for (const t of topics) {
-      const topicTitle = t.title;
-      let topicContent = t.content;
-      try {
-        topicContent = await expandTopicContent(topicTitle, topicContent || topicTitle);
-      } catch {
-        topicContent = synthesizeRichContent(topicTitle, topicContent || topicTitle);
-      }
-      if (!topicContent || (topicContent.match(/[.!?]+/g) || []).length < 15) {
-        topicContent = synthesizeRichContent(topicTitle, topicContent || topicTitle);
-      }
-
-      const openPrompt = `"${topicTitle}" mavzusi bo'yicha PDF matniga tayanib ${TESTS_PER_TOPIC} ta VARIANTLI (4 javobli, ABC) test yarat.
+  const openPrompt = `"${topicTitle}" mavzusi bo'yicha quyidagi matnga tayanib ${AI_TESTS_REQUEST} ta VARIANTLI (4 javobli) test yarat.
 Qoidalar:
 - Savollar BIR-BIRIDAN FARQLI bo'lsin, takrorlanmasin.
 - Har xil turdagi savollar bo'lsin: ta'rif, misol, taqqoslash, sabab-oqibat, bo'sh joyni to'ldirish.
-- 4 ta variant bo'lsin, faqat bittasi to'g'ri.
-- correctIndex 0-3 oralig'ida.
+- Savollar shu matndagi ma'lumotga asoslansin.
+- 4 ta variant bo'lsin, faqat bittasi to'g'ri, correctIndex 0-3 oralig'ida.
 - Faqat JSON array qaytar.
 
 Mavzu matni:
@@ -470,12 +324,11 @@ ${topicContent.slice(0, 3500)}
 
 Format:
 [{"question":"...","options":["A","B","C","D"],"correctIndex":0}]`;
-      const openTests = normalizeTests(await callAiJson(openPrompt, 6000), topicTitle, topicContent);
 
-      const closedPrompt = `"${topicTitle}" mavzusi bo'yicha PDF matniga tayanib ${CLOSED_TESTS_PER_TOPIC} ta YOZMA (faqat savol, variantsiz) savol yarat.
+  const closedPrompt = `"${topicTitle}" mavzusi bo'yicha quyidagi matnga tayanib ${AI_TESTS_REQUEST} ta YOZMA (variantsiz) savol yarat.
 Qoidalar:
 - Savollar BIR-BIRIDAN FARQLI bo'lsin, TAKRORLANMASIN.
-- Turli xil: izohlash, taqqoslash, misol so'rash, sabab-oqibat, fikr bildirish, xulosa chiqarish.
+- Turli xil: izohlash, taqqoslash, misol so'rash, sabab-oqibat, xulosa chiqarish.
 - O'quvchi yozma javob berishi kerak.
 - Faqat JSON array qaytar.
 
@@ -484,25 +337,169 @@ ${topicContent.slice(0, 3500)}
 
 Format:
 [{"question":"Savol matni?"}]`;
-      const closedTests = normalizeClosedTests(await callAiJson(closedPrompt, 4000), topicTitle, topicContent);
 
-      const createdTopic = createTopic({
-        lessonId, title: topicTitle, content: topicContent,
-        tests: openTests, openTests, closedTests,
-      });
-      createdTopics.push({ id: createdTopic.id, title: topicTitle, testsCount: openTests.length, closedCount: closedTests.length });
-      totalTests += openTests.length + closedTests.length;
+  const [openRaw, closedRaw] = await Promise.all([
+    callAiJson(openPrompt, 6000),
+    callAiJson(closedPrompt, 4000),
+  ]);
+  const openTests = normalizeTests(openRaw, topicTitle, topicContent, sourceText);
+  const closedTests = normalizeClosedTests(closedRaw, topicTitle, topicContent, sourceText);
+
+  const created = createTopic({
+    lessonId, order, title: topicTitle, content: topicContent,
+    tests: openTests, openTests, closedTests,
+  });
+  return { id: created.id, title: topicTitle, testsCount: openTests.length, closedCount: closedTests.length };
+}
+
+// ── Routes ───────────────────────────────────────────────────────────────
+
+/**
+ * O'quvchiga mavzu qaytarilganda savollar va to'g'ri javoblar yuborilmaydi —
+ * faqat nechta savol borligi ko'rsatiladi. Aks holda javoblarni brauzerdan
+ * ko'rib olish mumkin bo'lardi.
+ */
+function safeTopic(topic, user) {
+  if (!topic) return topic;
+  if (user?.role === "teacher") return topic;
+  const { tests, openTests, closedTests, ...rest } = topic;
+  const openPool = openTests ?? tests ?? [];
+  const closedPool = closedTests ?? [];
+  return {
+    ...rest,
+    openCount: Math.min(TESTS_PER_ATTEMPT, openPool.length),
+    closedCount: Math.min(TESTS_PER_ATTEMPT, closedPool.length),
+  };
+}
+
+router.get("/lessons", requireAuth, (req, res) => {
+  const lessons = getLessons().map(l => ({
+    ...l,
+    topics: getTopicsByLesson(l.id).map(t => safeTopic(t, req.user)),
+  }));
+  res.json(lessons);
+});
+
+router.post("/lessons", requireAuth, (req, res) => {
+  if (req.user.role !== "teacher") return res.status(403).json({ error: "Faqat o'qituvchilar" });
+  const { title, description, grade, section } = req.body;
+  if (!title || !grade) return res.status(400).json({ error: "Sarlavha va sinf kerak" });
+  const lesson = createLesson({
+    title, description: description || "", grade: Number(grade),
+    section: pickSection(section),
+    teacherId: req.user.id,
+  });
+  res.status(201).json(lesson);
+});
+
+router.get("/lessons/:id", requireAuth, (req, res) => {
+  const lesson = getLessonById(Number(req.params.id));
+  if (!lesson) return res.status(404).json({ error: "Topilmadi" });
+  res.json({ ...lesson, topics: getTopicsByLesson(lesson.id).map(t => safeTopic(t, req.user)) });
+});
+
+router.delete("/lessons/:id", requireAuth, (req, res) => {
+  if (req.user.role !== "teacher") return res.status(403).json({ error: "Faqat o'qituvchilar" });
+  deleteLesson(Number(req.params.id));
+  res.json({ success: true });
+});
+
+/** PDF o'qilmagan sababiga qarab tushunarli xabar. */
+function pdfReadErrorMessage(readError) {
+  const e = String(readError || "").toLowerCase();
+  if (e.includes("password") || e.includes("encrypt")) {
+    return "PDF parol bilan himoyalangan. Parolsiz nusxasini yuklang.";
+  }
+  if (e.includes("invalid") || e.includes("corrupt") || e.includes("structure")) {
+    return "PDF fayl buzilgan yoki to'liq yuklanmagan. Faylni qayta saqlab ko'ring.";
+  }
+  return "PDF ichida matn topilmadi — bu skaner qilingan (rasm ko'rinishidagi) PDF. "
+    + "Matnli PDF yuklang yoki faylni matn tanib oluvchi (OCR) dastur orqali o'tkazing.";
+}
+
+router.post("/lessons/:id/pdf", requireAuth, upload.single("pdf"), async (req, res) => {
+  if (req.user.role !== "teacher") return res.status(403).json({ error: "Faqat o'qituvchilar" });
+  const lessonId = Number(req.params.id);
+  const lesson = getLessonById(lessonId);
+  if (!lesson) return res.status(404).json({ error: "Topilmadi" });
+  if (!req.file) return res.status(400).json({ error: "PDF fayl kerak" });
+
+  // Fayl haqiqatan PDF mi? (boshida "%PDF-" imzosi turadi)
+  if (req.file.buffer.subarray(0, 5).toString("latin1") !== "%PDF-") {
+    return res.status(400).json({
+      error: `Bu fayl PDF emas (${req.file.originalname || "fayl"}). Iltimos, .pdf faylni tanlang.`,
+    });
+  }
+
+  try {
+    // 1) PDF ni sahifalarga bo'lib o'qiymiz.
+    //    readPdf ikki usulni ketma-ket sinaydi: pdf.js va zaxira o'qigich.
+    const { pages, method, error: readError } = await readPdf(req.file.buffer);
+    const pdfText = cleanText(pages.join("\n"));
+    if (!pdfText || pdfText.length < 30) {
+      return res.status(400).json({ error: pdfReadErrorMessage(readError) });
     }
+
+    // 2) Mavzularni PDF ning o'z tuzilishidan ajratamiz:
+    //    sarlavhalar ("1-§.", "12-mavzu", BOSH HARFLI nomlar) bo'yicha.
+    const analysis = analyzePdf(pages, lesson.title);
+    let topics = analysis.topics;
+    let mode = analysis.mode;
+
+    // 3) Sarlavhalar topilmasa (uzluksiz matn) — AI yordamida bo'lamiz
+    if (mode !== "headings" || topics.length < 2) {
+      const aiTopics = await aiSplitTopics(pdfText, lesson.title);
+      if (aiTopics.length >= 2) {
+        topics = aiTopics;
+        mode = "ai";
+      }
+    }
+
+    topics = topics
+      .map(t => ({
+        title: cleanText(t.title).slice(0, 110),
+        content: trimToSentence(cleanText(t.content || t.title), MAX_TOPIC_CHARS),
+      }))
+      .filter(t => t.title && t.content)
+      .slice(0, MAX_PDF_TOPICS);
+
+    if (!topics.length) {
+      return res.status(400).json({ error: "PDF dan mavzu ajratib bo'lmadi. Fayl matnini tekshirib ko'ring." });
+    }
+
+    // 4) Har bir mavzu uchun matn va testlar tayyorlanadi.
+    //    Mavzular PDF dagi ketma-ketlikda saqlanadi (order maydoni).
+    const createdTopics = [];
+    let totalTests = 0;
+    for (let i = 0; i < topics.length; i += AI_BATCH) {
+      const batch = await Promise.all(
+        topics.slice(i, i + AI_BATCH).map((t, k) => buildTopicRecord(lessonId, t, i + k))
+      );
+      for (const tp of batch) {
+        createdTopics.push(tp);
+        totalTests += tp.testsCount + tp.closedCount;
+      }
+    }
+
+    const modeLabel = {
+      headings: "PDF sarlavhalari bo'yicha",
+      ai: "matn tahlili (AI) bo'yicha",
+      chunks: "matn bo'laklari bo'yicha",
+    }[mode] || "matn bo'yicha";
 
     res.json({
       success: true,
       summary: [
         `✅ PDF muvaffaqiyatli qayta ishlandi`,
+        `📄 Sahifalar: ${analysis.pages} ta${method === "raw" ? " (zaxira o'qish usuli)" : ""}`,
+        `🔍 Mavzular ${modeLabel} ajratildi`,
         `📚 Aniqlangan mavzular soni: ${createdTopics.length}`,
-        `📝 Jami testlar: ${totalTests} (har mavzuda ${TESTS_PER_TOPIC} variantli + ${CLOSED_TESTS_PER_TOPIC} yozma)`,
+        `📝 Savollar zaxirasi: ${totalTests} ta (har urinishda ${TESTS_PER_ATTEMPT} tasi tasodifiy tanlanadi)`,
         ``,
         ...createdTopics.map((tp, i) => `${i + 1}. ${tp.title} — ${tp.testsCount} variantli + ${tp.closedCount} yozma`),
       ].join("\n"),
+      mode,
+      pages: analysis.pages,
       topicsCreated: createdTopics.length,
       testsCreated: totalTests,
       topics: createdTopics,
@@ -514,7 +511,7 @@ Format:
 });
 
 router.get("/lessons/:id/topics", requireAuth, (req, res) => {
-  res.json(getTopicsByLesson(Number(req.params.id)));
+  res.json(getTopicsByLesson(Number(req.params.id)).map(t => safeTopic(t, req.user)));
 });
 
 router.post("/lessons/:id/topics", requireAuth, (req, res) => {
@@ -530,10 +527,20 @@ router.post("/topics/generate-tests", requireAuth, async (req, res) => {
   const topicId = Number(req.body?.topicId);
   const topic = getTopicById(topicId);
   if (!topic) return res.status(404).json({ error: "Topilmadi" });
-  const content = req.body?.topicContent || topic.content || topic.title;
-  const tests = normalizeTests(null, topic.title, String(content));
-  const updated = updateTopic(topic.id, { tests });
-  res.json({ success: true, tests, testsCount: tests.length, topic: updated });
+  const content = String(req.body?.topicContent || topic.content || topic.title);
+  const tests = normalizeTests(null, topic.title, content);
+  const closedTests = normalizeClosedTests(null, topic.title, content);
+  const updated = updateTopic(topic.id, { tests, openTests: tests, closedTests });
+  res.json({
+    success: true,
+    perAttempt: TESTS_PER_ATTEMPT,
+    counts: { open: tests.length, closed: closedTests.length },
+    open: tests,
+    closed: closedTests,
+    // eski mijozlar uchun
+    tests, testsCount: tests.length, closedCount: closedTests.length,
+    topic: updated,
+  });
 });
 
 router.delete("/topics/:id", requireAuth, (req, res) => {
@@ -545,37 +552,152 @@ router.delete("/topics/:id", requireAuth, (req, res) => {
 router.get("/topics/:id", requireAuth, (req, res) => {
   const topic = getTopicById(Number(req.params.id));
   if (!topic) return res.status(404).json({ error: "Topilmadi" });
-  res.json(topic);
+  res.json(safeTopic(topic, req.user));
 });
 
+// Savollar zaxirasi (javoblari bilan) — faqat o'qituvchi ko'ra oladi.
+//   ?mode=open   → variantli savollar (default)
+//   ?mode=closed → yozma savollar
+//   ?mode=all    → ikkalasi + hisoblar
 router.get("/topics/:id/tests", requireAuth, (req, res) => {
+  if (req.user.role !== "teacher") return res.status(403).json({ error: "Faqat o'qituvchilar" });
   const topic = getTopicById(Number(req.params.id));
   if (!topic) return res.status(404).json({ error: "Topilmadi" });
+
+  const open = topic.openTests ?? topic.tests ?? [];
+  const closed = topic.closedTests ?? [];
   const mode = String(req.query.mode || "open");
-  if (mode === "closed") return res.json(topic.closedTests ?? []);
-  res.json(topic.openTests ?? topic.tests ?? []);
+
+  if (mode === "all") {
+    return res.json({
+      topicId: topic.id,
+      title: topic.title,
+      perAttempt: TESTS_PER_ATTEMPT,
+      counts: { open: open.length, closed: closed.length },
+      open,
+      closed,
+    });
+  }
+  if (mode === "closed") return res.json(closed);
+  res.json(open);
+});
+
+/**
+ * Yangi urinish. Har chaqirilganda savollar zaxiradan qaytadan tanlanadi,
+ * tartibi va javob variantlari aralashtiriladi — ya'ni o'quvchi testni
+ * tashlab chiqib ketsa yoki qayta boshlasa, savollar yangilanadi.
+ * To'g'ri javoblar javobda yuborilmaydi.
+ */
+router.post("/topics/:id/attempt", requireAuth, (req, res) => {
+  const topic = getTopicById(Number(req.params.id));
+  if (!topic) return res.status(404).json({ error: "Topilmadi" });
+
+  const mode = req.body?.mode === "closed" ? "closed" : "open";
+  const pool = mode === "closed"
+    ? (topic.closedTests ?? [])
+    : (topic.openTests ?? topic.tests ?? []);
+  if (!pool.length) return res.json({ variantId: null, mode, total: 0, questions: [] });
+
+  const picked = pickVariant(pool, TESTS_PER_ATTEMPT);
+  const variant = createVariant({
+    topicId: topic.id,
+    userId: req.user.id,
+    mode,
+    key: picked.map(q => ({ id: q.id, correctIndex: q.correctIndex ?? null })),
+  });
+
+  res.json({
+    variantId: variant.id,
+    mode,
+    total: picked.length,
+    poolSize: pool.length,
+    questions: picked.map(q => ({
+      id: q.id,
+      num: q.num,
+      questionText: q.questionText,
+      ...(q.options ? { options: q.options } : {}),
+    })),
+  });
+});
+
+/** {questionId: javob} ko'rinishidagi mijoz javoblarini tozalaydi. */
+function normalizeClientAnswers(given) {
+  const out = {};
+  if (given && typeof given === "object") {
+    for (const [k, v] of Object.entries(given)) {
+      if (Number.isInteger(v)) out[Number(k)] = v;
+    }
+  }
+  return out;
+}
+
+/** Variantni tekshiradi va shu o'quvchiga tegishliligini ta'minlaydi. */
+function loadVariant(req, topicId) {
+  const variant = getVariant(String(req.body?.variantId || ""));
+  if (!variant) return null;
+  if (variant.userId !== req.user.id || variant.topicId !== topicId) return null;
+  return variant;
+}
+
+// Bitta savolga javob — to'g'riligi serverda tekshiriladi
+router.post("/topics/:id/answer", requireAuth, (req, res) => {
+  const topicId = Number(req.params.id);
+  const variant = loadVariant(req, topicId);
+  if (!variant) return res.status(400).json({ error: "Test varianti topilmadi" });
+  if (variant.finished) return res.status(400).json({ error: "Test yakunlangan" });
+
+  const questionId = Number(req.body?.questionId);
+  const item = (variant.key || []).find(k => k.id === questionId);
+  if (!item) return res.status(400).json({ error: "Savol topilmadi" });
+
+  const answers = { ...(variant.answers || {}) };
+  const given = Number.isInteger(req.body?.answer) ? req.body.answer : -1;
+  // Faqat birinchi javob hisobga olinadi
+  if (!(questionId in answers)) {
+    answers[questionId] = given;
+    updateVariant(variant.id, { answers });
+  }
+  res.json({ correct: given === item.correctIndex, correctIndex: item.correctIndex });
 });
 
 router.post("/topics/:id/submit", requireAuth, (req, res) => {
   if (req.user.role !== "student") return res.status(403).json({ error: "Faqat o'quvchilar" });
-  const topic = getTopicById(Number(req.params.id));
+  const topicId = Number(req.params.id);
+  const topic = getTopicById(topicId);
   if (!topic) return res.status(404).json({ error: "Topilmadi" });
   const { answers, timeTaken } = req.body;
-  const tests = topic.openTests ?? topic.tests ?? [];
+
   let correct = 0;
-  for (let i = 0; i < tests.length; i++) {
-    if (answers?.[i] === tests[i].correctIndex) correct++;
+  let total = 0;
+  const variant = loadVariant(req, topicId);
+  if (variant) {
+    // Natija serverdagi variant bo'yicha hisoblanadi
+    // Serverda qayd etilgan javoblar ustun: mijoz ularni o'zgartira olmaydi,
+    // yuborgan qiymatlari faqat qayd etilmay qolgan savollarga qo'llanadi.
+    const given = { ...normalizeClientAnswers(req.body?.given), ...(variant.answers || {}) };
+    for (const item of variant.key || []) {
+      total++;
+      if (given[item.id] === item.correctIndex) correct++;
+    }
+    updateVariant(variant.id, { finished: true, answers: given });
+  } else {
+    // Eski mijozlar uchun zaxira yo'l
+    const tests = topic.openTests ?? topic.tests ?? [];
+    total = Math.min(tests.length, Array.isArray(answers) ? answers.length : tests.length);
+    for (let i = 0; i < total; i++) {
+      if (answers?.[i] === tests[i]?.correctIndex) correct++;
+    }
   }
-  const percentage = tests.length > 0 ? (correct / tests.length) * 100 : 0;
+  const percentage = total > 0 ? (correct / total) * 100 : 0;
   const points = Math.round(percentage);
   updateUser(req.user.id, { totalScore: (req.user.totalScore || 0) + points });
   createActivity({
     userId: req.user.id, studentName: req.user.name,
     topicId: topic.id, topicTitle: topic.title,
-    correct, total: tests.length, percentage, pointsEarned: points,
+    correct, total, percentage, pointsEarned: points,
     timeTaken: timeTaken || 0,
   });
-  res.json({ correct, total: tests.length, percentage, pointsEarned: points });
+  res.json({ correct, total, percentage, pointsEarned: points });
 });
 
 export default router;

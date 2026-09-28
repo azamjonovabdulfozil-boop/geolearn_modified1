@@ -1,0 +1,214 @@
+[
+  {
+    "id": 1,
+    "createdAt": "2026-09-18T10:03:07.227Z",
+    "students": [
+      {
+        "id": "918bbdc5b5",
+        "fullName": "Toxir Toxirov Toxirovich"
+      },
+      {
+        "id": "e1f8e1ab36",
+        "fullName": "Aliyev Vali Karimovich"
+      }
+    ],
+    "name": "10-V",
+    "grade": 10,
+    "section": "uz",
+    "teacherId": 1
+  },
+  {
+    "id": 2,
+    "createdAt": "2026-09-18T10:05:55.258Z",
+    "students": [
+      {
+        "id": "fcdb8ac2be",
+        "fullName": "Asosiy atamalar: Geologik vaqt"
+      },
+      {
+        "id": "5f5b676f52",
+        "fullName": "mavzu. O‘rta Osiyo hududining rivojlanish tarixi."
+      },
+      {
+        "id": "eed676b04b",
+        "fullName": "Foydali qazilmalari"
+      },
+      {
+        "id": "0ac509e1fe",
+        "fullName": "Hududning hozirgi ko‘rinishi uzoq geologik rivojlanish natijasidir. Tektonik harakatlar"
+      },
+      {
+        "id": "9bc0e9dde2",
+        "fullName": "tog‘larning ko‘tarilishi"
+      },
+      {
+        "id": "12b8581de2",
+        "fullName": "bo‘lgan. Geologik jarayonlar natijasida neft"
+      },
+      {
+        "id": "94c11089b6",
+        "fullName": "qurilish materiallari kabi foydali qazilmalar shakllangan."
+      },
+      {
+        "id": "cd789ae03a",
+        "fullName": "Asosiy atamalar: Tektonik harakat"
+      },
+      {
+        "id": "92d5ddbca9",
+        "fullName": "mavzu. Yer yuzasi tuzilishining asosiy xususiyatlari"
+      },
+      {
+        "id": "6534f404bc",
+        "fullName": "O‘rta Osiyo relyefida tekisliklar"
+      },
+      {
+        "id": "fb4304971e",
+        "fullName": "keng tekisliklar ustun bo‘lsa"
+      },
+      {
+        "id": "e8a0a293b3",
+        "fullName": "tuproq va o‘simliklarning tarqalishiga kuchli ta’sir qiladi. Balandlik oshgan sari tabiiy"
+      },
+      {
+        "id": "566c194c36",
+        "fullName": "sharoitlar ham o‘zgarib boradi."
+      },
+      {
+        "id": "f4c5961b38",
+        "fullName": "Asosiy atamalar: Relyef"
+      },
+      {
+        "id": "333dc5c2b0",
+        "fullName": "mavzu. O‘rta Osiyo iqlimi. Iqlimga ta’sir ko‘rsatuvchi"
+      },
+      {
+        "id": "fad65470bd",
+        "fullName": "Iqlimga geografik kenglik"
+      },
+      {
+        "id": "3e4c13724e",
+        "fullName": "ta’sir qiladi. Yoz odatda issiq va quruq"
+      },
+      {
+        "id": "c61ee94aa6",
+        "fullName": "harakatiga ta’sir qilib"
+      },
+      {
+        "id": "70447818f3",
+        "fullName": "Asosiy atamalar: Iqlim"
+      },
+      {
+        "id": "c75376a1b9",
+        "fullName": "mavzu. Havo massalari. Siklon va antisiklonlar"
+      },
+      {
+        "id": "ca02b77797",
+        "fullName": "Havo massalari katta hududlarda shakllangan havo qatlamlaridir. Ular harorat va namlik"
+      },
+      {
+        "id": "25722cddb7",
+        "fullName": "bulutlilik va yog‘in bilan bog‘liq. Antisiklon yuqori bosimli tizim bo‘lib"
+      },
+      {
+        "id": "99585131b6",
+        "fullName": "quruq ob-havoni yuzaga keltiradi."
+      },
+      {
+        "id": "19399a77bb",
+        "fullName": "Asosiy atamalar: Havo massasi"
+      },
+      {
+        "id": "2b93ec96e8",
+        "fullName": "mavzu. O‘lka iqlimining ta’rifi. Tekislik iqlimi"
+      },
+      {
+        "id": "66eae64472",
+        "fullName": "Tekisliklarda iqlimning asosiy xususiyati — quruqlik va keskin kontinental sharoitdir."
+      },
+      {
+        "id": "f0bf808fb7",
+        "fullName": "Okeanlardan uzoqlik sabab namlik kam keladi. Yozda kuchli isish"
+      },
+      {
+        "id": "bde92639af",
+        "fullName": "kuzatiladi. Cho‘l va yarim cho‘l hududlarida yog‘in juda kam bo‘lib"
+      },
+      {
+        "id": "6278fc7034",
+        "fullName": "amplitudasi katta bo‘lishi mumkin."
+      },
+      {
+        "id": "5545a41ffa",
+        "fullName": "Asosiy atamalar: Tekislik iqlimi"
+      },
+      {
+        "id": "d21fed662e",
+        "fullName": "mavzu. O‘rta Osiyo tog‘larining iqlimi"
+      },
+      {
+        "id": "fcf69cdf61",
+        "fullName": "Tog‘larda balandlik oshgani sari havo harorati pasayadi. Relyefning balandligi va"
+      },
+      {
+        "id": "56d7d8d297",
+        "fullName": "shamolga qaragan yonbag‘irlarida yog‘in ko‘proq bo‘lishi mumkin. Balandlik mintaqalari"
+      },
+      {
+        "id": "c690a04c60",
+        "fullName": "bo‘yicha iqlim va tabiiy sharoitlar o‘zgaradi."
+      },
+      {
+        "id": "b704ec8bb3",
+        "fullName": "Asosiy atamalar: Balandlik"
+      },
+      {
+        "id": "39c5c562e4",
+        "fullName": "mavzu. O‘rta Osiyodagi iqlimiy tafovutlar"
+      },
+      {
+        "id": "0a66d3760d",
+        "fullName": "O‘lkaning shimoldan janubga"
+      },
+      {
+        "id": "82fcea6f0d",
+        "fullName": "o‘zgaradi. Janubiy hududlar odatda iliqroq"
+      },
+      {
+        "id": "52d15e4824",
+        "fullName": "haroratning taqsimlanishiga sabab bo‘ladi. Okeanlardan uzoqlik ham g‘arb-sharq"
+      },
+      {
+        "id": "c67920cfa1",
+        "fullName": "yo‘nalishidagi iqlimiy farqlarga ta’sir ko‘rsatadi."
+      },
+      {
+        "id": "774d89dc43",
+        "fullName": "Asosiy atamalar: Iqlimiy tafovut"
+      },
+      {
+        "id": "b96a4605e1",
+        "fullName": "mavzu. O‘rta Osiyo suvlari haqida umumiy tushuncha"
+      },
+      {
+        "id": "692572daf9",
+        "fullName": "foydali qazilmalar va relyef"
+      },
+      {
+        "id": "0a5877f90c",
+        "fullName": "havo massalari"
+      },
+      {
+        "id": "6dac9e9952",
+        "fullName": "band amaliy"
+      },
+      {
+        "id": "ed85fabbaa",
+        "fullName": "Toxir Toxirov Toxirovich"
+      }
+    ],
+    "name": "8-B",
+    "grade": 8,
+    "section": "uz",
+    "teacherId": 1
+  }
+]
