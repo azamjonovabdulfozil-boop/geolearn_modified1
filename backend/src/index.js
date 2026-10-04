@@ -50,6 +50,19 @@ const SITES = {
 // FRONTEND_URL env orqali ruxsat etilgan manzillar (vergul bilan bir nechta):
 // masalan https://geolearn-admin.vercel.app,https://geolearn.vercel.app
 // Bo'sh qoldirilsa — hamma originlarga ruxsat (lokal ishlab chiqish uchun).
+const cors = require("cors");
+
+app.use(cors({
+  origin: [
+    "https://geolearn-modified1-admin.vercel.app",
+  ],
+  credentials: true,
+  methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
+  allowedHeaders: ["Content-Type", "Authorization"],
+}));
+
+app.options("*", cors());
+
 const allowedOrigins = (process.env.FRONTEND_URL || "")
   .split(",")
   .map(o => o.trim())
