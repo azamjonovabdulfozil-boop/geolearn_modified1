@@ -5,8 +5,8 @@ import { createUser, getUserByUsername } from './lib/db.js';
 import { hashPassword } from './lib/auth.js';
 import { findForeignServer, reportConflict } from './lib/port.js';
 import { eventsHandler } from './lib/events.js';
+
 // DIQQAT: dotenv eng birinchi bo'lishi SHART.
-// ES modullar e'lon tartibida yuklanadi.
 import "dotenv/config";
 
 
@@ -38,7 +38,9 @@ const REPO_ROOT = join(__dirname, "../..");
 // SAYTLAR
 // ─────────────────────────────────────────────────────────────
 
-const siteArg = process.argv.find(a => a.startsWith("--site="))?.slice(7);
+const siteArg = process.argv
+  .find((a) => a.startsWith("--site="))
+  ?.slice(7);
 
 const SITE = (
   siteArg ||
@@ -48,22 +50,33 @@ const SITE = (
 
 const API_ONLY = process.env.API_ONLY === "1";
 
-const TEACHER_PORT = Number(process.env.PORT) || 3000;
+const TEACHER_PORT =
+  Number(process.env.PORT) || 3000;
+
 const STUDENT_PORT =
-  Number(process.env.STUDENT_PORT) || TEACHER_PORT + 1;
+  Number(process.env.STUDENT_PORT) ||
+  TEACHER_PORT + 1;
 
 const SITES = {
   teacher: {
     label: "Admin (o'qituvchi) sayti",
     apiLabel: "API — admin",
-    dist: join(REPO_ROOT, "admin", "dist"),
+    dist: join(
+      REPO_ROOT,
+      "admin",
+      "dist"
+    ),
     buildCmd: "npm run build:admin",
   },
 
   student: {
     label: "User (o'quvchi) sayti",
     apiLabel: "API — user",
-    dist: join(REPO_ROOT, "user", "dist"),
+    dist: join(
+      REPO_ROOT,
+      "user",
+      "dist"
+    ),
     buildCmd: "npm run build:user",
   },
 
@@ -79,42 +92,57 @@ const SITES = {
 // CORS
 // ─────────────────────────────────────────────────────────────
 
-// Render Environment Variables:
-//
+// Render Environment:
 // FRONTEND_URL=https://geolearn-modified1-admin.vercel.app
-//
-// Agar bir nechta frontend bo'lsa:
-//
-// FRONTEND_URL=https://geolearn-modified1-admin.vercel.app,https://geolearn-modified1.vercel.app
 
-const allowedOrigins = (process.env.FRONTEND_URL || "")
+const allowedOrigins = (
+  process.env.FRONTEND_URL || ""
+)
   .split(",")
-  .map(origin => origin.trim().replace(/\/$/, ""))
+  .map((origin) =>
+    origin.trim().replace(/\/$/, "")
+  )
   .filter(Boolean);
 
-// Lokal ishlaganda FRONTEND_URL bo'lmasa barcha originlarga ruxsat.
+// Asosiy frontend domeni.
+// FRONTEND_URL Render'da noto'g'ri bo'lsa ham,
+// shu domen ishlashi uchun qo'shib qo'yamiz.
+const ADMIN_ORIGIN =
+  "https://geolearn-modified1-admin.vercel.app";
+
+if (!allowedOrigins.includes(ADMIN_ORIGIN)) {
+  allowedOrigins.push(ADMIN_ORIGIN);
+}
+
+console.log(
+  "✅ CORS allowed origins:",
+  allowedOrigins
+);
+
+// ─────────────────────────────────────────────────────────────
+// CORS OPTIONS
+// ─────────────────────────────────────────────────────────────
+
 const corsOptions = {
   origin: (origin, callback) => {
-    // Postman, server-to-server yoki localhost kabi origin yubormaydigan
-    // so'rovlarni ham qabul qilamiz.
+    // Server-to-server / Postman kabi origin yo'q so'rovlar
     if (!origin) {
       return callback(null, true);
     }
 
-    // FRONTEND_URL berilmagan bo'lsa barcha originlarga ruxsat.
-    if (allowedOrigins.length === 0) {
-      return callback(null, true);
-    }
-
-    // Faqat ruxsat berilgan frontendlar.
+    // Ruxsat berilgan frontend
     if (allowedOrigins.includes(origin)) {
       return callback(null, true);
     }
 
-    console.log("❌ CORS bloklandi:", origin);
-    console.log("✅ Ruxsat berilgan originlar:", allowedOrigins);
+    console.log(
+      "⚠️ CORS bloklandi:",
+      origin
+    );
 
-    return callback(new Error("Not allowed by CORS"));
+    // Xato tashlamaymiz.
+    // Aks holda Express 500 qaytarishi mumkin.
+    return callback(null, false);
   },
 
   credentials: true,
@@ -136,11 +164,6 @@ const corsOptions = {
     "X-Requested-With",
   ],
 
-  exposedHeaders: [
-    "Content-Length",
-    "Content-Type",
-  ],
-
   optionsSuccessStatus: 204,
 };
 
@@ -159,8 +182,65 @@ function createApp(siteKey) {
 
   app.use(cors(corsOptions));
 
-  // Preflight OPTIONS so'rovlarini alohida qabul qilish.
-  app.options("*", cors(corsOptions));
+  // CORS headerlarini qo'lda ham beramiz.
+  // Bu /api/events kabi endpointlarda ham ishlaydi.
+
+  app.use((req, res, next) => {
+    const origin = req.headers.origin;
+
+    if (
+      origin &&
+      allowedOrigins.includes(origin)
+    ) {
+      res.header(
+        "Access-Control-Allow-Origin",
+        origin
+      );
+
+      res.header(
+        "Access-Control-Allow-Credentials",
+        "true"
+      );
+
+      res.header(
+        "Access-Control-Allow-Methods",
+        "GET,POST,PUT,PATCH,DELETE,OPTIONS"
+      );
+
+      res.header(
+        "Access-Control-Allow-Headers",
+        "Content-Type, Authorization, Accept, Origin, X-Requested-With"
+      );
+
+      res.header(
+        "Access-Control-Expose-Headers",
+        "Content-Length, Content-Type"
+      );
+
+      // Cache orqali eski CORS javobi kelmasligi uchun
+      res.header(
+        "Vary",
+        "Origin"
+      );
+    }
+
+    // ───────────────────────────────────────────────────────
+    // PREFLIGHT OPTIONS
+    // ───────────────────────────────────────────────────────
+
+    if (req.method === "OPTIONS") {
+      if (
+        !origin ||
+        allowedOrigins.includes(origin)
+      ) {
+        return res.sendStatus(204);
+      }
+
+      return res.sendStatus(403);
+    }
+
+    next();
+  });
 
   // ─────────────────────────────────────────────────────────
   // BODY PARSER
@@ -183,64 +263,107 @@ function createApp(siteKey) {
   // HEALTH CHECK
   // ─────────────────────────────────────────────────────────
 
-  app.get("/health", (req, res) => {
-    res.status(200).json({
-      status: "ok",
-      service: "GeoLearn API",
-    });
-  });
+  app.get(
+    "/health",
+    (req, res) => {
+      res.status(200).json({
+        status: "ok",
+        service: "GeoLearn API",
+        site: siteKey,
+      });
+    }
+  );
 
   // ─────────────────────────────────────────────────────────
-  // API SITE
+  // SITE
   // ─────────────────────────────────────────────────────────
 
-  app.get("/api/site", (req, res) => {
-    res.json({
-      site: siteKey,
-      label: site.label,
-    });
-  });
+  app.get(
+    "/api/site",
+    (req, res) => {
+      res.json({
+        site: siteKey,
+        label: site.label,
+      });
+    }
+  );
 
   // ─────────────────────────────────────────────────────────
   // REAL TIME EVENTS / SSE
   // ─────────────────────────────────────────────────────────
 
-  app.get("/api/events", eventsHandler);
+  app.get(
+    "/api/events",
+    eventsHandler
+  );
 
   // ─────────────────────────────────────────────────────────
   // API ROUTES
   // ─────────────────────────────────────────────────────────
 
-  app.use("/api", authRoutes);
+  app.use(
+    "/api",
+    authRoutes
+  );
 
-  app.use("/api", lessonRoutes);
+  app.use(
+    "/api",
+    lessonRoutes
+  );
 
-  app.use("/api", videoRoutes);
+  app.use(
+    "/api",
+    videoRoutes
+  );
 
-  app.use("/api", gameRoutes);
+  app.use(
+    "/api",
+    gameRoutes
+  );
 
-  app.use("/api", ratingRoutes);
+  app.use(
+    "/api",
+    ratingRoutes
+  );
 
-  app.use("/api", homeworkRoutes);
+  app.use(
+    "/api",
+    homeworkRoutes
+  );
 
-  app.use("/api", aiRoutes);
+  app.use(
+    "/api",
+    aiRoutes
+  );
 
-  app.use("/api", analyticsRoutes);
+  app.use(
+    "/api",
+    analyticsRoutes
+  );
 
-  app.use("/api", classRoutes);
+  app.use(
+    "/api",
+    classRoutes
+  );
 
-  app.use("/api", gradeRoutes);
+  app.use(
+    "/api",
+    gradeRoutes
+  );
 
   // ─────────────────────────────────────────────────────────
   // UNKNOWN API ROUTE
   // ─────────────────────────────────────────────────────────
 
-  app.use("/api", (req, res) => {
-    res.status(404).json({
-      error: "API yo'li topilmadi",
-      path: req.originalUrl,
-    });
-  });
+  app.use(
+    "/api",
+    (req, res) => {
+      res.status(404).json({
+        error: "API yo'li topilmadi",
+        path: req.originalUrl,
+      });
+    }
+  );
 
   // ─────────────────────────────────────────────────────────
   // STATIC FRONTEND
@@ -249,30 +372,95 @@ function createApp(siteKey) {
   const hasBuild =
     !API_ONLY &&
     Boolean(site.dist) &&
-    existsSync(join(site.dist, "index.html"));
+    existsSync(
+      join(
+        site.dist,
+        "index.html"
+      )
+    );
 
   if (hasBuild) {
-    app.use(express.static(site.dist));
+    app.use(
+      express.static(site.dist)
+    );
 
-    app.get("*", (req, res) => {
-      res.sendFile(
-        join(site.dist, "index.html")
-      );
-    });
+    app.get(
+      "*",
+      (req, res) => {
+        res.sendFile(
+          join(
+            site.dist,
+            "index.html"
+          )
+        );
+      }
+    );
   } else {
-    app.get("*", (req, res) => {
-      res.status(200).json({
-        status: "GeoLearn API ishlayapti",
-        site: siteKey,
+    app.get(
+      "*",
+      (req, res) => {
+        res.status(200).json({
+          status:
+            "GeoLearn API ishlayapti",
 
-        ...(site.buildCmd
-          ? {
-              hint: `Sayt hali qurilmagan. Repo ildizida: ${site.buildCmd}`,
-            }
-          : {}),
-      });
-    });
+          site: siteKey,
+
+          ...(site.buildCmd
+            ? {
+                hint:
+                  `Sayt hali qurilmagan. Repo ildizida: ${site.buildCmd}`,
+              }
+            : {}),
+        });
+      }
+    );
   }
+
+  // ─────────────────────────────────────────────────────────
+  // ERROR HANDLER
+  // ─────────────────────────────────────────────────────────
+
+  app.use(
+    (err, req, res, next) => {
+      console.error(
+        "❌ SERVER ERROR:",
+        err
+      );
+
+      // Javobda CORS headerlari saqlanib qolishi uchun
+      const origin =
+        req.headers.origin;
+
+      if (
+        origin &&
+        allowedOrigins.includes(origin)
+      ) {
+        res.header(
+          "Access-Control-Allow-Origin",
+          origin
+        );
+
+        res.header(
+          "Access-Control-Allow-Credentials",
+          "true"
+        );
+      }
+
+      if (res.headersSent) {
+        return next(err);
+      }
+
+      res.status(500).json({
+        error:
+          "Serverda xatolik yuz berdi",
+        message:
+          process.env.NODE_ENV ===
+          "production"
+            ? "Internal server error"
+            : err.message,
+      });
+    }
+  );
 
   return {
     app,
@@ -284,53 +472,72 @@ function createApp(siteKey) {
 // SERVER START
 // ─────────────────────────────────────────────────────────────
 
-function start(siteKey, port) {
-  const site = SITES[siteKey];
+function start(
+  siteKey,
+  port
+) {
+  const site =
+    SITES[siteKey];
 
   const {
     app,
     hasBuild,
-  } = createApp(siteKey);
+  } =
+    createApp(siteKey);
 
-  const server = app.listen(
-    port,
-    () => {
-      const name = hasBuild
-        ? site.label
-        : site.apiLabel;
+  const server =
+    app.listen(
+      port,
+      () => {
+        const name =
+          hasBuild
+            ? site.label
+            : site.apiLabel;
 
-      console.log(
-        `${hasBuild ? "🌐" : "🔌"} ${name.padEnd(
-          26
-        )} → http://localhost:${port}${
-          hasBuild ? "" : "  (faqat API)"
-        }`
-      );
+        console.log(
+          `${hasBuild ? "🌐" : "🔌"} ${name.padEnd(
+            26
+          )} → http://localhost:${port}${
+            hasBuild
+              ? ""
+              : "  (faqat API)"
+          }`
+        );
 
-      console.log(
-        "CORS origins:",
-        allowedOrigins.length > 0
-          ? allowedOrigins
-          : "ALL"
-      );
+        console.log(
+          "🌐 FRONTEND_URL:",
+          process.env.FRONTEND_URL ||
+            "ALL"
+        );
+
+        console.log(
+          "🌐 CORS origins:",
+          allowedOrigins
+        );
+      }
+    );
+
+  server.on(
+    "error",
+    (err) => {
+      if (
+        err.code ===
+        "EADDRINUSE"
+      ) {
+        console.error(
+          `❌ ${port} porti band (${site.label}).`
+        );
+
+        console.error(
+          "   Boshqa port bilan: PORT=4000 STUDENT_PORT=4001 npm start"
+        );
+
+        process.exit(1);
+      }
+
+      throw err;
     }
   );
-
-  server.on("error", (err) => {
-    if (err.code === "EADDRINUSE") {
-      console.error(
-        `❌ ${port} porti band (${site.label}).`
-      );
-
-      console.error(
-        "   Boshqa port bilan: PORT=4000 STUDENT_PORT=4001 npm start"
-      );
-
-      process.exit(1);
-    }
-
-    throw err;
-  });
 
   return server;
 }
@@ -339,11 +546,18 @@ function start(siteKey, port) {
 // SEED ADMIN TEACHER
 // ─────────────────────────────────────────────────────────────
 
-if (!getUserByUsername("admin")) {
+if (
+  !getUserByUsername(
+    "admin"
+  )
+) {
   createUser({
     name: "Administrator",
     username: "admin",
-    passwordHash: hashPassword("admin123"),
+    passwordHash:
+      hashPassword(
+        "admin123"
+      ),
     role: "teacher",
     grade: null,
     theme: "light",
@@ -365,13 +579,14 @@ console.log(
 );
 
 console.log(
-  "🌐 FRONTEND_URL:",
-  process.env.FRONTEND_URL || "ALL ORIGINS"
+  "🌐 SITE:",
+  SITE
 );
 
 console.log(
-  "🖥️ SITE:",
-  SITE
+  "🌐 FRONTEND_URL:",
+  process.env.FRONTEND_URL ||
+    "ALL ORIGINS"
 );
 
 const ports =
@@ -388,9 +603,13 @@ const ports =
 // PORT CHECK
 // ─────────────────────────────────────────────────────────────
 
-for (const port of ports) {
+for (
+  const port of ports
+) {
   const foreign =
-    await findForeignServer(port);
+    await findForeignServer(
+      port
+    );
 
   if (foreign) {
     reportConflict(
@@ -406,7 +625,9 @@ for (const port of ports) {
 // START
 // ─────────────────────────────────────────────────────────────
 
-if (ports.length === 1) {
+if (
+  ports.length === 1
+) {
   start(
     SITE,
     TEACHER_PORT
