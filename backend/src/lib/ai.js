@@ -15,12 +15,14 @@ const PROVIDERS = [
     url: "https://api.openai.com/v1/chat/completions",
     envKey: "OPENAI_API_KEY",
     models: ["gpt-4o-mini"],
+    visionModels: ["gpt-4o-mini"],
   },
   {
     name: "OpenRouter",
     url: "https://openrouter.ai/api/v1/chat/completions",
     envKey: "OPENROUTER_API_KEY",
     models: ["deepseek/deepseek-chat-v3-0324:free", "meta-llama/llama-3.3-70b-instruct:free"],
+    visionModels: ["google/gemma-3-27b-it:free", "meta-llama/llama-4-maverick:free"],
   },
   {
     name: "HuggingFace",
@@ -43,12 +45,14 @@ const PROVIDERS = [
     url: "https://api.groq.com/openai/v1/chat/completions",
     envKey: "GROQ_API_KEY",
     models: ["llama-3.3-70b-versatile"],
+    visionModels: ["meta-llama/llama-4-scout-17b-16e-instruct"],
   },
   {
     name: "Pollinations",
     url: "https://text.pollinations.ai/openai",
     envKey: null, // kalitsiz, oxirgi zaxira
     models: ["openai"],
+    visionModels: ["openai"],
   },
 ];
 
@@ -99,13 +103,16 @@ async function callChat(provider, model, messages, timeoutMs = CALL_TIMEOUT_MS) 
  */
 export async function askAI(messages) {
   const errors = [];
+  // Rasm biriktirilgan bo'lsa — faqat rasmni ko'ra oladigan modellar
+  const vision = messages.some(m => Array.isArray(m.content));
   const deadline = Date.now() + TOTAL_BUDGET_MS;
 
   for (const provider of PROVIDERS) {
     if (provider.envKey && !process.env[provider.envKey]) continue;      // kalit yo'q
     if (disabledProviders.has(provider.name)) continue;                   // kvota tugagan
 
-    for (const model of provider.models) {
+    const models = vision ? (provider.visionModels ?? []) : provider.models;
+    for (const model of models) {
       const remaining = deadline - Date.now();
       if (remaining < 5000) {
         console.log("⏱️  AI vaqt budjeti tugadi — qolgan provayderlar sinalmadi");

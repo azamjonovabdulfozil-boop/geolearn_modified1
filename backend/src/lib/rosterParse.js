@@ -78,7 +78,7 @@ function colIndex(ref = "") {
   return Math.max(0, n - 1);
 }
 
-function xlsxRows(buf) {
+export function xlsxRows(buf) {
   const files = unzip(buf, n => n === "xl/sharedStrings.xml" || /^xl\/worksheets\/sheet\d+\.xml$/.test(n));
   const shared = files["xl/sharedStrings.xml"]
     ? blocks(files["xl/sharedStrings.xml"].toString("utf8"), "si").map(b => textOf(b.inner, "t"))
@@ -112,7 +112,7 @@ function xlsxRows(buf) {
 
 // ── Word (.docx) ──────────────────────────────────────────────────────────
 
-function docxRows(buf) {
+export function docxRows(buf) {
   const files = unzip(buf, n => n === "word/document.xml");
   const xml = files["word/document.xml"]?.toString("utf8");
   if (!xml) throw new Error("Word hujjat ichida matn topilmadi");

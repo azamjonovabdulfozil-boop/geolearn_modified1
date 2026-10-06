@@ -54,6 +54,11 @@
             </div>
             <div class="message-col" :class="msg.role === 'user' ? 'col-user' : 'col-ai'">
               <div class="message-bubble" :class="[msg.role === 'user' ? 'bubble-user' : 'bubble-ai', { 'bubble-warn': msg.meta?.warning }]">
+                <div v-if="msg.role === 'user' && msg.meta?.attachments?.length" class="msg-files">
+                  <span v-for="(f, k) in msg.meta.attachments" :key="k" class="msg-file">
+                    <component :is="fileIcon(f.kind)" :size="13" /> {{ f.name }}
+                  </span>
+                </div>
                 <span v-if="msg.role === 'user'" class="plain">{{ msg.content }}</span>
                 <div v-else class="md" v-html="renderMarkdown(msg.content)"></div>
               </div>
@@ -89,13 +94,30 @@
         <span>{{ settings.t('ai_chat_locked') }}</span>
         <button class="geo-btn-primary btn-new" @click="startNewChat"><Plus :size="14" /> {{ settings.t('ai_new_chat') }}</button>
       </div>
-      <div v-else class="chat-input-row">
-        <input v-model="input" @keydown.enter.prevent="send()"
-          :disabled="sending" class="geo-input chat-input"
-          :placeholder="settings.t('ai_placeholder')" />
-        <button @click="send()" :disabled="!input.trim() || sending" class="geo-btn-primary send-btn">
-          <Send :size="16" />
-        </button>
+      <div v-else class="chat-input-wrap"
+        :class="{ 'is-drag': dragOver }"
+        @dragover.prevent="dragOver = true" @dragleave.prevent="dragOver = false" @drop.prevent="onDrop">
+        <div v-if="pending.length || fileError" class="pending-row">
+          <span v-for="(f, k) in pending" :key="k" class="pending-file">
+            <img v-if="f.preview" :src="f.preview" class="pending-thumb" alt="" />
+            <component v-else :is="fileIcon(f.kind)" :size="14" />
+            <span class="pending-name">{{ f.name }}</span>
+            <button class="pending-x" :disabled="sending" @click="pending.splice(k, 1)"><X :size="12" /></button>
+          </span>
+          <span v-if="fileError" class="file-error">{{ fileError }}</span>
+        </div>
+        <div class="chat-input-row">
+          <input ref="fileEl" type="file" multiple hidden :accept="ACCEPT" @change="onPick" />
+          <button class="attach-btn" :title="settings.t('ai_attach')" :disabled="sending" @click="fileEl?.click()">
+            <Paperclip :size="17" />
+          </button>
+          <input v-model="input" @keydown.enter.prevent="send()" @paste="onPaste"
+            :disabled="sending" class="geo-input chat-input"
+            :placeholder="settings.t('ai_placeholder')" />
+          <button @click="send()" :disabled="(!input.trim() && !pending.length) || sending" class="geo-btn-primary send-btn">
+            <Send :size="16" />
+          </button>
+        </div>
       </div>
 
       <!-- ── Chat tarixi paneli (yondan ochiladi) ── -->
@@ -157,7 +179,8 @@
 import { ref, computed, onMounted, nextTick } from "vue";
 import {
   Bot, User, Send, Info, History, Plus, X, Trash2,
-  MessageSquare, Loader2, AlertTriangle, ShieldAlert, Lock, Ban } from "lucide-vue-next";
+  MessageSquare, Loader2, AlertTriangle, ShieldAlert, Lock, Ban,
+  Paperclip, FileText, FileSpreadsheet, FileImage, File as FileIcon } from "lucide-vue-next";
 import { useLive } from "@shared/composables/live";
 import { api } from "@shared/composables/api";
 import { renderMarkdown } from "@shared/composables/markdown";
@@ -175,6 +198,57 @@ const sending = ref(false);
 const loadingChat = ref(true);
 const historyOpen = ref(false);
 const chatEl = ref(null);
+
+// ── Biriktirilgan fayllar (PDF, Word, Excel, rasm) ────────────────────────
+const ACCEPT = ".pdf,.docx,.xlsx,.xlsm,.csv,.txt,image/png,image/jpeg,image/webp,image/gif";
+const MAX_FILES = 5;
+const MAX_BYTES = 10 * 1024 * 1024;
+const fileEl = ref(null);
+const pending = ref([]);        // [{ name, type, kind, data, preview }]
+const fileError = ref("");
+const dragOver = ref(false);
+
+function kindOf(file) {
+  const n = file.name.toLowerCase();
+  if (file.type.startsWith("image/") || /\.(png|jpe?g|webp|gif)$/.test(n)) return "image";
+  if (n.endsWith(".pdf")) return "pdf";
+  if (n.endsWith(".docx")) return "word";
+  if (/\.(xlsx|xlsm|csv)$/.test(n)) return "sheet";
+  if (n.endsWith(".txt")) return "text";
+  return null;
+}
+
+function fileIcon(kind) {
+  return { image: FileImage, sheet: FileSpreadsheet, pdf: FileText, word: FileText, text: FileText }[kind] ?? FileIcon;
+}
+
+function readAsDataUrl(file) {
+  return new Promise((resolve, reject) => {
+    const r = new FileReader();
+    r.onload = () => resolve(r.result);
+    r.onerror = () => reject(r.error);
+    r.readAsDataURL(file);
+  });
+}
+
+async function addFiles(list) {
+  fileError.value = "";
+  for (const file of Array.from(list || [])) {
+    if (pending.value.length >= MAX_FILES) { fileError.value = settings.t('ai_file_limit'); break; }
+    const kind = kindOf(file);
+    if (!kind) { fileError.value = `${file.name}: ${settings.t('ai_file_type')}`; continue; }
+    if (file.size > MAX_BYTES) { fileError.value = `${file.name}: ${settings.t('ai_file_too_big')}`; continue; }
+    const data = await readAsDataUrl(file);
+    pending.value.push({ name: file.name || "rasm.png", type: file.type, kind, data, preview: kind === "image" ? data : null });
+  }
+}
+
+function onPick(e) { addFiles(e.target.files); e.target.value = ""; }
+function onDrop(e) { dragOver.value = false; addFiles(e.dataTransfer?.files); }
+function onPaste(e) {
+  const files = Array.from(e.clipboardData?.files || []);
+  if (files.length) { e.preventDefault(); addFiles(files); }
+}
 
 const STORAGE_KEY = computed(() => `geo_ai_chat_${auth.user?.id ?? "anon"}`);
 
@@ -294,17 +368,24 @@ async function clearAll() {
 
 async function send(q) {
   const question = q ?? input.value.trim();
-  if (!question || sending.value) return;
+  const files = q ? [] : pending.value;
+  if ((!question && !files.length) || sending.value) return;
 
-  messages.value.push({ role: "user", content: question, createdAt: new Date().toISOString() });
-  if (!q) input.value = "";
+  messages.value.push({
+    role: "user", content: question, createdAt: new Date().toISOString(),
+    ...(files.length ? { meta: { attachments: files.map(f => ({ name: f.name, kind: f.kind })) } } : {}),
+  });
+  if (!q) { input.value = ""; pending.value = []; fileError.value = ""; }
   sending.value = true;
   scrollToBottom();
 
   try {
     const res = await api("/api/ai/ask", {
       method: "POST",
-      body: JSON.stringify({ question, language: settings.language, chatId: activeChatId.value }),
+      body: JSON.stringify({
+        question, language: settings.language, chatId: activeChatId.value,
+        attachments: files.map(f => ({ name: f.name, type: f.type, data: f.data })),
+      }),
     });
     messages.value.push({
       role: "assistant",
@@ -421,7 +502,37 @@ async function send(q) {
 .typing-dots { display: flex; gap: 4px; align-items: center; padding: 2px 0; }
 .typing-dots span { width: 7px; height: 7px; border-radius: 50%; background: hsl(var(--muted-fg)); animation: bounce .8s ease-in-out infinite; }
 
-.chat-input-row { display: flex; gap: 10px; padding: 14px 16px; border-top: 1px solid hsl(var(--border)); flex-shrink: 0; }
+.chat-input-wrap { border-top: 1px solid hsl(var(--border)); flex-shrink: 0; transition: background .15s; }
+.chat-input-wrap.is-drag { background: hsl(var(--primary)/0.06); }
+.chat-input-row { display: flex; gap: 10px; padding: 14px 16px; }
+.attach-btn {
+  width: 44px; height: 44px; border-radius: 12px; flex-shrink: 0;
+  display: inline-flex; align-items: center; justify-content: center;
+  border: 1.5px solid hsl(var(--border)); background: transparent; color: hsl(var(--muted-fg));
+  cursor: pointer; transition: all .15s;
+}
+.attach-btn:hover:not(:disabled) { border-color: hsl(var(--primary)); color: hsl(var(--primary)); }
+.attach-btn:disabled { opacity: .5; cursor: default; }
+.pending-row { display: flex; flex-wrap: wrap; gap: 8px; padding: 12px 16px 0; align-items: center; }
+.pending-file {
+  display: inline-flex; align-items: center; gap: 6px; max-width: 220px;
+  padding: 5px 6px 5px 8px; border-radius: 10px; background: hsl(var(--muted));
+  font-size: 12.5px;
+}
+.pending-thumb { width: 26px; height: 26px; border-radius: 6px; object-fit: cover; }
+.pending-name { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.pending-x {
+  display: inline-flex; align-items: center; justify-content: center; width: 20px; height: 20px;
+  border: none; border-radius: 6px; background: transparent; color: hsl(var(--muted-fg)); cursor: pointer; flex-shrink: 0;
+}
+.pending-x:hover { background: hsl(var(--destructive)/.12); color: hsl(var(--destructive)); }
+.file-error { font-size: 12px; color: hsl(var(--destructive)); }
+.msg-files { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 6px; }
+.msg-file {
+  display: inline-flex; align-items: center; gap: 5px; max-width: 100%;
+  padding: 3px 8px; border-radius: 8px; background: hsl(0 0% 100% / .18); font-size: 12px;
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
 .chat-input { flex: 1; }
 .send-btn { width: 44px; height: 44px; padding: 0; border-radius: 12px; flex-shrink: 0; }
 

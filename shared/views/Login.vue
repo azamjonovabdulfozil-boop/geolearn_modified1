@@ -86,6 +86,7 @@ import { ref } from "vue";
 import { useRouter, useRoute, RouterLink } from "vue-router";
 import { User, Lock, LogIn, Eye, EyeOff, Loader2, BookOpen, Gamepad2, Trophy } from "lucide-vue-next";
 import { useAuthStore } from "@shared/stores/auth";
+import { safeRedirect } from "@shared/router/guard";
 
 const APP_ROLE = typeof __APP_ROLE__ !== "undefined" ? __APP_ROLE__ : "both";
 // Ikkinchi portalning manzili: build vaqtida VITE_TEACHER_URL / VITE_STUDENT_URL
@@ -147,7 +148,7 @@ async function handleLogin() {
       return;
     }
 
-    router.push("/dashboard");
+    router.push(safeRedirect(route.query.redirect) || "/dashboard");
   } catch (e) {
     error.value = e.data?.error || "Login yoki parol noto'g'ri";
   }

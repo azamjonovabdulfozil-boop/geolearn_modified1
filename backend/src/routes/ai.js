@@ -4,6 +4,7 @@ import { read, write, userClassName, getUserById, updateUser } from "../lib/db.j
 import { findProfanity, maskWord } from "../lib/profanity.js";
 import { askAI, aiProviderStatus } from "../lib/ai.js";
 import { detectLanguage, buildMessages } from "../lib/aiPrompt.js";
+import { processAttachments, withFileTexts } from "../lib/aiFiles.js";
 import {
   listChats, getChat, createChat, appendMessages,
   renameChat, deleteChat, deleteAllChats,
@@ -135,9 +136,14 @@ flagPastLogs();
 
 // ── POST /api/ai/ask & /api/ai/chat — savol berish ────────────────────────
 router.post(["/ai/ask", "/ai/chat"], requireAuth, async (req, res) => {
-  const question = (req.body?.question ?? req.body?.message ?? "").toString().trim();
   const fallbackLang = (req.body?.language ?? "uz").toString();
   const chatId = req.body?.chatId ?? null;
+  const hasFiles = Array.isArray(req.body?.attachments) && req.body.attachments.length > 0;
+  let question = (req.body?.question ?? req.body?.message ?? "").toString().trim();
+  // Faqat fayl yuborilgan bo'lsa — standart so'rov
+  if (!question && hasFiles) {
+    question = fallbackLang === "ru" ? "Проанализируй прикреплённый файл и кратко объясни его содержание." : "Biriktirilgan faylni tahlil qilib, mazmunini qisqacha tushuntirib ber.";
+  }
 
   if (!question) return res.status(400).json({ error: "Savol kerak" });
   if (question.length > 4000) return res.status(400).json({ error: "Savol juda uzun (maks. 4000 belgi)" });
@@ -162,8 +168,19 @@ router.post(["/ai/ask", "/ai/chat"], requireAuth, async (req, res) => {
     return res.json(flagProfanity(req.user, question, language, existing, badWords.map(maskWord), "filter"));
   }
 
+  // Biriktirilgan fayllar: hujjatlardan matn, rasmlar — vision modelga
+  let files = { texts: [], images: [], meta: [] };
+  if (hasFiles) {
+    try { files = await processAttachments(req.body.attachments); }
+    catch (e) { return res.status(400).json({ error: e.message }); }
+  }
+  const fileText = files.texts.length ? withFileTexts("", files.texts).trim() : "";
+  const userMeta = files.meta.length
+    ? { attachments: files.meta, ...(fileText ? { fileText: fileText.slice(0, 20000) } : {}) }
+    : null;
+
   try {
-    const result = await askAI(buildMessages(history, question, language));
+    const result = await askAI(buildMessages(history, withFileTexts(question, files.texts), language, 10, files.images));
     // 2-himoya: ro'yxatda yo'q so'kinishni AI o'zi aniqlasa — [[HAQORAT]] belgisini qaytaradi
     if (result?.answer && AI_FLAG.test(result.answer)) {
       if (req.user.role === "student") {
@@ -175,7 +192,7 @@ router.post(["/ai/ask", "/ai/chat"], requireAuth, async (req, res) => {
     const answer = result?.answer ?? localGeoAnswer(question, language);
 
     const chat = appendMessages(req.user.id, existing?.id ?? null, [
-      { role: "user", content: question },
+      { role: "user", content: question, ...(userMeta ? { meta: userMeta } : {}) },
       { role: "assistant", content: answer, meta: { provider: result?.provider ?? "offline", offline } },
     ]);
 
@@ -183,6 +200,7 @@ router.post(["/ai/ask", "/ai/chat"], requireAuth, async (req, res) => {
       userId: req.user.id, userName: req.user.name, role: req.user.role,
       question, answer, success: !offline,
       provider: result?.provider ?? "offline", chatId: chat.id,
+      ...(files.meta.length ? { attachments: files.meta } : {}),
     });
 
     res.json({
