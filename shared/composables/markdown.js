@@ -1,6 +1,16 @@
 // AI javoblari Markdown ko'rinishida keladi (**qalin**, ro'yxatlar, sarlavhalar).
 // Tashqi kutubxonasiz, xavfsiz (HTML escape qilingan) minimal render.
 
+import { resolveUrl } from "@shared/composables/api";
+
+// Faqat AI chatidagi rasmlar va https manzillar ko'rsatiladi
+const IMAGE_LINE = /^!\[([^\]]*)\]\(((?:\/api\/ai\/images\/[a-f0-9]+\.(?:jpg|png|webp|gif))|https:\/\/[^\s)"<>]+)\)$/;
+
+function imageHtml(alt, url) {
+  const src = escapeHtml(resolveUrl(url));
+  return `<a class="md-img-link" href="${src}" target="_blank" rel="noopener"><img class="md-img" src="${src}" alt="${escapeHtml(alt)}" loading="lazy" /></a>`;
+}
+
 function escapeHtml(s) {
   return String(s)
     .replaceAll("&", "&amp;")
@@ -34,6 +44,14 @@ export function renderMarkdown(text) {
     const line = lines[i].trimEnd();
 
     if (!line.trim()) { closeList(); continue; }
+
+    // Rasm: ![izoh](manzil) — alohida qatorda
+    const img = line.trim().match(IMAGE_LINE);
+    if (img) {
+      closeList();
+      out.push(`<p class="md-img-wrap">${imageHtml(img[1], img[2])}</p>`);
+      continue;
+    }
 
     // Jadval: | a | b |
     if (isTableRow(line) && isTableRow(lines[i + 1] ?? "")) {

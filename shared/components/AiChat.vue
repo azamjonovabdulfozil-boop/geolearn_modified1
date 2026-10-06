@@ -53,9 +53,16 @@
               <User v-else :size="14" />
             </div>
             <div class="message-col" :class="msg.role === 'user' ? 'col-user' : 'col-ai'">
-              <div class="message-bubble" :class="[msg.role === 'user' ? 'bubble-user' : 'bubble-ai', { 'bubble-warn': msg.meta?.warning }]">
-                <div v-if="msg.role === 'user' && msg.meta?.attachments?.length" class="msg-files">
-                  <span v-for="(f, k) in msg.meta.attachments" :key="k" class="msg-file">
+              <!-- Yuborilgan rasmlar — ChatGPT'dagidek katta ko'rinishda -->
+              <div v-if="msgImages(msg).length" class="msg-images">
+                <a v-for="(src, k) in msgImages(msg)" :key="k" :href="src" target="_blank" rel="noopener" class="msg-image-link">
+                  <img :src="src" class="msg-image" alt="" loading="lazy" />
+                </a>
+              </div>
+              <div v-if="msg.role !== 'user' || msg.content || msgDocs(msg).length"
+                class="message-bubble" :class="[msg.role === 'user' ? 'bubble-user' : 'bubble-ai', { 'bubble-warn': msg.meta?.warning }]">
+                <div v-if="msg.role === 'user' && msgDocs(msg).length" class="msg-files">
+                  <span v-for="(f, k) in msgDocs(msg)" :key="k" class="msg-file">
                     <component :is="fileIcon(f.kind)" :size="13" /> {{ f.name }}
                   </span>
                 </div>
@@ -182,7 +189,7 @@ import {
   MessageSquare, Loader2, AlertTriangle, ShieldAlert, Lock, Ban,
   Paperclip, FileText, FileSpreadsheet, FileImage, File as FileIcon } from "lucide-vue-next";
 import { useLive } from "@shared/composables/live";
-import { api } from "@shared/composables/api";
+import { api, resolveUrl } from "@shared/composables/api";
 import { renderMarkdown } from "@shared/composables/markdown";
 import { useSettingsStore } from "@shared/stores/settings";
 import { useAuthStore } from "@shared/stores/auth";
@@ -238,9 +245,45 @@ async function addFiles(list) {
     const kind = kindOf(file);
     if (!kind) { fileError.value = `${file.name}: ${settings.t('ai_file_type')}`; continue; }
     if (file.size > MAX_BYTES) { fileError.value = `${file.name}: ${settings.t('ai_file_too_big')}`; continue; }
-    const data = await readAsDataUrl(file);
-    pending.value.push({ name: file.name || "rasm.png", type: file.type, kind, data, preview: kind === "image" ? data : null });
+    let data, type = file.type;
+    try {
+      data = kind === "image" ? await shrinkImage(file) : await readAsDataUrl(file);
+      if (kind === "image") type = data.slice(5, data.indexOf(";"));
+    } catch {
+      fileError.value = `${file.name}: ${settings.t('ai_file_type')}`;
+      continue;
+    }
+    pending.value.push({ name: file.name || "rasm.png", type, kind, data, preview: kind === "image" ? data : null });
   }
+}
+
+/** Katta rasmni yuborishdan oldin kichraytiradi (tezroq yuklanadi, AI uchun yetarli). */
+async function shrinkImage(file, maxSide = 1600) {
+  const src = await readAsDataUrl(file);
+  if (file.type === "image/gif") return src;          // animatsiya buzilmasin
+  const img = await new Promise((resolve, reject) => {
+    const i = new Image();
+    i.onload = () => resolve(i);
+    i.onerror = reject;
+    i.src = src;
+  });
+  const scale = Math.min(1, maxSide / Math.max(img.width, img.height));
+  if (scale === 1 && file.size < 1.5 * 1024 * 1024) return src;
+  const canvas = document.createElement("canvas");
+  canvas.width = Math.round(img.width * scale);
+  canvas.height = Math.round(img.height * scale);
+  canvas.getContext("2d").drawImage(img, 0, 0, canvas.width, canvas.height);
+  return canvas.toDataURL("image/jpeg", 0.88);
+}
+
+// Xabardagi rasmlar (katta ko'rinish) va hujjatlar (nomi bilan) alohida
+function msgImages(msg) {
+  return (msg.meta?.attachments ?? [])
+    .filter(f => f.kind === "image" && (f.preview || f.url))
+    .map(f => f.preview || resolveUrl(f.url));
+}
+function msgDocs(msg) {
+  return (msg.meta?.attachments ?? []).filter(f => f.kind !== "image" || !(f.preview || f.url));
 }
 
 function onPick(e) { addFiles(e.target.files); e.target.value = ""; }
@@ -373,7 +416,7 @@ async function send(q) {
 
   messages.value.push({
     role: "user", content: question, createdAt: new Date().toISOString(),
-    ...(files.length ? { meta: { attachments: files.map(f => ({ name: f.name, kind: f.kind })) } } : {}),
+    ...(files.length ? { meta: { attachments: files.map(f => ({ name: f.name, kind: f.kind, preview: f.preview })) } } : {}),
   });
   if (!q) { input.value = ""; pending.value = []; fileError.value = ""; }
   sending.value = true;
@@ -528,6 +571,14 @@ async function send(q) {
 .pending-x:hover { background: hsl(var(--destructive)/.12); color: hsl(var(--destructive)); }
 .file-error { font-size: 12px; color: hsl(var(--destructive)); }
 .msg-files { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 6px; }
+.msg-files:last-child { margin-bottom: 0; }
+.msg-images { display: flex; flex-wrap: wrap; gap: 8px; justify-content: flex-end; }
+.msg-image-link { display: block; border-radius: 16px; overflow: hidden; border: 1px solid hsl(var(--border)); }
+.msg-image { display: block; max-width: min(360px, 100%); max-height: 360px; object-fit: cover; }
+/* AI yaratgan rasmlar */
+.md :deep(.md-img-wrap) { margin: 2px 0 10px; }
+.md :deep(.md-img-link) { display: inline-block; border-radius: 14px; overflow: hidden; border: 1px solid hsl(var(--border)); }
+.md :deep(.md-img) { display: block; width: 100%; max-width: 480px; height: auto; background: hsl(var(--fg)/0.05); min-height: 120px; }
 .msg-file {
   display: inline-flex; align-items: center; gap: 5px; max-width: 100%;
   padding: 3px 8px; border-radius: 8px; background: hsl(0 0% 100% / .18); font-size: 12px;

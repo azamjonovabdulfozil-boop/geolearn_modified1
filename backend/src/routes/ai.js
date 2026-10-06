@@ -5,6 +5,8 @@ import { findProfanity, maskWord } from "../lib/profanity.js";
 import { askAI, aiProviderStatus } from "../lib/ai.js";
 import { detectLanguage, buildMessages } from "../lib/aiPrompt.js";
 import { processAttachments, withFileTexts } from "../lib/aiFiles.js";
+import { join } from "path";
+import { AI_IMAGE_DIR, isImageName, imageMime, imageUrlToDataUrl, generateImage } from "../lib/aiImages.js";
 import {
   listChats, getChat, createChat, appendMessages,
   renameChat, deleteChat, deleteAllChats,
@@ -57,6 +59,41 @@ function localGeoAnswer(question, language) {
   return uz
     ? `Hozir AI xizmatiga ulanib bo'lmadi, shuning uchun to'liq javob bera olmayapman. Savolingizni ("${question}") biroz keyinroq qayta yuboring yoki uni aniqroq shaklda yozing.`
     : `Сейчас не удалось подключиться к AI-сервису, поэтому полный ответ дать не могу. Повторите вопрос («${question}») чуть позже или сформулируйте его точнее.`;
+}
+
+// ── Rasm yaratish: AI javobidagi [[RASM: ...]] belgilari ─────────────────
+const IMAGE_TAG = /\[\[\s*RASM\s*:\s*([^\]]+?)\s*\]\]/gi;
+// AI belgini qo'ymay qolsa ham — savolning o'zidan rasm so'ralganini bilamiz
+const IMAGE_REQUEST = /(rasm|surat|tasvir)\S*\s+(\S+\s+)?(chiz|yarat|ko'rsat|ko‘rsat|tashla|ber|yubor)|chizib\s+ber|нарису|картин\S*\s+(\S+\s+)?(созда|покаж|сгенер)|изображени\S*\s+(\S+\s+)?(созда|покаж|сгенер)|\b(draw|generate (an? )?image|picture of)\b/i;
+
+/** Javobdagi belgilarni yaratilgan rasmlar bilan almashtiradi. */
+async function renderImageTags(answer, question, language) {
+  const prompts = [...answer.matchAll(IMAGE_TAG)].map(m => m[1]).slice(0, 2);
+  const text = answer.replace(IMAGE_TAG, "").trim();
+  if (!prompts.length && IMAGE_REQUEST.test(question)) prompts.push(question);
+  if (!prompts.length) return { text, images: [] };
+
+  const urls = (await Promise.all(prompts.map(generateImage))).filter(Boolean);
+  if (!urls.length) {
+    const note = language === "ru"
+      ? "*Не удалось создать изображение — попробуйте ещё раз чуть позже.*"
+      : "*Rasm yaratib bo'lmadi — birozdan so'ng qayta urinib ko'ring.*";
+    return { text: [note, text].filter(Boolean).join("\n\n"), images: [] };
+  }
+  const md = urls.map(u => `![rasm](${u})`);
+  return { text: [...md, text].filter(Boolean).join("\n\n"), images: urls };
+}
+
+/** Suhbatdagi oxirgi rasm(lar) — "bu qaysi joy?" kabi keyingi savollar uchun. */
+function recentImages(history) {
+  for (const m of [...history].reverse().slice(0, 6)) {
+    if (m.role !== "user") continue;
+    const urls = (m.meta?.attachments ?? []).filter(a => a.kind === "image" && a.url).map(a => a.url);
+    if (urls.length) {
+      return urls.slice(0, 2).map(url => ({ url, dataUrl: imageUrlToDataUrl(url) })).filter(i => i.dataUrl);
+    }
+  }
+  return [];
 }
 
 // ── Log yozish ─────────────────────────────────────────────────────────────
@@ -180,7 +217,8 @@ router.post(["/ai/ask", "/ai/chat"], requireAuth, async (req, res) => {
     : null;
 
   try {
-    const result = await askAI(buildMessages(history, withFileTexts(question, files.texts), language, 10, files.images));
+    const images = files.images.length ? files.images : recentImages(history);
+    const result = await askAI(buildMessages(history, withFileTexts(question, files.texts), language, 10, images));
     // 2-himoya: ro'yxatda yo'q so'kinishni AI o'zi aniqlasa — [[HAQORAT]] belgisini qaytaradi
     if (result?.answer && AI_FLAG.test(result.answer)) {
       if (req.user.role === "student") {
@@ -189,7 +227,18 @@ router.post(["/ai/ask", "/ai/chat"], requireAuth, async (req, res) => {
       result.answer = language === "ru" ? "Пожалуйста, пишите корректно." : "Iltimos, odob bilan yozing.";
     }
     const offline = !result;
-    const answer = result?.answer ?? localGeoAnswer(question, language);
+    let answer;
+    if (result) {
+      answer = (await renderImageTags(result.answer, question, language)).text;
+    } else if (files.images.length) {
+      answer = language === "ru"
+        ? "Сейчас не удалось проанализировать изображение — сервисы AI недоступны. Попробуйте отправить его ещё раз чуть позже."
+        : "Hozir rasmni tahlil qilib bo'lmadi — AI xizmatlari javob bermadi. Birozdan so'ng rasmni qayta yuboring.";
+    } else {
+      // AI ishlamasa ham rasm so'rovini bajarishga harakat qilamiz
+      const drawn = IMAGE_REQUEST.test(question) ? await renderImageTags("", question, language) : null;
+      answer = drawn?.images.length ? drawn.text : localGeoAnswer(question, language);
+    }
 
     const chat = appendMessages(req.user.id, existing?.id ?? null, [
       { role: "user", content: question, ...(userMeta ? { meta: userMeta } : {}) },
@@ -219,6 +268,16 @@ router.post(["/ai/ask", "/ai/chat"], requireAuth, async (req, res) => {
     });
     res.status(500).json({ error: msg });
   }
+});
+
+// ── GET /api/ai/images/:name — chatdagi rasmlar ──────────────────────────
+// <img> teg token yubora olmaydi, shuning uchun ochiq; nomlar tasodifiy va taxmin qilib bo'lmaydi.
+router.get("/ai/images/:name", (req, res) => {
+  const name = req.params.name;
+  if (!isImageName(name)) return res.status(404).end();
+  res.type(imageMime(name));
+  res.set("Cache-Control", "public, max-age=31536000, immutable");
+  res.sendFile(join(AI_IMAGE_DIR, name), err => { if (err && !res.headersSent) res.status(404).end(); });
 });
 
 // ── Chat sessiyalari ──────────────────────────────────────────────────────

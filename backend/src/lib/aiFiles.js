@@ -3,6 +3,7 @@
 // qo'shiladi. Rasmlar esa ko'ra oladigan (vision) modelga yuboriladi.
 import { readPdf } from "./pdfRead.js";
 import { xlsxRows, docxRows } from "./rosterParse.js";
+import { saveImage } from "./aiImages.js";
 
 export const MAX_FILES = 5;
 export const MAX_FILE_BYTES = 10 * 1024 * 1024;
@@ -40,7 +41,7 @@ async function extractText(kind, buf, name) {
 
 /**
  * Mijozdan kelgan [{ name, type, data(base64) }] ro'yxatini qayta ishlaydi.
- * @returns {Promise<{ texts: {name, kind, text}[], images: {name, dataUrl}[], meta: {name, kind}[] }>}
+ * @returns {Promise<{ texts: {name, kind, text}[], images: {name, url, dataUrl}[], meta: {name, kind, url?}[] }>}
  */
 export async function processAttachments(list) {
   const files = Array.isArray(list) ? list : [];
@@ -55,12 +56,15 @@ export async function processAttachments(list) {
     if (buf.length > MAX_FILE_BYTES) throw new Error(`"${name}": fayl juda katta (maks. 10 MB)`);
 
     const kind = kindOf(name, type);
-    meta.push({ name, kind });
     if (kind === "image") {
       const mime = IMAGE_TYPES.includes(type) ? type : "image/png";
-      images.push({ name, dataUrl: `data:${mime};base64,${buf.toString("base64")}` });
+      // Chatda katta ko'rinishi va keyingi savollarda ishlatish uchun saqlaymiz
+      const url = saveImage(buf, mime);
+      meta.push({ name, kind, url });
+      images.push({ name, url, dataUrl: `data:${mime};base64,${buf.toString("base64")}` });
       continue;
     }
+    meta.push({ name, kind });
     let text;
     try { text = (await extractText(kind, buf, name)).trim(); }
     catch (e) { throw new Error(e.message.startsWith(`"${name}"`) ? e.message : `"${name}": faylni o'qib bo'lmadi`); }

@@ -37,6 +37,12 @@ const PROVIDERS = [
       "deepseek-ai/DeepSeek-V3-0324",
       "deepseek-ai/DeepSeek-V3.1",
     ],
+    // Rasmni ko'ra oladigan modellar (sinovda o'zbekcha to'g'ri javob berdi)
+    visionModels: [
+      "Qwen/Qwen3-VL-235B-A22B-Instruct",
+      "meta-llama/Llama-4-Scout-17B-16E-Instruct",
+      "google/gemma-3-27b-it",
+    ],
   },
   {
     // Tezkor zaxira. Llama modellari o'zbek tilida DeepSeek'chalik aniq emas,
@@ -52,7 +58,6 @@ const PROVIDERS = [
     url: "https://text.pollinations.ai/openai",
     envKey: null, // kalitsiz, oxirgi zaxira
     models: ["openai"],
-    visionModels: ["openai"],
   },
 ];
 
