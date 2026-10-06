@@ -82,6 +82,13 @@ const translations = {
     ai_earlier: "Oldinroq",
     ai_close: "Yopish",
     ai_download: "Yuklab olish",
+    ai_listen: "Eshitish",
+    ai_stop: "To'xtatish",
+    ai_voice: "Ovozli xabar yozish",
+    ai_recording: "Ovoz yozilmoqda…",
+    ai_rec_cancel: "Bekor qilish",
+    ai_rec_send: "Yuborish",
+    ai_mic_denied: "Mikrofonga ruxsat berilmadi — brauzer sozlamalarida ruxsat bering",
 
     // settings
     settings_title: "Sozlamalar", settings_sub: "Profil va ilova sozlamalari",
@@ -179,6 +186,13 @@ const translations = {
     ai_earlier: "Ранее",
     ai_close: "Закрыть",
     ai_download: "Скачать",
+    ai_listen: "Прослушать",
+    ai_stop: "Остановить",
+    ai_voice: "Записать голосовое сообщение",
+    ai_recording: "Идёт запись…",
+    ai_rec_cancel: "Отменить",
+    ai_rec_send: "Отправить",
+    ai_mic_denied: "Нет доступа к микрофону — разрешите его в настройках браузера",
 
     settings_title: "Настройки", settings_sub: "Профиль и настройки приложения",
     profile: "Профиль",

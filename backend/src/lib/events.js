@@ -9,7 +9,7 @@ const clients = new Set();
 const pending = new Set();
 let flushTimer = null;
 
-const FLUSH_MS = 150;       // bir nechta yozuvni bitta hodisaga jamlaymiz
+const FLUSH_MS = 400;       // bir nechta yozuvni bitta hodisaga jamlaymiz (ko'p foydalanuvchida kamroq to'lqin)
 const HEARTBEAT_MS = 25000; // proksi/hosting ulanishni uzib qo'ymasligi uchun
 
 function flush() {

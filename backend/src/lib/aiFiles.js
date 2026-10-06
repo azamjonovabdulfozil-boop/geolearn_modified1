@@ -9,10 +9,18 @@ export const MAX_FILES = 5;
 export const MAX_FILE_BYTES = 10 * 1024 * 1024;
 const MAX_TEXT_PER_FILE = 15000;
 const IMAGE_TYPES = ["image/png", "image/jpeg", "image/webp", "image/gif"];
+const AUDIO_TYPES = { "audio/webm": "audio/webm", "audio/ogg": "audio/ogg", "audio/mp4": "audio/mp4", "audio/x-m4a": "audio/mp4", "audio/aac": "audio/mp4", "audio/mpeg": "audio/mpeg", "audio/mp3": "audio/mpeg", "audio/wav": "audio/wav", "audio/x-wav": "audio/wav" };
+const AUDIO_BY_EXT = { webm: "audio/webm", ogg: "audio/ogg", oga: "audio/ogg", m4a: "audio/mp4", mp4: "audio/mp4", aac: "audio/mp4", mp3: "audio/mpeg", wav: "audio/wav" };
+
+function audioMime(name, type) {
+  const base = type.split(";")[0].trim();
+  return AUDIO_TYPES[base] ?? AUDIO_BY_EXT[name.toLowerCase().split(".").pop()] ?? null;
+}
 
 function kindOf(name, type) {
   const n = name.toLowerCase();
   if (IMAGE_TYPES.includes(type) || /\.(png|jpe?g|webp|gif)$/.test(n)) return "image";
+  if (audioMime(name, type)) return "audio";
   if (n.endsWith(".pdf") || type === "application/pdf") return "pdf";
   if (n.endsWith(".docx")) return "word";
   if (/\.(xlsx|xlsm)$/.test(n)) return "sheet";
@@ -41,13 +49,13 @@ async function extractText(kind, buf, name) {
 
 /**
  * Mijozdan kelgan [{ name, type, data(base64) }] ro'yxatini qayta ishlaydi.
- * @returns {Promise<{ texts: {name, kind, text}[], images: {name, url, dataUrl}[], meta: {name, kind, url?}[] }>}
+ * @returns {Promise<{ texts: {name, kind, text}[], images: {name, url, dataUrl}[], audios: {name, url, buf}[], meta: {name, kind, url?}[] }>}
  */
 export async function processAttachments(list) {
   const files = Array.isArray(list) ? list : [];
   if (files.length > MAX_FILES) throw new Error(`Bir martada ko'pi bilan ${MAX_FILES} ta fayl yuborish mumkin`);
 
-  const texts = [], images = [], meta = [];
+  const texts = [], images = [], audios = [], meta = [];
   for (const f of files) {
     const name = String(f?.name || "fayl").slice(0, 120);
     const type = String(f?.type || "").toLowerCase();
@@ -56,6 +64,13 @@ export async function processAttachments(list) {
     if (buf.length > MAX_FILE_BYTES) throw new Error(`"${name}": fayl juda katta (maks. 10 MB)`);
 
     const kind = kindOf(name, type);
+    if (kind === "audio") {
+      // Ovozli xabar: saqlanadi (chatda qayta tinglash uchun), matnga route'da aylantiriladi
+      const url = saveImage(buf, audioMime(name, type));
+      meta.push({ name, kind, url });
+      audios.push({ name, url, buf });
+      continue;
+    }
     if (kind === "image") {
       const mime = IMAGE_TYPES.includes(type) ? type : "image/png";
       // Chatda katta ko'rinishi va keyingi savollarda ishlatish uchun saqlaymiz
@@ -71,7 +86,7 @@ export async function processAttachments(list) {
     if (!text) throw new Error(`"${name}": fayl ichida matn topilmadi`);
     texts.push({ name, kind, text: text.length > MAX_TEXT_PER_FILE ? text.slice(0, MAX_TEXT_PER_FILE) + "\n…(qisqartirildi)" : text });
   }
-  return { texts, images, meta };
+  return { texts, images, audios, meta };
 }
 
 /** Fayl matnlarini model uchun savol matniga qo'shadi. */

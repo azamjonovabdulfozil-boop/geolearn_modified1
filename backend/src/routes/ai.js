@@ -6,8 +6,9 @@ import { askAI, aiProviderStatus } from "../lib/ai.js";
 import { detectLanguage, buildMessages } from "../lib/aiPrompt.js";
 import { processAttachments, withFileTexts } from "../lib/aiFiles.js";
 import { teacherSystemAddon } from "../lib/aiTeacherContext.js";
+import { synthesize, transcribe } from "../lib/aiVoice.js";
 import { join } from "path";
-import { AI_IMAGE_DIR, isImageName, imageMime, imageUrlToDataUrl, generateImage } from "../lib/aiImages.js";
+import { AI_IMAGE_DIR, isImageName, imageMime, imageUrlToDataUrl, generateImage, ensureImage } from "../lib/aiImages.js";
 import {
   listChats, getChat, createChat, appendMessages,
   renameChat, deleteChat, deleteAllChats,
@@ -178,20 +179,39 @@ router.post(["/ai/ask", "/ai/chat"], requireAuth, async (req, res) => {
   const chatId = req.body?.chatId ?? null;
   const hasFiles = Array.isArray(req.body?.attachments) && req.body.attachments.length > 0;
   let question = (req.body?.question ?? req.body?.message ?? "").toString().trim();
-  // Faqat fayl yuborilgan bo'lsa — standart so'rov
-  if (!question && hasFiles) {
-    question = fallbackLang === "ru" ? "Проанализируй прикреплённый файл и кратко объясни его содержание." : "Biriktirilgan faylni tahlil qilib, mazmunini qisqacha tushuntirib ber.";
-  }
-
-  if (!question) return res.status(400).json({ error: "Savol kerak" });
   if (question.length > 4000) return res.status(400).json({ error: "Savol juda uzun (maks. 4000 belgi)" });
-
-  const language = detectLanguage(question, fallbackLang);
 
   // Admin bloklagan bo'lsa — AI dan foydalanib bo'lmaydi
   if (req.user.aiBlocked) {
     return res.status(403).json({ error: "AI yordamchi siz uchun o'qituvchi tomonidan bloklangan", blocked: true });
   }
+
+  // Biriktirilgan fayllar: hujjatlardan matn, rasmlar — vision modelga, ovoz — matnga
+  let files = { texts: [], images: [], audios: [], meta: [] };
+  if (hasFiles) {
+    try { files = await processAttachments(req.body.attachments); }
+    catch (e) { return res.status(400).json({ error: e.message }); }
+  }
+
+  // Ovozli xabar → matn; u savolning o'zi bo'ladi (yozilgan matn bo'lsa — qo'shiladi)
+  let transcript = "";
+  if (files.audios.length) {
+    try {
+      const lang = fallbackLang === "ru" ? "ru" : "uz";
+      transcript = (await Promise.all(files.audios.map(a => transcribe(a.buf, lang)))).join(" ").trim();
+    } catch (e) {
+      return res.status(400).json({ error: e.message });
+    }
+    question = [question, transcript].filter(Boolean).join("\n").slice(0, 4000);
+  }
+
+  // Faqat fayl yuborilgan bo'lsa — standart so'rov
+  if (!question && hasFiles) {
+    question = fallbackLang === "ru" ? "Проанализируй прикреплённый файл и кратко объясни его содержание." : "Biriktirilgan faylni tahlil qilib, mazmunini qisqacha tushuntirib ber.";
+  }
+  if (!question) return res.status(400).json({ error: "Savol kerak" });
+
+  const language = detectLanguage(question, fallbackLang);
 
   // Suhbat tarixini kontekst sifatida yuklaymiz
   const existing = chatId ? getChat(req.user.id, chatId) : null;
@@ -206,15 +226,9 @@ router.post(["/ai/ask", "/ai/chat"], requireAuth, async (req, res) => {
     return res.json(flagProfanity(req.user, question, language, existing, badWords.map(maskWord), "filter"));
   }
 
-  // Biriktirilgan fayllar: hujjatlardan matn, rasmlar — vision modelga
-  let files = { texts: [], images: [], meta: [] };
-  if (hasFiles) {
-    try { files = await processAttachments(req.body.attachments); }
-    catch (e) { return res.status(400).json({ error: e.message }); }
-  }
   const fileText = files.texts.length ? withFileTexts("", files.texts).trim() : "";
   const userMeta = files.meta.length
-    ? { attachments: files.meta, ...(fileText ? { fileText: fileText.slice(0, 20000) } : {}) }
+    ? { attachments: files.meta, ...(fileText ? { fileText: fileText.slice(0, 20000) } : {}), ...(transcript ? { transcript } : {}) }
     : null;
 
   try {
@@ -265,6 +279,7 @@ router.post(["/ai/ask", "/ai/chat"], requireAuth, async (req, res) => {
       provider: result?.provider ?? "offline",
       chatId: chat.id,
       chatTitle: chat.title,
+      ...(transcript ? { transcript, question } : {}),
     });
   } catch (e) {
     const msg = e?.message || "AI xatosi";
@@ -276,11 +291,26 @@ router.post(["/ai/ask", "/ai/chat"], requireAuth, async (req, res) => {
   }
 });
 
+// ── POST /api/ai/tts { text, language } — javobni ovozda o'qib berish (mp3) ──
+router.post("/ai/tts", requireAuth, async (req, res) => {
+  const text = String(req.body?.text ?? "");
+  if (!text.trim()) return res.status(400).json({ error: "Matn kerak" });
+  try {
+    const audio = await synthesize(text, req.body?.language);
+    res.set("Content-Type", "audio/mpeg");
+    res.set("Cache-Control", "private, max-age=86400");
+    res.send(audio);
+  } catch (e) {
+    console.log("⚠️  TTS:", e.message);
+    res.status(502).json({ error: "Ovozga aylantirib bo'lmadi" });
+  }
+});
+
 // ── GET /api/ai/images/:name — chatdagi rasmlar ──────────────────────────
 // <img> teg token yubora olmaydi, shuning uchun ochiq; nomlar tasodifiy va taxmin qilib bo'lmaydi.
-router.get("/ai/images/:name", (req, res) => {
+router.get("/ai/images/:name", async (req, res) => {
   const name = req.params.name;
-  if (!isImageName(name)) return res.status(404).end();
+  if (!isImageName(name) || !(await ensureImage(name))) return res.status(404).end();
   res.type(imageMime(name));
   res.set("Cache-Control", "public, max-age=31536000, immutable");
   res.sendFile(join(AI_IMAGE_DIR, name), err => { if (err && !res.headersSent) res.status(404).end(); });

@@ -54,7 +54,7 @@
       </div>
 
       <div v-else class="rating-list">
-        <div v-for="entry in ratings" :key="entry.userId"
+        <div v-for="entry in paged.visible.value" :key="entry.userId"
           class="rating-row"
           :class="{ 'rating-row--me': entry.userId === auth.user?.id }">
           <div class="rank-col">
@@ -74,6 +74,8 @@
             <span class="s-val">{{ entry.totalScore }}</span>
           </div>
         </div>
+        <ShowMore :remaining="paged.remaining.value" :shown="paged.visible.value.length"
+          :step="paged.pageSize" @more="paged.more" />
       </div>
     </div>
   </div>
@@ -86,10 +88,13 @@ import { api } from "@shared/composables/api";
 import { useLive } from "@shared/composables/live";
 import { useAuthStore } from "@shared/stores/auth";
 import { useGradesStore } from "@shared/stores/grades";
+import { usePaged } from "@shared/composables/paged";
+import ShowMore from "@shared/components/ShowMore.vue";
 
 const auth = useAuthStore();
 const grades = useGradesStore();
 const ratings = ref([]);
+const paged = usePaged(ratings, 30);
 const myRank = ref(null);
 const loading = ref(true);
 const activeGrade = ref(0);   // 0 = umumiy
@@ -104,6 +109,7 @@ async function loadRatings(silent = false) {
 function selectGrade(g) {
   if (activeGrade.value === g) return;
   activeGrade.value = g;
+  paged.reset();
   loadRatings();
 }
 
@@ -207,4 +213,8 @@ useLive(["users", "activity"], () => Promise.all([loadMe(), loadRatings(true)]))
 
 .p-4 { padding: 16px; }
 .mb-2 { margin-bottom: 8px; }
+
+@media (max-width: 640px) {
+  .u-name { white-space: normal; flex-wrap: wrap; overflow-wrap: anywhere; line-height: 1.3; }
+}
 </style>

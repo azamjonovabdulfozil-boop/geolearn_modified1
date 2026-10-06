@@ -11,9 +11,18 @@ const router = Router();
 
 // POST /api/auth/register
 router.post("/auth/register", (req, res) => {
-  const { name, username, password, className } = req.body;
+  const { name, className } = req.body;
+  // Bo'sh joylar kesiladi — keyin login'da xuddi shunday tekshiriladi
+  const username = String(req.body.username ?? "").trim();
+  const password = String(req.body.password ?? "").trim();
   if (!name || !username || !password || !className) {
     return res.status(400).json({ error: "Barcha maydonlarni to'ldiring" });
+  }
+  if (/\s/.test(username)) {
+    return res.status(400).json({ error: "Username'da bo'sh joy bo'lmasin" });
+  }
+  if (password.length < 4) {
+    return res.status(400).json({ error: "Parol kamida 4 ta belgidan iborat bo'lsin" });
   }
   // O'quvchi sinfini o'zi yozadi: "7-A", "7-B" ...
   const cls = parseClassName(className);
@@ -48,12 +57,15 @@ router.post("/auth/register", (req, res) => {
 
 // POST /api/auth/login
 router.post("/auth/login", (req, res) => {
-  const { username, password } = req.body;
+  const username = String(req.body.username ?? "").trim();
+  const password = String(req.body.password ?? "");
   if (!username || !password) {
     return res.status(400).json({ error: "Login yoki parol kiritilmagan" });
   }
   const user = getUserByUsername(username);
-  if (!user || user.passwordHash !== hashPassword(password)) {
+  // Parol aynan yoki chetdagi bo'sh joylarsiz mos kelsa (avval shunday saqlangan bo'lishi mumkin)
+  const ok = user && [password, password.trim()].some(p => user.passwordHash === hashPassword(p));
+  if (!ok) {
     return res.status(401).json({ error: "Login yoki parol noto'g'ri" });
   }
   const token = generateToken(user.id);

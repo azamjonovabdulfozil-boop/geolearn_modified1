@@ -397,7 +397,7 @@ async function deleteVideo(v) {
 .viewers-empty { text-align: center; padding: 22px 8px; font-size: 13.5px; color: hsl(var(--muted-fg)); }
 
 .notwatched { margin-top: 16px; padding-top: 14px; border-top: 1px dashed hsl(var(--border)); }
-.nw-chips { display: flex; flex-wrap: wrap; gap: 6px; }
+.nw-chips { display: flex; flex-wrap: wrap; gap: 6px; max-height: 160px; overflow-y: auto; }
 .nw-chip { font-size: 11.5px; padding: 4px 10px; border-radius: 99px; background: hsl(var(--warning)/.1); color: hsl(var(--warning)); font-weight: 600; }
 
 /* Bo'sh */

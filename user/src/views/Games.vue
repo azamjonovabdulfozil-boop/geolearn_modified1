@@ -358,7 +358,7 @@ onUnmounted(() => {
 .waiting-title { font-size:15px;font-weight:600; }
 .players-box { width:100%;background:hsl(var(--muted));border-radius:14px;padding:14px 16px;text-align:left; }
 .players-label { font-size:12.5px;font-weight:700;margin-bottom:10px;color:hsl(var(--muted-fg)); }
-.players-chips { display:flex;flex-wrap:wrap;gap:6px; }
+.players-chips { display:flex;flex-wrap:wrap;gap:6px;max-height:200px;overflow-y:auto; }
 .player-chip { display:flex;align-items:center;gap:6px;font-size:12.5px;padding:4px 10px;border-radius:99px;background:hsl(var(--card)); }
 .pc-av { width:20px;height:20px;border-radius:50%;background:hsl(var(--primary));color:white;font-size:10px;font-weight:700;display:flex;align-items:center;justify-content:center; }
 

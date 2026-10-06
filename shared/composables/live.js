@@ -6,6 +6,7 @@ import { ref, onMounted, onUnmounted, getCurrentInstance } from "vue";
 import { resolveUrl } from "./api";
 
 const listeners = new Set();
+const JITTER_MS = 900;
 export const liveConnected = ref(false);
 
 let source = null;
@@ -60,7 +61,9 @@ export function useLive(collections, fn, { delay = 350 } = {}) {
   }
   function trigger() {
     clearTimeout(timer);
-    timer = setTimeout(run, delay);
+    // Tasodifiy qo'shimcha kechikish: 100+ foydalanuvchi bir vaqtda serverga
+    // yopirilib kelmasligi uchun so'rovlar ~1 soniyaga taqsimlanadi
+    timer = setTimeout(run, delay + Math.random() * JITTER_MS);
   }
 
   const listener = { collections: [...collections, "settings"], trigger };

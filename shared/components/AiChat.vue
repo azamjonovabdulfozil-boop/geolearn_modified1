@@ -59,8 +59,13 @@
                   <img :src="src" class="msg-image" alt="" loading="lazy" />
                 </a>
               </div>
-              <div v-if="msg.role !== 'user' || msg.content || msgDocs(msg).length"
+              <div v-if="msg.role !== 'user' || msg.content || msgDocs(msg).length || msgAudio(msg)"
                 class="message-bubble" :class="[msg.role === 'user' ? 'bubble-user' : 'bubble-ai', { 'bubble-warn': msg.meta?.warning }]">
+                <!-- Ovozli xabar: qayta tinglash + matni -->
+                <div v-if="msgAudio(msg)" class="voice-msg">
+                  <Mic :size="14" />
+                  <audio :src="msgAudio(msg)" controls preload="none" class="voice-audio"></audio>
+                </div>
                 <div v-if="msg.role === 'user' && msgDocs(msg).length" class="msg-files">
                   <span v-for="(f, k) in msgDocs(msg)" :key="k" class="msg-file">
                     <component :is="fileIcon(f.kind)" :size="13" /> {{ f.name }}
@@ -69,6 +74,16 @@
                 <span v-if="msg.role === 'user'" class="plain">{{ msg.content }}</span>
                 <div v-else class="md" v-html="renderMarkdown(msg.content)"></div>
               </div>
+              <!-- AI javobini ovozda eshitish -->
+              <button v-if="msg.role === 'assistant' && !msg.meta?.warning && msg.content"
+                class="speak-btn" :class="{ 'is-on': speakingKey === msgKey(msg, i) }"
+                :disabled="speakLoadingKey === msgKey(msg, i)"
+                @click="toggleSpeak(msg, i)">
+                <Loader2 v-if="speakLoadingKey === msgKey(msg, i)" :size="13" class="spin" />
+                <Square v-else-if="speakingKey === msgKey(msg, i)" :size="12" />
+                <Volume2 v-else :size="14" />
+                <span>{{ speakingKey === msgKey(msg, i) ? settings.t('ai_stop') : settings.t('ai_listen') }}</span>
+              </button>
               <p v-if="msg.meta?.warning" class="warn-note">
                 <ShieldAlert :size="11" /> {{ settings.t('ai_warning_note') }}
               </p>
@@ -113,7 +128,21 @@
           </span>
           <span v-if="fileError" class="file-error">{{ fileError }}</span>
         </div>
-        <div class="chat-input-row">
+        <!-- Ovoz yozilmoqda -->
+        <div v-if="recording" class="chat-input-row rec-row">
+          <button class="attach-btn rec-cancel" :title="settings.t('ai_rec_cancel')" @click="stopRecording(false)">
+            <Trash2 :size="17" />
+          </button>
+          <div class="rec-status">
+            <span class="rec-dot"></span>
+            <span>{{ settings.t('ai_recording') }}</span>
+            <b class="rec-time">{{ recTimeLabel }}</b>
+          </div>
+          <button class="geo-btn-primary send-btn" :title="settings.t('ai_rec_send')" @click="stopRecording(true)">
+            <Send :size="16" />
+          </button>
+        </div>
+        <div v-else class="chat-input-row">
           <input ref="fileEl" type="file" multiple hidden :accept="ACCEPT" @change="onPick" />
           <button class="attach-btn" :title="settings.t('ai_attach')" :disabled="sending" @click="fileEl?.click()">
             <Paperclip :size="17" />
@@ -121,7 +150,12 @@
           <input v-model="input" @keydown.enter.prevent="send()" @paste="onPaste"
             :disabled="sending" class="geo-input chat-input"
             :placeholder="settings.t('ai_placeholder')" />
-          <button @click="send()" :disabled="(!input.trim() && !pending.length) || sending" class="geo-btn-primary send-btn">
+          <!-- Matn yo'q bo'lsa — mikrofon (ovozli xabar), bor bo'lsa — yuborish -->
+          <button v-if="canRecord && !input.trim() && !pending.length" class="geo-btn-primary send-btn"
+            :title="settings.t('ai_voice')" :disabled="sending" @click="startRecording">
+            <Mic :size="17" />
+          </button>
+          <button v-else @click="send()" :disabled="(!input.trim() && !pending.length) || sending" class="geo-btn-primary send-btn">
             <Send :size="16" />
           </button>
         </div>
@@ -204,7 +238,7 @@ import { ref, computed, onMounted, onBeforeUnmount, nextTick } from "vue";
 import {
   Bot, User, Send, Info, History, Plus, X, Trash2,
   MessageSquare, Loader2, AlertTriangle, ShieldAlert, Lock, Ban,
-  Paperclip, FileText, FileSpreadsheet, FileImage, Download, File as FileIcon } from "lucide-vue-next";
+  Paperclip, FileText, FileSpreadsheet, FileImage, Download, Mic, Volume2, Square, File as FileIcon } from "lucide-vue-next";
 import { useLive } from "@shared/composables/live";
 import { api, resolveUrl } from "@shared/composables/api";
 import { renderMarkdown } from "@shared/composables/markdown";
@@ -300,8 +334,127 @@ function msgImages(msg) {
     .map(f => f.preview || resolveUrl(f.url));
 }
 function msgDocs(msg) {
-  return (msg.meta?.attachments ?? []).filter(f => f.kind !== "image" || !(f.preview || f.url));
+  return (msg.meta?.attachments ?? []).filter(f => f.kind !== "audio" && (f.kind !== "image" || !(f.preview || f.url)));
 }
+function msgAudio(msg) {
+  const a = (msg.meta?.attachments ?? []).find(f => f.kind === "audio" && (f.preview || f.url));
+  return a ? (a.preview || resolveUrl(a.url)) : null;
+}
+
+// ── AI javobini ovozda eshitish ───────────────────────────────────────────
+// Server Microsoft neural ovozi bilan mp3 qaytaradi (o'zbekcha ham chiroyli);
+// ishlamasa — brauzerning o'z ovozi.
+const speakingKey = ref(null);
+const speakLoadingKey = ref(null);
+let player = null;
+
+// Kalit vaqtga emas, matnga bog'liq: javobdan keyin chat serverdan qayta
+// yuklanganda createdAt o'zgaradi, lekin tugma holati yo'qolmasligi kerak
+function msgKey(msg, i) { return `${i}-${msg.content?.length ?? 0}`; }
+
+function stopSpeaking() {
+  if (player) { player.pause(); URL.revokeObjectURL(player.src); player = null; }
+  if (typeof speechSynthesis !== "undefined") speechSynthesis.cancel();
+  speakingKey.value = null;
+}
+
+async function toggleSpeak(msg, i) {
+  const key = msgKey(msg, i);
+  if (speakingKey.value === key) { stopSpeaking(); return; }
+  stopSpeaking();
+  speakLoadingKey.value = key;
+  try {
+    const token = localStorage.getItem("geo_token");
+    const r = await fetch(resolveUrl("/api/ai/tts"), {
+      method: "POST",
+      headers: { "Content-Type": "application/json", ...(token ? { Authorization: `Bearer ${token}` } : {}) },
+      body: JSON.stringify({ text: msg.content, language: settings.language }),
+    });
+    if (!r.ok) throw new Error(`TTS ${r.status}`);
+    const audio = new Audio(URL.createObjectURL(await r.blob()));
+    player = audio;
+    audio.onended = () => { if (player === audio) stopSpeaking(); };
+    speakLoadingKey.value = null;
+    speakingKey.value = key;
+    await audio.play();
+  } catch {
+    speakLoadingKey.value = null;
+    speakWithBrowser(msg.content, key);
+  }
+}
+
+function speakWithBrowser(text, key) {
+  if (typeof speechSynthesis === "undefined") return;
+  const plain = text.replace(/!\[[^\]]*\]\([^)]*\)/g, "").replace(/[*_#`>|]/g, " ");
+  const u = new SpeechSynthesisUtterance(plain);
+  u.lang = settings.language === "ru" ? "ru-RU" : "uz-UZ";
+  const voice = speechSynthesis.getVoices().find(v => v.lang?.toLowerCase().startsWith(u.lang.slice(0, 2)));
+  if (voice) u.voice = voice;
+  u.onend = () => { if (speakingKey.value === key) speakingKey.value = null; };
+  speakingKey.value = key;
+  speechSynthesis.speak(u);
+}
+
+// ── Ovozli xabar yozish ───────────────────────────────────────────────────
+const MAX_REC_SEC = 120;
+const canRecord = typeof navigator !== "undefined" && !!navigator.mediaDevices?.getUserMedia && typeof MediaRecorder !== "undefined";
+const recording = ref(false);
+const recSeconds = ref(0);
+const recTimeLabel = computed(() => `${Math.floor(recSeconds.value / 60)}:${String(recSeconds.value % 60).padStart(2, "0")}`);
+let recorder = null, recStream = null, recChunks = [], recTimer = null, recSend = false;
+
+function pickAudioType() {
+  for (const t of ["audio/webm;codecs=opus", "audio/webm", "audio/ogg;codecs=opus", "audio/mp4"]) {
+    if (MediaRecorder.isTypeSupported?.(t)) return t;
+  }
+  return "";
+}
+
+async function startRecording() {
+  if (recording.value || sending.value) return;
+  fileError.value = "";
+  stopSpeaking();
+  try {
+    recStream = await navigator.mediaDevices.getUserMedia({ audio: true });
+  } catch {
+    fileError.value = settings.t('ai_mic_denied');
+    return;
+  }
+  const type = pickAudioType();
+  recorder = new MediaRecorder(recStream, type ? { mimeType: type } : undefined);
+  recChunks = [];
+  recSend = false;
+  recorder.ondataavailable = e => { if (e.data?.size) recChunks.push(e.data); };
+  recorder.onstop = onRecordingStop;
+  recorder.start();
+  recording.value = true;
+  recSeconds.value = 0;
+  recTimer = setInterval(() => {
+    recSeconds.value++;
+    if (recSeconds.value >= MAX_REC_SEC) stopRecording(true);
+  }, 1000);
+}
+
+function stopRecording(sendIt) {
+  if (!recorder) return;
+  recSend = sendIt;
+  clearInterval(recTimer);
+  recording.value = false;
+  if (recorder.state !== "inactive") recorder.stop();
+  recStream?.getTracks().forEach(t => t.stop());
+}
+
+async function onRecordingStop() {
+  const type = (recorder?.mimeType || "audio/webm").split(";")[0];
+  const blob = new Blob(recChunks, { type });
+  recorder = null; recStream = null; recChunks = [];
+  if (!recSend || blob.size < 1500) return;          // bekor qilindi yoki juda qisqa
+  const ext = { "audio/webm": "webm", "audio/ogg": "ogg", "audio/mp4": "m4a" }[type] ?? "webm";
+  const data = await readAsDataUrl(blob);
+  send(null, [{ name: `ovozli-xabar.${ext}`, type, kind: "audio", data, preview: data }]);
+}
+
+onBeforeUnmount(() => { stopSpeaking(); if (recorder) stopRecording(false); });
 
 function onPick(e) { addFiles(e.target.files); e.target.value = ""; }
 function onDrop(e) { dragOver.value = false; addFiles(e.dataTransfer?.files); }
@@ -447,16 +600,21 @@ async function clearAll() {
   startNewChat();
 }
 
-async function send(q) {
-  const question = q ?? input.value.trim();
-  const files = q ? [] : pending.value;
+/**
+ * @param q      tayyor savol (taklif tugmalari) — bo'lmasa kiritish maydonidan
+ * @param voice  ovozli xabar fayllari (mikrofondan)
+ */
+async function send(q, voice = null) {
+  const question = voice ? "" : (q ?? input.value.trim());
+  const files = voice ?? (q ? [] : pending.value);
   if ((!question && !files.length) || sending.value) return;
 
   messages.value.push({
     role: "user", content: question, createdAt: new Date().toISOString(),
     ...(files.length ? { meta: { attachments: files.map(f => ({ name: f.name, kind: f.kind, preview: f.preview })) } } : {}),
   });
-  if (!q) { input.value = ""; pending.value = []; fileError.value = ""; }
+  const userMsg = messages.value.at(-1);
+  if (!q && !voice) { input.value = ""; pending.value = []; fileError.value = ""; }
   sending.value = true;
   scrollToBottom();
 
@@ -468,6 +626,8 @@ async function send(q) {
         attachments: files.map(f => ({ name: f.name, type: f.type, data: f.data })),
       }),
     });
+    // Ovozli xabar matnga aylantirilgan bo'lsa — xabar ostida ko'rsatamiz
+    if (res.question && res.transcript) userMsg.content = res.question;
     messages.value.push({
       role: "assistant",
       content: res.answer,
@@ -615,6 +775,31 @@ async function send(q) {
 .msg-image { display: block; max-width: min(360px, 100%); max-height: 360px; object-fit: cover; }
 .msg-image-link, .md :deep(.md-img-link) { cursor: zoom-in; transition: transform .15s, box-shadow .15s; }
 .msg-image-link:hover, .md :deep(.md-img-link:hover) { transform: scale(1.01); box-shadow: 0 6px 20px hsl(0 0% 0% / .15); }
+
+/* ── Ovoz ── */
+.speak-btn {
+  display: inline-flex; align-items: center; gap: 6px; align-self: flex-start;
+  margin-top: 2px; padding: 5px 11px; border-radius: 99px;
+  border: 1px solid hsl(var(--border)); background: hsl(var(--card));
+  color: hsl(var(--muted-fg)); font-size: 12px; font-weight: 600; font-family: inherit;
+  cursor: pointer; transition: all .15s;
+}
+.speak-btn:hover:not(:disabled) { border-color: hsl(var(--primary)); color: hsl(var(--primary)); }
+.speak-btn.is-on { border-color: hsl(var(--primary)); background: hsl(var(--primary)/0.1); color: hsl(var(--primary)); }
+.speak-btn:disabled { cursor: wait; }
+.voice-msg { display: flex; align-items: center; gap: 8px; margin-bottom: 6px; }
+.voice-msg:last-child { margin-bottom: 0; }
+.voice-audio { height: 36px; max-width: 240px; min-width: 0; }
+.rec-row { align-items: center; }
+.rec-cancel:hover:not(:disabled) { border-color: hsl(var(--destructive)); color: hsl(var(--destructive)); }
+.rec-status {
+  flex: 1; display: flex; align-items: center; gap: 10px; min-width: 0;
+  height: 44px; padding: 0 14px; border-radius: 12px;
+  background: hsl(var(--destructive)/.07); color: hsl(var(--destructive)); font-size: 13.5px; font-weight: 600;
+}
+.rec-dot { width: 10px; height: 10px; border-radius: 50%; background: hsl(var(--destructive)); animation: recPulse 1s ease-in-out infinite; flex-shrink: 0; }
+.rec-time { margin-left: auto; font-variant-numeric: tabular-nums; }
+@keyframes recPulse { 0%, 100% { opacity: 1; transform: scale(1); } 50% { opacity: .35; transform: scale(.8); } }
 
 /* ── Lightbox ── */
 .lightbox {

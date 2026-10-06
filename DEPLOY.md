@@ -78,6 +78,7 @@ Keyin **Dashboard → geolearn-backend → Environment** bo'limiga kiring.
 
 | O'zgaruvchi | Qiymat | Majburiymi | Izoh |
 |---|---|---|---|
+| `DATABASE_URL` | `postgresql://...neon.tech/neondb?sslmode=require` | ✅ ha | **Bo'lmasa o'quvchilar o'chib ketadi va kira olmaydi.** Pastdagi "Ma'lumotlar bazasi" bo'limiga qarang |
 | `JWT_SECRET` | *(Render o'zi yaratadi)* | ✅ ha | `render.yaml` da `generateValue: true` — qo'lda kiritish shart emas |
 | `SITE` | `api` | ✅ ha | `render.yaml` da yozilgan, tegmang |
 | `FRONTEND_URL` | `https://geolearn-admin.vercel.app,https://geolearn.vercel.app` | ✅ ha | **3-qadamdan keyin** to'ldiriladi. Vergul bilan, oxirida `/` **bo'lmasin** |
@@ -101,13 +102,25 @@ curl https://geolearn-backend.onrender.com/api/site
 
 ### ⚠️ Bepul rejadagi ikki cheklov
 
-**1. Ma'lumotlar yo'qoladi.** Backend hamma narsani `backend/data/*.json`
-fayllarida saqlaydi. Render'ning bepul rejasida disk yo'q va fayl tizimi
-vaqtinchalik — **har bir deploy yoki qayta ishga tushishda o'quvchilar,
-test natijalari va darslar o'chib ketadi.**
+**1. Disk vaqtinchalik — `DATABASE_URL` shart.** Render'ning bepul rejasida
+fayl tizimi har deploy va har uxlab-uyg'onishda tozalanadi. `DATABASE_URL`
+bo'lmasa, ro'yxatdan o'tgan o'quvchilar o'chib ketadi va keyin **kira
+olmaydi** ("Login yoki parol noto'g'ri").
 
-Saqlanishi kerak bo'lsa: pullik rejaga (`starter`) o'ting va `render.yaml`
-oxiridagi 4 qatorni izohdan chiqaring:
+#### Ma'lumotlar bazasi (bepul, 5 daqiqa)
+
+1. https://neon.tech → Sign up (GitHub bilan) → **Create project**
+   (region: Europe / Frankfurt).
+2. **Connection string** ni nusxalang (`postgresql://...?sslmode=require`).
+3. Render → geolearn-backend → **Environment** → `DATABASE_URL` = shu qator → Save.
+4. Render loglarida `💾 Ma'lumotlar: Postgres (... ta to'plam yuklandi)` chiqsa — tayyor.
+
+Shundan keyin o'quvchilar, natijalar, AI suhbatlari va chatdagi rasmlar
+bazada saqlanadi; server qayta ishga tushganda hammasi bazadan tiklanadi.
+Bazaga ulanib bo'lmasa server ataylab to'xtaydi (eski bo'sh fayllar bilan
+bazadagi to'g'ri ma'lumotni ustidan yozib yubormaslik uchun).
+
+Muqobil (pullik): `starter` rejaga o'tib `render.yaml` oxiridagi diskni yoqish:
 ```yaml
 disk:
   name: geolearn-data

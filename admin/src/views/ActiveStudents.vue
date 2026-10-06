@@ -51,7 +51,7 @@
           </tr>
         </thead>
         <tbody>
-          <tr v-for="s in rows" :key="s.id">
+          <tr v-for="s in paged.visible.value" :key="s.id">
             <td>
               <div class="who">
                 <span class="av" :class="{ 'av--on': s.online }">
@@ -81,12 +81,16 @@
           </tr>
         </tbody>
       </table>
+      <ShowMore :remaining="paged.remaining.value" :shown="paged.visible.value.length"
+        :step="paged.pageSize" @more="paged.more" />
     </div>
   </div>
 </template>
 
 <script setup>
-import { ref, computed, onMounted, onUnmounted } from "vue";
+import { ref, computed, watch, onMounted, onUnmounted } from "vue";
+import { usePaged } from "@shared/composables/paged";
+import ShowMore from "@shared/components/ShowMore.vue";
 import { Users, Wifi, CalendarCheck, CalendarDays, UserX, Search } from "lucide-vue-next";
 import { api } from "@shared/composables/api";
 import { useLive } from "@shared/composables/live";
@@ -127,6 +131,10 @@ const rows = computed(() => {
   if (q) list = list.filter(s => s.name.toLowerCase().includes(q) || s.username?.toLowerCase().includes(q));
   return list;
 });
+
+// 100+ o'quvchida jadval juda uzun bo'lmasligi uchun 40 tadan
+const paged = usePaged(rows, 40);
+watch([filter, classFilter, search], () => paged.reset());
 
 const updatedLabel = computed(() => {
   if (!updatedAt.value) return "yuklanmoqda";

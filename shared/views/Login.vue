@@ -40,6 +40,7 @@
               <User :size="16" class="input-icon" />
               <input v-model="form.username" class="geo-input input-with-icon"
                 placeholder="foydalanuvchi_nomi" autocomplete="username"
+                autocapitalize="none" autocorrect="off" spellcheck="false"
                 @keydown.enter="handleLogin" />
             </div>
           </div>

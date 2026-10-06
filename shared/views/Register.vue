@@ -22,7 +22,8 @@
             <div class="input-wrap">
               <AtSign :size="15" class="iico" />
               <input v-model="form.username" class="geo-input pipad"
-                placeholder="ali123" autocomplete="username" />
+                placeholder="ali123" autocomplete="username"
+                autocapitalize="none" autocorrect="off" spellcheck="false" />
             </div>
           </div>
 
@@ -32,7 +33,8 @@
               <Lock :size="15" class="iico" />
               <input v-model="form.password" :type="showPw ? 'text' : 'password'"
                 class="geo-input pipad pipad-r"
-                placeholder="••••••••" autocomplete="new-password" />
+                placeholder="••••••••" autocomplete="new-password"
+                autocapitalize="none" autocorrect="off" spellcheck="false" />
               <button type="button" @click="showPw = !showPw" class="eye-btn">
                 <Eye v-if="!showPw" :size="15" /><EyeOff v-else :size="15" />
               </button>
@@ -99,7 +101,7 @@ async function handleRegister() {
   try {
     const user = await auth.register({
       name: form.value.name,
-      username: form.value.username,
+      username: form.value.username.trim(),
       password: form.value.password,
       role: "student",
       className: normalizedClass.value,

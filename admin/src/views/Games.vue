@@ -352,7 +352,10 @@ function statusStyle(s) {
   return 'background:hsl(var(--muted));color:hsl(var(--muted-fg))';
 }
 
-function playersOf(game) { return players.value[game.gameCode]?.players ?? []; }
+// O'yindagilar oldin, chiqib ketganlar keyin — 60+ o'quvchida ham tartibli
+function playersOf(game) {
+  return [...(players.value[game.gameCode]?.players ?? [])].sort((a, b) => Number(b.online) - Number(a.online));
+}
 function onlineOf(game)  { return players.value[game.gameCode]?.online ?? 0; }
 function leftOf(game)    { return playersOf(game).filter(p => !p.online); }
 
@@ -531,7 +534,7 @@ useLive(["games"], load, { delay: 150 });
 .players-empty { display:flex;align-items:center;gap:6px;font-size:11.5px;color:hsl(var(--muted-fg)); }
 .players-label { font-size:11.5px;color:hsl(var(--muted-fg));flex-shrink:0; }
 .players-label strong { font-size:13px;color:hsl(var(--fg)); }
-.players-list { display:flex;flex-wrap:wrap;gap:5px; }
+.players-list { display:flex;flex-wrap:wrap;gap:5px;max-height:220px;overflow-y:auto;padding-right:4px; }
 .player-chip { display:flex;align-items:center;gap:6px;font-size:12px;padding:3px 10px 3px 3px;border-radius:99px;background:hsl(var(--muted));transition:opacity .2s; }
 .player-chip-av { width:20px;height:20px;border-radius:50%;background:linear-gradient(135deg, hsl(var(--primary)), hsl(172 70% 38%));color:white;font-size:10px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0; }
 .player-chip-name { display:flex;align-items:baseline;gap:5px;font-weight:600; }

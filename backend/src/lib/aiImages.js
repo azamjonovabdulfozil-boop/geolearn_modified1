@@ -7,12 +7,14 @@ import { dirname, join } from "path";
 import { fileURLToPath } from "url";
 import { existsSync, mkdirSync, writeFileSync, readFileSync } from "fs";
 import { randomBytes } from "crypto";
+import { saveFile, loadFile } from "./storage.js";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 export const AI_IMAGE_DIR = join(__dirname, "../../uploads/ai");
 const URL_PREFIX = "/api/ai/images/";
-const MIME = { jpg: "image/jpeg", png: "image/png", webp: "image/webp", gif: "image/gif" };
-const EXT = { "image/jpeg": "jpg", "image/png": "png", "image/webp": "webp", "image/gif": "gif" };
+// Rasmlar va ovozli xabarlar
+const MIME = { jpg: "image/jpeg", png: "image/png", webp: "image/webp", gif: "image/gif", webm: "audio/webm", ogg: "audio/ogg", m4a: "audio/mp4", mp3: "audio/mpeg", wav: "audio/wav" };
+const EXT = { "image/jpeg": "jpg", "image/png": "png", "image/webp": "webp", "image/gif": "gif", "audio/webm": "webm", "audio/ogg": "ogg", "audio/mp4": "m4a", "audio/mpeg": "mp3", "audio/wav": "wav" };
 
 /** Nom faqat tasodifiy hex + kengaytma bo'lishi mumkin (yo'l bilan o'ynab bo'lmaydi). */
 export function isImageName(name) {
@@ -28,7 +30,14 @@ export function saveImage(buf, mime = "image/jpeg") {
   if (!existsSync(AI_IMAGE_DIR)) mkdirSync(AI_IMAGE_DIR, { recursive: true });
   const name = `${randomBytes(12).toString("hex")}.${EXT[mime] ?? "jpg"}`;
   writeFileSync(join(AI_IMAGE_DIR, name), buf);
+  saveFile(name, mime, buf);            // Postgres bo'lsa — server qayta ishga tushsa ham yo'qolmaydi
   return URL_PREFIX + name;
+}
+
+/** Rasm diskda bo'lmasa (server qayta ishga tushgan) — bazadan tiklaydi. */
+export async function ensureImage(name) {
+  if (!existsSync(AI_IMAGE_DIR)) mkdirSync(AI_IMAGE_DIR, { recursive: true });
+  return loadFile(name, join(AI_IMAGE_DIR, name));
 }
 
 /** Saqlangan rasm manzilidan modelga yuboriladigan data URL (fayl o'chgan bo'lsa — null). */

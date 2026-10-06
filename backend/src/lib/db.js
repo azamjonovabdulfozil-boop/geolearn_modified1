@@ -1,26 +1,43 @@
-import { readFileSync, writeFileSync, existsSync, mkdirSync } from "fs";
+import { readFileSync, existsSync, mkdirSync } from "fs";
 import { randomBytes } from "crypto";
 import { join, dirname } from "path";
 import { fileURLToPath } from "url";
 import { currentScope, contentInSection, parseSection } from "./scope.js";
 import { GRADES } from "./constants.js";
 import { notifyChange } from "./events.js";
+import { initStorage, persist, atomicWrite } from "./storage.js";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const DATA_DIR = join(__dirname, "../../data");
 
 if (!existsSync(DATA_DIR)) mkdirSync(DATA_DIR, { recursive: true });
 
+// Postgres (DATABASE_URL) bo'lsa — ma'lumotlar avval bazadan tiklanadi
+await initStorage(DATA_DIR);
+
 function filePath(name) { return join(DATA_DIR, `${name}.json`); }
 
+// Xotiradagi nusxa: har so'rovda diskdan o'qimaslik uchun (100+ foydalanuvchida
+// har bir so'rov users.json ni qayta o'qirdi). Matn saqlanadi va har o'qishda
+// yangi obyekt qaytariladi — chaqiruvchi uni o'zgartirsa ham kesh buzilmaydi.
+const cache = new Map();
+
 export function read(name) {
-  const p = filePath(name);
-  if (!existsSync(p)) return [];
-  try { return JSON.parse(readFileSync(p, "utf8")); } catch { return []; }
+  let text = cache.get(name);
+  if (text === undefined) {
+    const p = filePath(name);
+    if (!existsSync(p)) return [];
+    try { text = readFileSync(p, "utf8"); } catch { return []; }
+    cache.set(name, text);
+  }
+  try { return JSON.parse(text); } catch { return []; }
 }
 
 export function write(name, data, { silent = false } = {}) {
-  writeFileSync(filePath(name), JSON.stringify(data, null, 2), "utf8");
+  const text = JSON.stringify(data, null, 2);
+  atomicWrite(filePath(name), text);
+  cache.set(name, text);
+  persist(name, text);
   // Real vaqt: ochiq sahifalarga "shu ma'lumot o'zgardi" deb xabar beramiz
   if (!silent) notifyChange(name);
 }
@@ -97,7 +114,20 @@ export function getUsers() {
   return list.filter(u => u.role !== "student" || userSection(u, classes) === section);
 }
 export function getUserById(id)    { return read("users").find(u => u.id === id) ?? null; }
-export function getUserByUsername(username) { return read("users").find(u => u.username === username) ?? null; }
+/**
+ * Username bo'yicha qidiradi. Telefon klaviaturasi bosh harfni katta qilib
+ * yoki oxiriga bo'sh joy qo'shib yuborishi mumkin — shuning uchun katta-kichik
+ * harf va chetdagi bo'sh joylar hisobga olinmaydi (aniq mos kelgani ustun).
+ */
+export function getUserByUsername(username) {
+  const raw = String(username ?? "").trim();
+  if (!raw) return null;
+  const users = read("users");
+  const exact = users.find(u => u.username === raw);
+  if (exact) return exact;
+  const key = raw.toLowerCase();
+  return users.find(u => String(u.username ?? "").trim().toLowerCase() === key) ?? null;
+}
 
 export function createUser(data) {
   const list = read("users");

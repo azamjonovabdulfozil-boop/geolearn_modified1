@@ -34,6 +34,13 @@ services:
       - key: FRONTEND_URL
         sync: false
 
+      # ── MA'LUMOTLAR BAZASI (MAJBURIY — aks holda o'quvchilar o'chib ketadi) ──
+      # Bepul Postgres: https://neon.tech (yoki supabase.com) da loyiha yarating,
+      # "Connection string" ni shu yerga qo'ying. Masalan:
+      # postgresql://user:parol@ep-xxx.eu-central-1.aws.neon.tech/neondb?sslmode=require
+      - key: DATABASE_URL
+        sync: false
+
       # ── AI yordamchisi (ixtiyoriy — bo'sh qolsa AI o'chiq bo'ladi) ──
       - key: OPENAI_API_KEY
         sync: false
@@ -47,13 +54,13 @@ services:
         sync: false
 
     # ── DIQQAT: ma'lumotlar saqlanishi ──────────────────────────────────
-    # Backend ma'lumotlarni backend/data/*.json fayllarida saqlaydi.
     # Render'ning BEPUL rejasida disk yo'q va fayl tizimi vaqtinchalik:
-    # har bir deploy yoki qayta ishga tushishda o'quvchilar, darslar va
-    # natijalar YO'QOLADI.
+    # server uxlab-uyg'onganda yoki har deploy'da backend/data/*.json
+    # o'chib ketadi. Shuning uchun DATABASE_URL (bepul Neon Postgres)
+    # berilsa — barcha ma'lumotlar o'sha bazada saqlanadi va server har
+    # ishga tushganda bazadan tiklanadi (backend/src/lib/storage.js).
     #
-    # Ma'lumot saqlanishi kerak bo'lsa — pullik rejaga o'ting (starter)
-    # va quyidagi 4 qatorni izohdan chiqaring:
+    # Muqobil (pullik): starter rejaga o'tib quyidagi diskni yoqish:
     #
     # disk:
     #   name: geolearn-data

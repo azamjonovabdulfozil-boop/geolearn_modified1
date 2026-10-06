@@ -61,13 +61,19 @@ export function inRange(list, from, to, field = "createdAt") {
  * sinf ichida qayta hisoblanadi.
  */
 export function buildRatings(grade = null) {
-  const activity = getActivity();
   let users = getUsers().filter(u => u.role === "student");
   if (grade) users = users.filter(u => Number(u.grade) === Number(grade));
 
+  // Faoliyatni bir marta guruhlaymiz (har o'quvchi uchun butun ro'yxatni aylanmaslik uchun)
+  const byUser = new Map();
+  for (const a of getActivity()) {
+    if (!byUser.has(a.userId)) byUser.set(a.userId, []);
+    byUser.get(a.userId).push(a);
+  }
+
   return users
     .map(u => {
-      const acts = activity.filter(a => a.userId === u.id);
+      const acts = byUser.get(u.id) ?? [];
       return {
         userId: u.id,
         name: u.name,

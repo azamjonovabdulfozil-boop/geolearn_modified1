@@ -28,6 +28,10 @@
         <h2>{{ activeGrade === 0 ? 'Umumiy reyting jadvali' : `${activeGrade}-sinf reytingi` }}</h2>
         <span class="geo-badge geo-badge-muted ml-auto">{{ ratings.length }} o'quvchi</span>
       </div>
+      <div v-if="ratings.length > 10" class="ratings-search">
+        <Search :size="15" class="ratings-search-icon" />
+        <input v-model="search" class="geo-input ratings-search-input" placeholder="Ism yoki sinf bo'yicha qidirish..." />
+      </div>
 
       <div v-if="loading" class="p-4">
         <div v-for="i in 6" :key="i" class="geo-skeleton mb-2" style="height:56px"></div>
@@ -39,8 +43,13 @@
         <p class="empty-sub">O'quvchilar ro'yxatdan o'tgach bu yerda ko'rinadi</p>
       </div>
 
+      <div v-else-if="!filtered.length" class="empty-state">
+        <Search :size="36" style="opacity:.3" />
+        <p class="empty-title">"{{ search }}" bo'yicha hech kim topilmadi</p>
+      </div>
+
       <div v-else class="ratings-list">
-        <div v-for="entry in ratings" :key="entry.userId"
+        <div v-for="entry in paged.visible.value" :key="entry.userId"
           class="rating-row" @mouseenter="hoverId = entry.userId" @mouseleave="hoverId = null">
           <!-- Rank -->
           <div class="rank-col">
@@ -73,21 +82,34 @@
           </button>
           <div v-else class="del-placeholder"></div>
         </div>
+        <ShowMore :remaining="paged.remaining.value" :shown="paged.visible.value.length"
+          :step="paged.pageSize" @more="paged.more" />
       </div>
     </div>
   </div>
 </template>
 
 <script setup>
-import { ref, onMounted } from "vue";
-import { Trophy, Star, Trash2, Users, Loader2 } from "lucide-vue-next";
+import { ref, computed, watch, onMounted } from "vue";
+import { Trophy, Star, Trash2, Users, Loader2, Search } from "lucide-vue-next";
 import { api } from "@shared/composables/api";
 import { useLive } from "@shared/composables/live";
+import { usePaged } from "@shared/composables/paged";
 import { useGradesStore } from "@shared/stores/grades";
+import ShowMore from "@shared/components/ShowMore.vue";
 
 const grades = useGradesStore();
 
 const ratings = ref([]);
+const search = ref("");
+const filtered = computed(() => {
+  const q = search.value.trim().toLowerCase();
+  if (!q) return ratings.value;
+  return ratings.value.filter(r =>
+    r.name.toLowerCase().includes(q) || String(r.className || "").toLowerCase().includes(q));
+});
+const paged = usePaged(filtered, 30);
+watch(search, () => paged.reset());
 const loading = ref(true);
 const hoverId = ref(null);
 const deletingId = ref(null);
@@ -112,6 +134,7 @@ async function loadStats() {
 function selectGrade(g) {
   if (activeGrade.value === g) return;
   activeGrade.value = g;
+  paged.reset();
   load();
 }
 
@@ -164,6 +187,10 @@ async function deleteStudent(entry) {
   display: flex; align-items: center; justify-content: center;
 }
 .ratings-head h2 { font-size: 14.5px; font-weight: 700; }
+.ratings-search { position: relative; padding: 12px 16px 4px; }
+.ratings-search-icon { position: absolute; left: 30px; top: calc(50% + 4px); transform: translateY(-50%); color: hsl(var(--muted-fg)); pointer-events: none; }
+.ratings-search-input { padding-left: 40px; }
+
 
 .ratings-list { }
 .rating-row {
@@ -220,4 +247,11 @@ async function deleteStudent(entry) {
 
 .p-4 { padding: 16px; }
 .mb-2 { margin-bottom: 8px; }
+
+/* Telefonda: uzun ismlar ikki qatorga tushadi (kesilib qolmaydi) */
+@media (max-width: 640px) {
+  .user-name { white-space: normal; overflow-wrap: anywhere; line-height: 1.3; }
+  .score-unit, .del-placeholder { display: none; }
+  .rank-col { width: 30px; }
+}
 </style>

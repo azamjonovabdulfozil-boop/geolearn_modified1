@@ -596,7 +596,7 @@ useLive(["users", "activity", "video_views", "videos", "lessons", "topics", "gam
 .rank-score { display: inline-flex; align-items: center; gap: 3px; font-size: 12px; font-weight: 800; color: hsl(var(--warning)); flex-shrink: 0; }
 
 /* E'tibor */
-.risk-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 3px; }
+.risk-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 3px; max-height: 400px; overflow-y: auto; }
 .risk-row { display: flex; align-items: center; gap: 9px; padding: 8px; border-radius: 11px; background: hsl(var(--destructive) / .05); }
 .risk-avatar { width: 30px; height: 30px; border-radius: 50%; background: hsl(var(--destructive) / .15); color: hsl(var(--destructive)); font-size: 12px; font-weight: 700; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
 .risk-info { flex: 1; min-width: 0; }
@@ -627,7 +627,7 @@ useLive(["users", "activity", "video_views", "videos", "lessons", "topics", "gam
 .act-pct { font-size: 11px; font-weight: 800; padding: 3px 8px; border-radius: 99px; flex-shrink: 0; }
 
 /* Onlayn */
-.online-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 2px; }
+.online-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 2px; max-height: 360px; overflow-y: auto; }
 .online-row { display: flex; align-items: center; gap: 8px; padding: 7px 8px; border-radius: 11px; }
 .online-pulse { width: 7px; height: 7px; border-radius: 50%; background: hsl(var(--success)); box-shadow: 0 0 0 0 hsl(var(--success) / .5); animation: pulse 2s infinite; flex-shrink: 0; }
 @keyframes pulse { 70% { box-shadow: 0 0 0 7px transparent } 100% { box-shadow: 0 0 0 0 transparent } }

@@ -71,7 +71,7 @@
               </tr>
             </thead>
             <tbody>
-              <tr v-for="r in results" :key="r.id">
+              <tr v-for="r in paged.visible.value" :key="r.id">
                 <td>
                   <div class="student-cell">
                     <span class="student-av">{{ r.studentName.charAt(0).toUpperCase() }}</span>
@@ -91,6 +91,8 @@
             </tbody>
           </table>
         </div>
+        <ShowMore :remaining="paged.remaining.value" :shown="paged.visible.value.length"
+          :step="paged.pageSize" @more="paged.more" />
         <div class="table-foot">{{ results.length }} ta natija</div>
       </template>
     </div>
@@ -103,10 +105,14 @@ import { ClipboardList, Search, RefreshCw, Users, Percent, CheckCircle2 } from "
 import { api } from "@shared/composables/api";
 import { useLive } from "@shared/composables/live";
 import { useGradesStore } from "@shared/stores/grades";
+import { usePaged } from "@shared/composables/paged";
+import ShowMore from "@shared/components/ShowMore.vue";
 
 const grades = useGradesStore();
 
 const results = ref([]);
+// 100+ o'quvchida yuzlab natija — 50 tadan ko'rsatamiz
+const paged = usePaged(results, 50);
 const summary = ref({ totalResults: 0, students: 0, avgPercentage: 0, passed: 0 });
 const loading = ref(true);
 const activeGrade = ref(0);   // 0 = barcha sinflar
@@ -139,13 +145,14 @@ async function load(silent = false) {
 function selectGrade(g) {
   if (activeGrade.value === g) return;
   activeGrade.value = g;
+  paged.reset();
   load();
 }
 
 // Yozish tugagach qidiramiz — har bosishda so'rov yubormaymiz
 watch(search, () => {
   clearTimeout(searchTimer);
-  searchTimer = setTimeout(load, 350);
+  searchTimer = setTimeout(() => { paged.reset(); load(); }, 350);
 });
 
 function pctClass(p) {
