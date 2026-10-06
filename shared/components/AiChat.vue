@@ -29,7 +29,7 @@
       </div>
 
       <!-- ── Xabarlar ── -->
-      <div ref="chatEl" class="chat-messages">
+      <div ref="chatEl" class="chat-messages" @click="onMessagesClick">
         <div v-if="loadingChat" class="chat-loading">
           <Loader2 :size="22" class="spin" />
         </div>
@@ -55,7 +55,7 @@
             <div class="message-col" :class="msg.role === 'user' ? 'col-user' : 'col-ai'">
               <!-- Yuborilgan rasmlar — ChatGPT'dagidek katta ko'rinishda -->
               <div v-if="msgImages(msg).length" class="msg-images">
-                <a v-for="(src, k) in msgImages(msg)" :key="k" :href="src" target="_blank" rel="noopener" class="msg-image-link">
+                <a v-for="(src, k) in msgImages(msg)" :key="k" :href="src" class="msg-image-link" @click.prevent="lightbox = src">
                   <img :src="src" class="msg-image" alt="" loading="lazy" />
                 </a>
               </div>
@@ -179,15 +179,32 @@
         </aside>
       </transition>
     </div>
+
+    <!-- ── Rasmni sayt ichida katta ko'rish ── -->
+    <Teleport to="body">
+      <transition name="lb">
+        <div v-if="lightbox" class="lightbox" @click.self="lightbox = null">
+          <div class="lightbox-bar">
+            <a :href="lightbox" download target="_blank" rel="noopener" class="lightbox-btn" :title="settings.t('ai_download')">
+              <Download :size="18" />
+            </a>
+            <button class="lightbox-btn" :title="settings.t('ai_close')" @click="lightbox = null">
+              <X :size="20" />
+            </button>
+          </div>
+          <img :src="lightbox" class="lightbox-img" alt="" @click.stop />
+        </div>
+      </transition>
+    </Teleport>
   </div>
 </template>
 
 <script setup>
-import { ref, computed, onMounted, nextTick } from "vue";
+import { ref, computed, onMounted, onBeforeUnmount, nextTick } from "vue";
 import {
   Bot, User, Send, Info, History, Plus, X, Trash2,
   MessageSquare, Loader2, AlertTriangle, ShieldAlert, Lock, Ban,
-  Paperclip, FileText, FileSpreadsheet, FileImage, File as FileIcon } from "lucide-vue-next";
+  Paperclip, FileText, FileSpreadsheet, FileImage, Download, File as FileIcon } from "lucide-vue-next";
 import { useLive } from "@shared/composables/live";
 import { api, resolveUrl } from "@shared/composables/api";
 import { renderMarkdown } from "@shared/composables/markdown";
@@ -295,9 +312,30 @@ function onPaste(e) {
 
 const STORAGE_KEY = computed(() => `geo_ai_chat_${auth.user?.id ?? "anon"}`);
 
-const suggestions = computed(() => settings.language === "ru"
-  ? ["Природные ресурсы Узбекистана", "О мировом океане", "Высочайшая гора Азии", "Что такое пустыня?", "О реке Нил"]
-  : ["O'zbekistonning tabiiy boyliklari", "Dunyo okeani haqida", "Osiyoning eng baland tog'i", "Sahro nima?", "Nil daryosi haqida"]);
+const suggestions = computed(() => {
+  // Admin: AI platforma ma'lumotlarini (reyting, natijalar) ko'radi
+  if (auth.isTeacher) {
+    return settings.language === "ru"
+      ? ["Какие ученики учатся лучше всех?", "Кто на каком месте в рейтинге?", "Кто отстаёт и кому нужна помощь?", "Какие темы самые сложные?"]
+      : ["Qaysi o'quvchilar yaxshi o'qiyapti?", "Reytingda kim nechanchi o'rinda?", "Kim orqada qolyapti, kimga yordam kerak?", "Qaysi mavzular eng qiyin bo'lyapti?"];
+  }
+  return settings.language === "ru"
+    ? ["Природные ресурсы Узбекистана", "О мировом океане", "Высочайшая гора Азии", "Что такое пустыня?", "О реке Нил"]
+    : ["O'zbekistonning tabiiy boyliklari", "Dunyo okeani haqida", "Osiyoning eng baland tog'i", "Sahro nima?", "Nil daryosi haqida"];
+});
+
+// ── Rasmni katta ko'rish (lightbox) ───────────────────────────────────────
+const lightbox = ref(null);
+// AI javobidagi rasmlar v-html orqali chiqadi — bosishni shu yerda ushlaymiz
+function onMessagesClick(e) {
+  const link = e.target.closest?.("a.md-img-link");
+  if (!link) return;
+  e.preventDefault();
+  lightbox.value = link.getAttribute("href");
+}
+function onKey(e) { if (e.key === "Escape") lightbox.value = null; }
+onMounted(() => window.addEventListener("keydown", onKey));
+onBeforeUnmount(() => window.removeEventListener("keydown", onKey));
 
 const activeLocked = computed(() => Boolean(chats.value.find(x => x.id === activeChatId.value)?.locked));
 
@@ -575,6 +613,36 @@ async function send(q) {
 .msg-images { display: flex; flex-wrap: wrap; gap: 8px; justify-content: flex-end; }
 .msg-image-link { display: block; border-radius: 16px; overflow: hidden; border: 1px solid hsl(var(--border)); }
 .msg-image { display: block; max-width: min(360px, 100%); max-height: 360px; object-fit: cover; }
+.msg-image-link, .md :deep(.md-img-link) { cursor: zoom-in; transition: transform .15s, box-shadow .15s; }
+.msg-image-link:hover, .md :deep(.md-img-link:hover) { transform: scale(1.01); box-shadow: 0 6px 20px hsl(0 0% 0% / .15); }
+
+/* ── Lightbox ── */
+.lightbox {
+  position: fixed; inset: 0; z-index: 1000;
+  display: flex; align-items: center; justify-content: center;
+  padding: 64px 16px 24px;
+  background: hsl(0 0% 0% / .86);
+  backdrop-filter: blur(6px);
+  cursor: zoom-out;
+}
+.lightbox-img {
+  max-width: min(1200px, 100%); max-height: 100%;
+  object-fit: contain; border-radius: 14px;
+  box-shadow: 0 20px 60px hsl(0 0% 0% / .5);
+  cursor: default;
+}
+.lightbox-bar { position: absolute; top: 14px; right: 16px; display: flex; gap: 8px; }
+.lightbox-btn {
+  width: 40px; height: 40px; border-radius: 12px; border: none;
+  display: inline-flex; align-items: center; justify-content: center;
+  background: hsl(0 0% 100% / .14); color: white; cursor: pointer; transition: background .15s;
+}
+.lightbox-btn:hover { background: hsl(0 0% 100% / .26); }
+.lb-enter-active, .lb-leave-active { transition: opacity .18s ease; }
+.lb-enter-active .lightbox-img, .lb-leave-active .lightbox-img { transition: transform .18s ease; }
+.lb-enter-from, .lb-leave-to { opacity: 0; }
+.lb-enter-from .lightbox-img, .lb-leave-to .lightbox-img { transform: scale(.96); }
+
 /* AI yaratgan rasmlar */
 .md :deep(.md-img-wrap) { margin: 2px 0 10px; }
 .md :deep(.md-img-link) { display: inline-block; border-radius: 14px; overflow: hidden; border: 1px solid hsl(var(--border)); }

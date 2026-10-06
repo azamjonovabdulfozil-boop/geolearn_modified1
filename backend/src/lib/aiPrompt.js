@@ -84,17 +84,16 @@ export function systemPrompt(language) {
 /**
  * Chat tarixi + yangi savoldan model uchun messages massivini yasaydi.
  * @param images  [{ dataUrl }] — rasmlar (vision modelga yuboriladi)
+ * @param systemExtra  system promptga qo'shimcha (masalan, admin uchun platforma ma'lumotlari)
  */
-export function buildMessages(history, question, language, maxHistory = 10, images = []) {
+export function buildMessages(history, question, language, maxHistory = 10, images = [], systemExtra = "") {
   const recent = (history || [])
     .filter(m => m && (m.role === "user" || m.role === "assistant") && m.content)
     .slice(-maxHistory)
     .map(m => ({
       role: m.role,
       // Avval biriktirilgan fayl matni — keyingi savollarda ham kontekstda qolsin
-      content: (m.meta?.fileText ? `${String(m.meta.fileText).slice(0, 8000)}
-
-` : "") + String(m.content).slice(0, 4000),
+      content: (m.meta?.fileText ? `${String(m.meta.fileText).slice(0, 8000)}\n\n` : "") + String(m.content).slice(0, 4000),
     }));
 
   const content = images.length
@@ -102,7 +101,7 @@ export function buildMessages(history, question, language, maxHistory = 10, imag
     : question;
 
   return [
-    { role: "system", content: systemPrompt(language) },
+    { role: "system", content: systemPrompt(language) + systemExtra },
     ...recent,
     { role: "user", content },
   ];

@@ -5,6 +5,7 @@ import { findProfanity, maskWord } from "../lib/profanity.js";
 import { askAI, aiProviderStatus } from "../lib/ai.js";
 import { detectLanguage, buildMessages } from "../lib/aiPrompt.js";
 import { processAttachments, withFileTexts } from "../lib/aiFiles.js";
+import { teacherSystemAddon } from "../lib/aiTeacherContext.js";
 import { join } from "path";
 import { AI_IMAGE_DIR, isImageName, imageMime, imageUrlToDataUrl, generateImage } from "../lib/aiImages.js";
 import {
@@ -218,7 +219,12 @@ router.post(["/ai/ask", "/ai/chat"], requireAuth, async (req, res) => {
 
   try {
     const images = files.images.length ? files.images : recentImages(history);
-    const result = await askAI(buildMessages(history, withFileTexts(question, files.texts), language, 10, images));
+    // Faqat admin (o'qituvchi): AI platforma ma'lumotlarini (reyting, natijalar) ko'radi
+    let extra = "";
+    if (req.user.role === "teacher") {
+      try { extra = teacherSystemAddon(language); } catch (e) { console.log("Admin konteksti xatosi:", e.message); }
+    }
+    const result = await askAI(buildMessages(history, withFileTexts(question, files.texts), language, 10, images, extra));
     // 2-himoya: ro'yxatda yo'q so'kinishni AI o'zi aniqlasa — [[HAQORAT]] belgisini qaytaradi
     if (result?.answer && AI_FLAG.test(result.answer)) {
       if (req.user.role === "student") {

@@ -81,6 +81,7 @@ const translations = {
     ai_yesterday: "Kecha",
     ai_earlier: "Oldinroq",
     ai_close: "Yopish",
+    ai_download: "Yuklab olish",
 
     // settings
     settings_title: "Sozlamalar", settings_sub: "Profil va ilova sozlamalari",
@@ -177,6 +178,7 @@ const translations = {
     ai_yesterday: "Вчера",
     ai_earlier: "Ранее",
     ai_close: "Закрыть",
+    ai_download: "Скачать",
 
     settings_title: "Настройки", settings_sub: "Профиль и настройки приложения",
     profile: "Профиль",
