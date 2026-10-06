@@ -27,10 +27,23 @@ export function atomicWrite(path, text) {
   renameSync(tmp, path);
 }
 
+/**
+ * SSL sozlamasi pastda aniq beriladi — Neon qatoridagi sslmode/channel_binding
+ * parametrlari olib tashlanadi (aks holda pg har ishga tushishda ogohlantiradi).
+ */
+function cleanUrl(raw) {
+  try {
+    const u = new globalThis.URL(raw);
+    u.searchParams.delete("sslmode");
+    u.searchParams.delete("channel_binding");
+    return u.toString();
+  } catch { return raw; }
+}
+
 async function connect() {
   const { default: pg } = await import("pg");
   pool = new pg.Pool({
-    connectionString: URL,
+    connectionString: cleanUrl(URL),
     ssl: /localhost|127\.0\.0\.1/.test(URL) ? false : { rejectUnauthorized: false },
     max: 5,
     idleTimeoutMillis: 30000,
