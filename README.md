@@ -246,13 +246,14 @@ Kalitlar `backend/.env` da:
 | Env | Provayder | Izoh |
 |-----|-----------|------|
 | `OPENAI_API_KEY` | OpenAI | pullik |
+| `GEMINI_API_KEY` | Google Gemini | bepul tarif katta, o'zbekchada yaxshi |
 | `OPENROUTER_API_KEY` | OpenRouter | bepul modellar bor |
 | `HF_TOKEN` | HuggingFace router | bepul tarif bor |
 | `GROQ_API_KEY` | Groq | tezkor, bepul tarif bor |
 | — | Pollinations | kalitsiz zaxira |
 
 Bitta modelga 25 soniya, butun zanjirga 60 soniya vaqt ajratilgan. Kvota tugagan
-provayder avtomatik chetlab o'tiladi. Hech biri ishlamasa — oflayn zaxira javob
+provayder 10 daqiqaga chetlab o'tiladi, keyin yana sinaladi. Hech biri ishlamasa — oflayn zaxira javob
 qaytadi va chatda belgilanadi.
 
 Suhbatlar `backend/data/ai_chats.json` da saqlanadi, shuning uchun sahifa

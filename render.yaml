@@ -44,6 +44,8 @@ services:
       # ── AI yordamchisi (ixtiyoriy — bo'sh qolsa AI o'chiq bo'ladi) ──
       - key: OPENAI_API_KEY
         sync: false
+      - key: GEMINI_API_KEY
+        sync: false
       - key: OPENROUTER_API_KEY
         sync: false
       - key: GROQ_API_KEY

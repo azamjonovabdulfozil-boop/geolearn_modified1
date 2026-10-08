@@ -83,6 +83,7 @@ Keyin **Dashboard → geolearn-backend → Environment** bo'limiga kiring.
 | `SITE` | `api` | ✅ ha | `render.yaml` da yozilgan, tegmang |
 | `FRONTEND_URL` | `https://geolearn-admin.vercel.app,https://geolearn.vercel.app` | ✅ ha | **3-qadamdan keyin** to'ldiriladi. Vergul bilan, oxirida `/` **bo'lmasin** |
 | `OPENAI_API_KEY` | `sk-...` | ⬜ ixtiyoriy | AI yordamchisi uchun |
+| `GEMINI_API_KEY` | `AIza...` | ⬜ ixtiyoriy | **Bepul** AI — https://aistudio.google.com/apikey |
 | `OPENROUTER_API_KEY` | | ⬜ ixtiyoriy | OpenAI o'rniga ishlatsa bo'ladi |
 | `GROQ_API_KEY` | | ⬜ ixtiyoriy | |
 | `HF_TOKEN` | | ⬜ ixtiyoriy | rasm generatsiyasi |

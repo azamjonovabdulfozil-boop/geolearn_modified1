@@ -18,6 +18,15 @@ const PROVIDERS = [
     visionModels: ["gpt-4o-mini"],
   },
   {
+    // Google Gemini — bepul tarifi katta, o'zbek tilida yaxshi javob beradi.
+    // Kalit: https://aistudio.google.com/apikey
+    name: "Gemini",
+    url: "https://generativelanguage.googleapis.com/v1beta/openai/chat/completions",
+    envKey: "GEMINI_API_KEY",
+    models: ["gemini-2.5-flash", "gemini-2.5-flash-lite"],
+    visionModels: ["gemini-2.5-flash", "gemini-2.5-flash-lite"],
+  },
+  {
     name: "OpenRouter",
     url: "https://openrouter.ai/api/v1/chat/completions",
     envKey: "OPENROUTER_API_KEY",
@@ -61,12 +70,21 @@ const PROVIDERS = [
   },
 ];
 
-// Kvota tugagan / kalit noto'g'ri bo'lgan provayderni jarayon davomida
-// qayta-qayta urinib vaqt yo'qotmaslik uchun o'chirib qo'yamiz.
-const disabledProviders = new Map();
+// Kvota tugagan / kalit noto'g'ri bo'lgan provayderni qayta-qayta urinib vaqt
+// yo'qotmaslik uchun vaqtincha o'chirib qo'yamiz. Muddat o'tgach yana sinaladi —
+// balans to'ldirilsa yoki limit yangilansa, serverni qayta ishga tushirish shart emas.
+const DISABLE_MS = 10 * 60 * 1000;
+const disabledProviders = new Map(); // name -> { reason, until }
 
 function isFatalStatus(status) {
   return status === 401 || status === 402 || status === 403 || status === 429;
+}
+
+function isDisabled(name) {
+  const d = disabledProviders.get(name);
+  if (!d) return false;
+  if (Date.now() >= d.until) { disabledProviders.delete(name); return false; }
+  return true;
 }
 
 async function callChat(provider, model, messages, timeoutMs = CALL_TIMEOUT_MS) {
@@ -114,7 +132,10 @@ export async function askAI(messages) {
 
   for (const provider of PROVIDERS) {
     if (provider.envKey && !process.env[provider.envKey]) continue;      // kalit yo'q
-    if (disabledProviders.has(provider.name)) continue;                   // kvota tugagan
+    if (isDisabled(provider.name)) {                                      // kvota tugagan
+      errors.push(`${provider.name}: vaqtincha o'chirilgan`);
+      continue;
+    }
 
     const models = vision ? (provider.visionModels ?? []) : provider.models;
     for (const model of models) {
@@ -134,13 +155,14 @@ export async function askAI(messages) {
         console.log(`⚠️  ${provider.name} / ${model} — ${e.message}`);
         if (isFatalStatus(e.status)) {
           // Kalit/kvota muammosi — bu provayderning boshqa modellarini sinamaymiz
-          disabledProviders.set(provider.name, e.message);
+          disabledProviders.set(provider.name, { reason: e.message, until: Date.now() + DISABLE_MS });
           break;
         }
       }
     }
   }
 
+  if (errors.length === 0) errors.push("hech bir provayder kaliti sozlanmagan");
   console.error("❌ Hech bir AI provayder javob bermadi:", errors.join(" | "));
   return null;
 }
@@ -149,6 +171,6 @@ export function aiProviderStatus() {
   return PROVIDERS.map(p => ({
     name: p.name,
     configured: p.envKey ? Boolean(process.env[p.envKey]) : true,
-    disabledReason: disabledProviders.get(p.name) ?? null,
+    disabledReason: isDisabled(p.name) ? disabledProviders.get(p.name).reason : null,
   }));
 }
