@@ -7,7 +7,7 @@
 // Budjet tugasa — qolgan provayderlar sinalmaydi va oflayn zaxira javob qaytadi,
 // aks holda foydalanuvchi bir necha daqiqa kutib qolishi mumkin.
 const CALL_TIMEOUT_MS = 25000;
-const TOTAL_BUDGET_MS = 60000;
+const TOTAL_BUDGET_MS = 90000;
 
 const PROVIDERS = [
   {
@@ -67,6 +67,12 @@ const PROVIDERS = [
     url: "https://text.pollinations.ai/openai",
     envKey: null, // kalitsiz, oxirgi zaxira
     models: ["openai"],
+    // Kalitsiz tarif sekin (30 soniyagacha) va tez-tez so'rasa 402/429 qaytaradi.
+    // Shuning uchun uzoqroq kutamiz, bir necha marta qayta urinamiz va hech qachon
+    // o'chirib qo'ymaymiz — aks holda kalitlar ishlamaganda AI butunlay jim qoladi.
+    timeoutMs: 45000,
+    retries: 2,
+    neverDisable: true,
   },
 ];
 
@@ -120,6 +126,21 @@ async function callChat(provider, model, messages, timeoutMs = CALL_TIMEOUT_MS) 
   return text.trim();
 }
 
+// Kalitsiz provayder band bo'lsa (402/429) yoki kechiksa — biroz kutib qayta urinamiz.
+async function callWithRetry(provider, model, messages, deadline) {
+  const attempts = 1 + (provider.retries ?? 0);
+  for (let i = 0; ; i++) {
+    const remaining = deadline - Date.now();
+    try {
+      return await callChat(provider, model, messages, Math.min(provider.timeoutMs ?? CALL_TIMEOUT_MS, remaining));
+    } catch (e) {
+      const retryable = !e.status || e.status === 402 || e.status === 429 || e.status >= 500;
+      if (i + 1 >= attempts || !retryable || deadline - Date.now() < 10000) throw e;
+      await new Promise(r => setTimeout(r, 3000 * (i + 1)));
+    }
+  }
+}
+
 /**
  * Provayderlarni navbatma-navbat sinab, birinchi muvaffaqiyatli javobni qaytaradi.
  * @returns {Promise<{answer:string, provider:string, model:string}|null>}
@@ -147,13 +168,13 @@ export async function askAI(messages) {
       }
 
       try {
-        const answer = await callChat(provider, model, messages, Math.min(CALL_TIMEOUT_MS, remaining));
+        const answer = await callWithRetry(provider, model, messages, deadline);
         console.log(`✅ AI javob berdi: ${provider.name} / ${model}`);
         return { answer, provider: provider.name, model };
       } catch (e) {
         errors.push(e.message);
         console.log(`⚠️  ${provider.name} / ${model} — ${e.message}`);
-        if (isFatalStatus(e.status)) {
+        if (isFatalStatus(e.status) && !provider.neverDisable) {
           // Kalit/kvota muammosi — bu provayderning boshqa modellarini sinamaymiz
           disabledProviders.set(provider.name, { reason: e.message, until: Date.now() + DISABLE_MS });
           break;
