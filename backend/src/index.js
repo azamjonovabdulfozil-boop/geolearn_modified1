@@ -162,6 +162,7 @@ const corsOptions = {
     "Accept",
     "Origin",
     "X-Requested-With",
+    "X-Section",
   ],
 
   optionsSuccessStatus: 204,
@@ -209,7 +210,7 @@ function createApp(siteKey) {
 
       res.header(
         "Access-Control-Allow-Headers",
-        "Content-Type, Authorization, Accept, Origin, X-Requested-With"
+        "Content-Type, Authorization, Accept, Origin, X-Requested-With, X-Section"
       );
 
       res.header(
