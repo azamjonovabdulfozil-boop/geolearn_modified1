@@ -4,12 +4,13 @@
       <div class="auth-left-content">
         <div class="brand">
           <div class="brand-icon">
-            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <img v-if="settings.brandLogo" :src="settings.brandLogo" class="brand-logo-img" alt="" />
+            <svg v-else width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
               <circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/>
               <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/>
             </svg>
           </div>
-          <span class="brand-name">GeoLearn</span>
+          <span class="brand-name">{{ settings.brandName }}</span>
         </div>
         <div v-if="APP_ROLE === 'teacher'" class="role-badge teacher-badge">🏫 O'qituvchi portali</div>
         <div v-else-if="APP_ROLE === 'student'" class="role-badge student-badge">🎓 O'quvchi portali</div>
@@ -87,7 +88,10 @@ import { ref } from "vue";
 import { useRouter, useRoute, RouterLink } from "vue-router";
 import { User, Lock, LogIn, Eye, EyeOff, Loader2, BookOpen, Gamepad2, Trophy } from "lucide-vue-next";
 import { useAuthStore } from "@shared/stores/auth";
+import { useSettingsStore } from "@shared/stores/settings";
 import { safeRedirect } from "@shared/router/guard";
+
+const settings = useSettingsStore();
 
 const APP_ROLE = typeof __APP_ROLE__ !== "undefined" ? __APP_ROLE__ : "both";
 // Ikkinchi portalning manzili: build vaqtida VITE_TEACHER_URL / VITE_STUDENT_URL
@@ -208,6 +212,7 @@ async function handleLogin() {
   display: flex; align-items: center; justify-content: center;
   box-shadow: 0 6px 20px hsl(174 60% 10%/0.6);
 }
+.brand-logo-img { width: 100%; height: 100%; object-fit: cover; border-radius: 14px; }
 .brand-name { font-size: 22px; font-weight: 800; color: white; }
 .left-title { font-size: 30px; font-weight: 800; color: white; line-height: 1.2; margin-bottom: 14px; }
 .left-desc { font-size: 15px; color: hsl(174 25% 68%); line-height: 1.6; margin-bottom: 36px; }

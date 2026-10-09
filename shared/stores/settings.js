@@ -1,5 +1,6 @@
 import { defineStore } from "pinia";
 import { ref, computed } from "vue";
+import { api } from "@shared/composables/api";
 
 const translations = {
   uz: {
@@ -258,10 +259,21 @@ export const useSettingsStore = defineStore("settings", () => {
   function applyBrand(name) {
     document.title = name || DEFAULT_BRAND_NAME;
   }
+  // Brauzer yorlig'idagi belgi (favicon) ham logoga almashadi
+  function applyFavicon(logo) {
+    try {
+      let link = document.querySelector("link[rel='icon']");
+      if (!link) { link = document.createElement("link"); link.rel = "icon"; document.head.appendChild(link); }
+      if (!link.dataset.default) link.dataset.default = link.getAttribute("href") || "";
+      link.removeAttribute("type");
+      link.href = logo || link.dataset.default;
+    } catch {}
+  }
 
   applyTheme(theme.value);
   applyFontSize(fontSize.value);
   applyBrand(brandName.value);
+  applyFavicon(brandLogo.value);
 
   function setSection(s) {
     section.value = SECTION_OPTIONS.some(o => o.value === s) ? s : "all";
@@ -273,20 +285,31 @@ export const useSettingsStore = defineStore("settings", () => {
   function setTheme(t)    { theme.value = t;    localStorage.setItem("geo_theme", t); applyTheme(t); }
   function setFontSize(f) { fontSize.value = f; localStorage.setItem("geo_fontsize", f); applyFontSize(f); }
 
-  function setBrandName(n) {
-    const v = (n || "").trim() || DEFAULT_BRAND_NAME;
-    brandName.value = v;
-    localStorage.setItem("geo_brand_name", v);
-    applyBrand(v);
+  // Brend serverda saqlanadi (admin o'zgartirsa — hamma saytda va qurilmada
+  // ko'rinadi). localStorage — faqat sahifa ochilganda darhol ko'rsatish uchun kesh.
+  function applyServerBrand(b) {
+    const name = (b?.name || "").trim() || DEFAULT_BRAND_NAME;
+    const logo = b?.logo || DEFAULT_BRAND_LOGO;
+    brandName.value = name;
+    brandLogo.value = logo;
+    try {
+      localStorage.setItem("geo_brand_name", name);
+      if (logo) localStorage.setItem("geo_brand_logo", logo); else localStorage.removeItem("geo_brand_logo");
+    } catch {}
+    applyBrand(name);
+    applyFavicon(logo);
   }
-  function setBrandLogo(dataUrl) {
-    brandLogo.value = dataUrl || null;
-    if (dataUrl) localStorage.setItem("geo_brand_logo", dataUrl);
-    else localStorage.removeItem("geo_brand_logo");
+  /** Serverdan joriy brendni oladi. */
+  async function loadBrand() {
+    try { applyServerBrand(await api("/api/brand")); } catch {}
+  }
+  /** Admin: brendni serverga saqlaydi. logo — data URL, null (o'chirish) yoki undefined (o'zgarmaydi). */
+  async function saveBrand(name, logo) {
+    const body = { name, logo: logo === undefined ? (brandLogo.value === DEFAULT_BRAND_LOGO ? null : brandLogo.value) : logo };
+    applyServerBrand(await api("/api/brand", { method: "PUT", body: JSON.stringify(body) }));
   }
   function resetBrand() {
-    setBrandName(DEFAULT_BRAND_NAME);
-    setBrandLogo(null);
+    return saveBrand(DEFAULT_BRAND_NAME, null);
   }
 
   // Reactive translation function — components using {{ t('key') }} re-render on language change.
@@ -300,7 +323,7 @@ export const useSettingsStore = defineStore("settings", () => {
   return {
     language, theme, fontSize, brandName, brandLogo, section, sectionLabel,
     setLanguage, setSection, setTheme, setFontSize,
-    setBrandName, setBrandLogo, resetBrand,
+    loadBrand, saveBrand, resetBrand,
     t,
   };
 });

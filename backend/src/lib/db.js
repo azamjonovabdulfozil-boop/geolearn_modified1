@@ -60,6 +60,22 @@ export function setBlockedGrades(grades) {
   write("settings", { ...(Array.isArray(s) ? {} : s), blockedGrades: blocked });
   return blocked;
 }
+// ── Brend (CRM nomi va logosi) ──
+// Admin sozlamalarda o'zgartiradi — admin va o'quvchi saytlarining hammasida,
+// barcha qurilmalarda bir xil ko'rinadi.
+export function getBrand() {
+  const s = read("settings");
+  return { name: s?.brandName || null, logo: s?.brandLogo || null };
+}
+export function setBrand({ name, logo }) {
+  const s = read("settings");
+  write("settings", {
+    ...(Array.isArray(s) ? {} : s),
+    brandName: (name ?? "").toString().trim().slice(0, 60) || null,
+    brandLogo: logo || null,
+  });
+  return getBrand();
+}
 /** Sinf ochiqmi? (grade yo'q bo'lsa — ha) */
 export function isGradeOpen(g) {
   if (g == null || g === "") return true;

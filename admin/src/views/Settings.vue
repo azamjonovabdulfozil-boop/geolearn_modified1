@@ -193,7 +193,7 @@
 </template>
 
 <script setup>
-import { ref } from "vue";
+import { ref, watch } from "vue";
 import { Sun, Moon, Lock, Loader2, Save, Palette, School, UserCircle, Type, ImageIcon, Trash2, Sparkles, Globe, RefreshCw, GraduationCap } from "lucide-vue-next";
 import { useAuthStore } from "@shared/stores/auth";
 import { useSettingsStore, SECTION_OPTIONS } from "@shared/stores/settings";
@@ -226,6 +226,8 @@ const profileOk = ref(false);
 const brandForm = ref({ name: settings.brandName });
 const brandLogoPreview = ref(null);
 const brandMsg = ref("");
+// Brend serverdan kechroq kelsa yoki boshqa joyda o'zgarsa — formani yangilaymiz
+watch(() => settings.brandName, (n) => { brandForm.value.name = n; });
 
 const pwForm = ref({ current: "", next: "" });
 const pwSaving = ref(false);
@@ -249,14 +251,18 @@ function onBrandLogoChange(e) {
   reader.onload = (ev) => { brandLogoPreview.value = ev.target?.result; };
   reader.readAsDataURL(file);
 }
-function saveBrand() {
-  settings.setBrandName(brandForm.value.name);
-  if (brandLogoPreview.value) settings.setBrandLogo(brandLogoPreview.value);
-  brandMsg.value = settings.t('brand_saved');
+async function saveBrand() {
+  try {
+    await settings.saveBrand(brandForm.value.name, brandLogoPreview.value || undefined);
+    brandLogoPreview.value = null;
+    brandMsg.value = settings.t('brand_saved');
+  } catch (e) {
+    brandMsg.value = e?.message || "Saqlanmadi";
+  }
   setTimeout(() => { brandMsg.value = ""; }, 2500);
 }
-function resetBrand() {
-  settings.resetBrand();
+async function resetBrand() {
+  try { await settings.resetBrand(); } catch (e) { brandMsg.value = e?.message || "Saqlanmadi"; }
   brandForm.value.name = settings.brandName;
   brandLogoPreview.value = null;
 }
