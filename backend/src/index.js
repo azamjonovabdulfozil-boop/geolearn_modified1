@@ -1,7 +1,7 @@
 import { dirname, join } from 'path';
 import { fileURLToPath } from 'url';
 import { existsSync } from 'fs';
-import { createUser, getUserByUsername } from './lib/db.js';
+import { createUser, getUserByUsername, updateUser } from './lib/db.js';
 import { hashPassword } from './lib/auth.js';
 import { findForeignServer, reportConflict } from './lib/port.js';
 import { eventsHandler } from './lib/events.js';
@@ -547,17 +547,27 @@ function start(
 // SEED ADMIN TEACHER
 // ─────────────────────────────────────────────────────────────
 
+// Admin paroli ADMIN_PASSWORD env o'zgaruvchisidan olinadi (Render →
+// Environment yoki backend/.env). U berilgan bo'lsa, server har ishga
+// tushganda admin paroli shu qiymatga keltiriladi — parolni almashtirish
+// uchun env'ni o'zgartirib, qayta deploy qilish kifoya.
+const ADMIN_PASSWORD = String(
+  process.env.ADMIN_PASSWORD ?? ""
+).trim();
+
+const adminUser = getUserByUsername(
+  "admin"
+);
+
 if (
-  !getUserByUsername(
-    "admin"
-  )
+  !adminUser
 ) {
   createUser({
     name: "Administrator",
     username: "admin",
     passwordHash:
       hashPassword(
-        "admin123"
+        ADMIN_PASSWORD || "admin123"
       ),
     role: "teacher",
     grade: null,
@@ -567,7 +577,21 @@ if (
   });
 
   console.log(
-    "✅ Admin yaratildi: admin / admin123"
+    ADMIN_PASSWORD
+      ? "✅ Admin yaratildi: admin / (ADMIN_PASSWORD)"
+      : "✅ Admin yaratildi: admin / admin123"
+  );
+} else if (
+  ADMIN_PASSWORD &&
+  adminUser.passwordHash !== hashPassword(ADMIN_PASSWORD)
+) {
+  updateUser(
+    adminUser.id,
+    { passwordHash: hashPassword(ADMIN_PASSWORD) }
+  );
+
+  console.log(
+    "🔑 Admin paroli ADMIN_PASSWORD bo'yicha yangilandi"
   );
 }
 

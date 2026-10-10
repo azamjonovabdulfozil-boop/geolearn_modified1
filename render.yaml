@@ -29,6 +29,11 @@ services:
       - key: JWT_SECRET
         generateValue: true
 
+      # Admin panel paroli (login: admin). Berilsa — server har ishga tushganda
+      # admin paroli shu qiymatga keltiriladi. Bo'sh qolsa parol o'zgarmaydi.
+      - key: ADMIN_PASSWORD
+        sync: false
+
       # Vercel'dagi ikkala saytning manzili, vergul bilan, / belgisiz.
       # Masalan: https://geolearn-admin.vercel.app,https://geolearn.vercel.app
       - key: FRONTEND_URL
