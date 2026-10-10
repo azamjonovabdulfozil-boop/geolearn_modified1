@@ -1,435 +1,481 @@
 <template>
   <div class="fade-in">
+    <!-- 1v1 o'yin xonasi -->
+    <DuelRoom v-if="inRoom" :key="duel.current.id" :duel="duel.current" @close="duel.clear()" />
 
-    <!-- Join mode -->
-    <template v-if="mode === 'join'">
-      <div class="page-header">
-        <h1 class="geo-page-title">O'yinlarga qo'shilish</h1>
-        <p class="geo-page-sub">O'qituvchi beradigan kodni kiriting</p>
-      </div>
+    <!-- Yolg'iz mashq -->
+    <SoloRoom v-else-if="soloId" :game-id="soloId" @close="soloId = null" @invite="inviteFromSolo" />
 
-      <div class="join-card geo-card">
-        <div class="join-icon"><Gamepad2 :size="32" style="color:hsl(var(--primary))" /></div>
-        <p class="join-title">O'yin kodini kiriting</p>
-        <input v-model="gameCode" class="geo-input code-input" placeholder="MASALAN: 3E641B"
-          maxlength="6" @input="e => gameCode = e.target.value.toUpperCase()" />
-        <button @click="joinGame" :disabled="gameCode.length < 4 || joining" class="geo-btn-primary join-btn">
-          <Loader2 v-if="joining" :size="15" class="animate-spin" />
-          <LogIn v-else :size="15" />
-          {{ joining ? "Qo'shilmoqda..." : "O'yinga qo'shilish" }}
-        </button>
-        <p v-if="joinError" class="join-error">{{ joinError }}</p>
-      </div>
-    </template>
-
-    <!-- Waiting -->
-    <template v-else-if="mode === 'waiting'">
-      <div class="page-header">
-        <h1 class="geo-page-title">{{ activeGame?.title }}</h1>
-        <p class="geo-page-sub">
-          <span v-if="activeGame?.topicIcon">{{ activeGame.topicIcon }}</span>
-          {{ activeGame?.topicName }} · O'qituvchi o'yinni boshlaguncha kuting
-        </p>
-      </div>
-      <div class="waiting-card geo-card">
-        <div class="waiting-anim">
-          <div class="w-ring"></div>
-          <Gamepad2 :size="28" style="color:hsl(var(--primary))" />
+    <!-- O'yinlar bosh sahifasi (o'qituvchi o'yini uzilib qolmasligi uchun yashiriladi, o'chirilmaydi) -->
+    <div v-show="!inRoom && !soloId">
+      <section class="hero">
+        <div class="hero-glow"></div>
+        <div class="hero-text">
+          <p class="hero-kicker">GeoLearn Arena</p>
+          <h1 class="hero-title">O'yinlar</h1>
+          <p class="hero-sub">Do'stingizni chaqiring va 1 ga 1 bellashing — g'alaba uchun reytingga ball qo'shiladi.</p>
         </div>
-        <p class="waiting-title">O'qituvchini kutyapmiz...</p>
-        <div v-if="waitingPlayers.length" class="players-box">
-          <p class="players-label">Qo'shilganlar ({{ waitingPlayers.length }}):</p>
-          <div class="players-chips">
-            <span v-for="p in waitingPlayers" :key="p.userId" class="player-chip">
-              <span class="pc-av">{{ p.name?.charAt(0) }}</span>{{ p.name }}
-            </span>
+        <div class="hero-stats">
+          <div class="hero-stat"><span class="hero-stat-val">{{ stats.played }}</span><span class="hero-stat-lbl">o'yin</span></div>
+          <div class="hero-stat"><span class="hero-stat-val">{{ stats.won }}</span><span class="hero-stat-lbl">g'alaba</span></div>
+          <div class="hero-stat"><span class="hero-stat-val">{{ winRate }}%</span><span class="hero-stat-lbl">yutuq</span></div>
+        </div>
+        <span class="hero-art hero-art--1">⚽</span>
+        <span class="hero-art hero-art--2">🎮</span>
+        <span class="hero-art hero-art--3">🏆</span>
+      </section>
+
+      <div class="tabs">
+        <button class="tab" :class="{ active: tab === 'duel' }" @click="tab = 'duel'"><Swords :size="15" /> Do'st bilan 1 ga 1</button>
+        <button class="tab" :class="{ active: tab === 'class' }" @click="tab = 'class'"><Users :size="15" /> O'qituvchi o'yini</button>
+      </div>
+
+      <div v-show="tab === 'duel'">
+        <div v-if="preset" class="preset">
+          <span>Do'st tanlandi: <strong>{{ preset.name }}</strong> — endi o'yinni tanlang</span>
+          <button class="preset-x" @click="clearPreset" aria-label="Bekor qilish"><X :size="14" /></button>
+        </div>
+
+        <div class="grid">
+          <article v-for="g in GAMES" :key="g.id" class="game" :style="{ '--c1': g.colors[0], '--c2': g.colors[1] }">
+            <button class="game-cover" @click="openInvite(g)">
+              <span class="game-shine"></span>
+              <span class="game-emoji">{{ g.emoji }}</span>
+              <span class="game-pill">1 ga 1</span>
+              <span class="game-tag">{{ g.tag }}</span>
+            </button>
+            <div class="game-body">
+              <h3 class="game-title">{{ g.title }}</h3>
+              <p class="game-desc">{{ g.desc }}</p>
+              <div class="game-actions">
+                <button class="game-btn game-btn--main" @click="openInvite(g)"><Swords :size="14" /> Do'stni chaqirish</button>
+                <button v-if="g.solo" class="game-btn" @click="soloId = g.id" title="Yolg'iz mashq qilish"><Play :size="14" /> Mashq</button>
+              </div>
+            </div>
+          </article>
+        </div>
+      </div>
+
+      <div v-show="tab === 'class'" class="class-tab">
+        <TeacherGame />
+      </div>
+    </div>
+
+    <!-- Do'stni chaqirish oynasi -->
+    <Transition name="modal">
+      <div v-if="picked" class="modal-backdrop" @click.self="closeInvite">
+        <div class="modal" :style="{ '--c1': picked.colors[0], '--c2': picked.colors[1] }">
+          <header class="modal-head">
+            <span class="modal-emoji">{{ picked.emoji }}</span>
+            <div class="modal-head-text">
+              <p class="modal-title">{{ picked.title }}</p>
+              <p class="modal-rules">{{ picked.rules }}</p>
+            </div>
+            <button class="modal-x" @click="closeInvite" aria-label="Yopish"><X :size="18" /></button>
+          </header>
+
+          <!-- Kutish: taklif yuborildi -->
+          <div v-if="waiting" class="wait">
+            <div class="wait-ring"><span class="wait-av">{{ initial(waiting.players[1].name) }}</span></div>
+            <p class="wait-title"><strong>{{ waiting.players[1].name }}</strong> javobini kutyapmiz...</p>
+            <p class="wait-sub">Unga "do'stingiz sizni o'yinga chaqiryapti" degan xabar bordi</p>
+            <div class="wait-bar"><div class="wait-bar-fill" :style="{ width: waitPct + '%' }"></div></div>
+            <button class="geo-btn-outline" @click="duel.cancel()"><X :size="14" /> Taklifni bekor qilish</button>
+          </div>
+
+          <!-- Javob: rad etildi / vaqt o'tdi -->
+          <div v-else-if="closedNote" class="wait">
+            <span class="wait-emoji">{{ closedNote.emoji }}</span>
+            <p class="wait-title">{{ closedNote.text }}</p>
+            <button class="geo-btn-primary" @click="duel.clear()">Boshqa do'stni chaqirish</button>
+          </div>
+
+          <div v-else class="modal-body">
+            <!-- 1. Mavzu (faqat savol-javob o'yinlarida) -->
+            <section v-if="needsTopic" class="step">
+              <p class="step-title"><span class="step-num">1</span> Mavzuni tanlang</p>
+              <input v-model="topicQuery" class="geo-input" placeholder="Mavzu qidirish: bayroqlar, poytaxtlar, daryolar..." />
+              <div class="topics">
+                <button v-for="t in shownTopics" :key="t.id" class="topic" :class="{ active: topicId === t.id }" @click="topicId = t.id">
+                  <span>{{ t.icon }}</span>{{ t.name }}
+                </button>
+                <p v-if="!shownTopics.length" class="empty">Bunday mavzu topilmadi</p>
+              </div>
+            </section>
+
+            <!-- 2. Do'st -->
+            <section class="step">
+              <p class="step-title"><span class="step-num">{{ needsTopic ? 2 : 1 }}</span> Do'stingizni toping</p>
+              <div v-if="preset" class="friend friend--preset">
+                <span class="friend-av">{{ initial(preset.name) }}</span>
+                <span class="friend-text"><span class="friend-name">{{ preset.name }}</span><span class="friend-class">Tanlangan do'st</span></span>
+                <button class="friend-btn" :disabled="!canInvite || inviting" @click="invite(preset)">
+                  <Swords :size="14" /> Chaqirish
+                </button>
+              </div>
+              <template v-else>
+                <div class="search-row">
+                  <div class="search-field">
+                    <Search :size="15" class="search-icon" />
+                    <input v-model="friendName" class="geo-input search-input" placeholder="Do'stingizning ismi" @input="searchSoon" />
+                  </div>
+                  <input v-model="friendClass" class="geo-input class-input" placeholder="Sinfi: 7-A" maxlength="8" @input="searchSoon" />
+                </div>
+                <div class="friends">
+                  <div v-for="f in friends" :key="f.id" class="friend">
+                    <span class="friend-av" :class="{ online: f.online }">
+                      <img v-if="f.avatarUrl" :src="f.avatarUrl" alt="" /><template v-else>{{ initial(f.name) }}</template>
+                    </span>
+                    <span class="friend-text">
+                      <span class="friend-name">{{ f.name }}</span>
+                      <span class="friend-class">{{ f.className || '—' }} · {{ f.busy ? "o'yinda" : f.online ? "saytda" : "hozir saytda emas" }}</span>
+                    </span>
+                    <button class="friend-btn" :disabled="!canInvite || inviting || f.busy || !f.online" @click="invite(f)"
+                      :title="!f.online ? 'Do\'stingiz saytga kirganda chaqirishingiz mumkin' : ''">
+                      <Swords :size="14" /> Chaqirish
+                    </button>
+                  </div>
+                  <p v-if="searching && !friends.length" class="empty">Qidirilmoqda...</p>
+                  <p v-else-if="!friends.length" class="empty">
+                    {{ friendName || friendClass ? "Bunday o'quvchi topilmadi. Ism yoki sinfni tekshiring." : "Do'stingizning ismini va sinfini yozing" }}
+                  </p>
+                </div>
+              </template>
+              <p v-if="needsTopic && !topicId" class="hint">Avval mavzuni tanlang</p>
+              <p v-if="inviteError" class="error">{{ inviteError }}</p>
+            </section>
           </div>
         </div>
-        <button @click="leaveGame" class="geo-btn-outline"><X :size="14" /> Bekor qilish</button>
       </div>
-    </template>
-
-    <!-- Active quiz -->
-    <template v-else-if="mode === 'active-quiz'">
-      <div class="game-header">
-        <div class="game-score-chip"><Star :size="13" />{{ gameScore }} ball</div>
-        <div class="game-progress">
-          <span class="gp-label">{{ currentQuizIdx + 1 }} / {{ activeGame?.questions?.length }}</span>
-          <div class="gp-bar"><div class="gp-fill" :style="`width:${((currentQuizIdx+1)/activeGame?.questions?.length)*100}%`"></div></div>
-        </div>
-        <div class="timer-chip" :class="{ urgent: quizTime <= 5 }"><Clock :size="13" />{{ quizTime }}s</div>
-      </div>
-
-      <div class="question-card geo-card">
-        <div v-if="currentQ?.imageUrl" class="q-image-wrap">
-          <img :src="currentQ.imageUrl" :alt="currentQ.questionText" class="q-image" />
-        </div>
-        <p class="question-text">{{ currentQ?.questionText }}</p>
-      </div>
-
-      <!-- Flag-grid layout (when question shows flag thumbnails per option) -->
-      <div v-if="currentQ?.layout === 'flag-grid'" class="flag-grid">
-        <button v-for="(opt, i) in currentQ?.options" :key="i"
-          @click="answerQuiz(i)" :disabled="quizAnswered"
-          class="flag-btn"
-          :class="{
-            'flag-selected': quizSelected === i,
-            'flag-correct': quizAnswered && i === currentQ?.correctIndex,
-            'flag-wrong': quizAnswered && quizSelected === i && i !== currentQ?.correctIndex,
-          }">
-          <img :src="currentQ.optionImages?.[i]" :alt="opt" />
-          <span>{{ opt }}</span>
-        </button>
-      </div>
-
-      <!-- Standard 4-option text answers -->
-      <div v-else class="answers-grid">
-        <button v-for="(opt, i) in currentQ?.options" :key="i"
-          @click="answerQuiz(i)" :disabled="quizAnswered"
-          class="answer-btn"
-          :class="{
-            'answer-selected': quizSelected === i,
-            'answer-correct': quizAnswered && i === currentQ?.correctIndex,
-            'answer-wrong': quizAnswered && quizSelected === i && i !== currentQ?.correctIndex,
-          }">
-          <div class="ans-letter">{{ ['A','B','C','D'][i] }}</div>
-          <span>{{ opt }}</span>
-        </button>
-      </div>
-
-      <div v-if="quizAnswered" class="next-row">
-        <button @click="nextQuiz" class="geo-btn-primary">
-          {{ currentQuizIdx < (activeGame?.questions?.length ?? 0) - 1 ? 'Keyingi →' : "Natija" }}
-        </button>
-      </div>
-    </template>
-
-    <!-- Active bosh_qotirma -->
-    <template v-else-if="mode === 'active-bt'">
-      <div class="game-header">
-        <div class="game-score-chip"><Star :size="13" />{{ gameScore }} ball</div>
-        <div class="game-progress">
-          <span class="gp-label">{{ currentBtIdx + 1 }} / {{ activeGame?.questions?.length }}</span>
-          <div class="gp-bar"><div class="gp-fill" :style="`width:${((currentBtIdx+1)/activeGame?.questions?.length)*100}%`"></div></div>
-        </div>
-        <div class="timer-chip" :class="{ urgent: btTime <= 5 }"><Clock :size="13" />{{ btTime }}s</div>
-      </div>
-
-      <div class="bt-question geo-card">
-        <div class="bt-topic">
-          <span v-if="activeGame?.topicIcon">{{ activeGame.topicIcon }}</span>
-          {{ activeGame?.topicName }}
-        </div>
-        <div v-if="currentBT?.imageUrl" class="bt-image-wrap">
-          <img :src="currentBT.imageUrl" :alt="currentBT.questionText" class="bt-image" />
-        </div>
-        <p class="bt-text">{{ currentBT?.questionText }}</p>
-      </div>
-
-      <div class="bt-btns">
-        <button @click="answerBt(true)" class="bt-btn bt-true"
-          :class="{ 'bt-selected': btSelected === true, 'bt-disabled': btAnswered && btSelected !== true,
-                    'bt-correct': btAnswered && currentBT?.isTrue === true,
-                    'bt-wrong-bg': btAnswered && btSelected === true && currentBT?.isTrue !== true }"
-          :disabled="btAnswered">
-          <CheckCircle :size="26" /><span>To'g'ri</span>
-        </button>
-        <button @click="answerBt(false)" class="bt-btn bt-false"
-          :class="{ 'bt-selected': btSelected === false, 'bt-disabled': btAnswered && btSelected !== false,
-                    'bt-correct': btAnswered && currentBT?.isTrue === false,
-                    'bt-wrong-bg': btAnswered && btSelected === false && currentBT?.isTrue !== false }"
-          :disabled="btAnswered">
-          <XCircle :size="26" /><span>Noto'g'ri</span>
-        </button>
-      </div>
-
-      <div v-if="btAnswered && currentBT?.explanation" class="bt-explain geo-card">
-        <strong>Tushuntirish:</strong> {{ currentBT.explanation }}
-      </div>
-
-      <div v-if="btAnswered" class="next-row">
-        <button @click="nextBt" class="geo-btn-primary">
-          {{ currentBtIdx < (activeGame?.questions?.length ?? 0) - 1 ? 'Keyingi →' : "Natija" }}
-        </button>
-      </div>
-    </template>
-
-    <!-- Result -->
-    <template v-else-if="mode === 'result'">
-      <div class="result-card geo-card">
-        <div class="result-icon" :class="resultPct >= 60 ? 'result-ok' : 'result-bad'">
-          <component :is="resultPct >= 60 ? CheckCircle : XCircle" :size="36" />
-        </div>
-        <p class="result-title">{{ resultPct >= 60 ? 'Barakalla! 🎉' : "Yana harakat qiling" }}</p>
-        <div class="result-stats">
-          <div class="result-stat"><span class="rs-val" style="color:hsl(var(--primary))">{{ gameScore }}</span><span class="rs-lbl">ball</span></div>
-          <div class="rs-div"></div>
-          <div class="result-stat"><span class="rs-val">{{ Math.round(resultPct) }}%</span><span class="rs-lbl">natija</span></div>
-        </div>
-        <div class="result-actions">
-          <button @click="goJoin" class="geo-btn-outline"><Gamepad2 :size="14" /> Yangi o'yin</button>
-        </div>
-      </div>
-    </template>
+    </Transition>
   </div>
 </template>
 
 <script setup>
-import { ref, computed, onUnmounted, onMounted } from "vue";
-import { Gamepad2, LogIn, Clock, CheckCircle, XCircle, Star, X, Loader2 } from "lucide-vue-next";
-import { api, resolveUrl } from "@shared/composables/api";
-import { useLive } from "@shared/composables/live";
+import { ref, computed, watch, onMounted, onUnmounted } from "vue";
+import { useRoute, useRouter } from "vue-router";
+import { Swords, Users, Play, X, Search } from "lucide-vue-next";
+import { api } from "@shared/composables/api";
+import { useAuthStore } from "@shared/stores/auth";
+import { useDuelStore } from "../stores/duel";
+import { GAMES, gameById } from "../lib/games";
+import DuelRoom from "../components/games/DuelRoom.vue";
+import SoloRoom from "../components/games/SoloRoom.vue";
+import TeacherGame from "../components/games/TeacherGame.vue";
 
-const mode = ref("join");
-const gameCode = ref("");
-const joining = ref(false);
-const joinError = ref("");
-const activeGame = ref(null);
-const waitingPlayers = ref([]);
-let pollTimer = null;
-// O'qituvchi panelida "kim onlayn" ko'rinishi uchun har 5 soniyada signal yuboramiz.
-// Signal to'xtasa (sahifa yopildi, internet uzildi) — o'qituvchiga xabar boradi.
-let heartbeatTimer = null;
+const route = useRoute();
+const router = useRouter();
+const auth = useAuthStore();
+const duel = useDuelStore();
 
-const currentQuizIdx = ref(0);
-const quizSelected = ref(null);
-const quizAnswered = ref(false);
-const quizTime = ref(20);
-const gameScore = ref(0);
-let quizTimerInt = null;
+const tab = ref("duel");
+const soloId = ref(null);
+const stats = ref({ played: 0, won: 0 });
+const topics = ref([]);
+const serverGames = ref([]);
 
-const currentBtIdx = ref(0);
-const btSelected = ref(null);
-const btAnswered = ref(false);
-const btTime = ref(15);
-let btTimerInt = null;
+const inRoom = computed(() => ["active", "finished"].includes(duel.current?.status));
+const winRate = computed(() => (stats.value.played ? Math.round((stats.value.won / stats.value.played) * 100) : 0));
+const initial = name => (name || "?").charAt(0).toUpperCase();
 
-const resultPct = ref(0);
-
-const currentQ = computed(() => activeGame.value?.questions?.[currentQuizIdx.value]);
-const currentBT = computed(() => activeGame.value?.questions?.[currentBtIdx.value]);
-
-function startHeartbeat() {
-  stopHeartbeat();
-  heartbeatTimer = setInterval(() => {
-    if (!gameCode.value) return;
-    api(`/api/games/${gameCode.value}/heartbeat`, { method: "POST" }).catch(() => {});
-  }, 5000);
-}
-function stopHeartbeat() {
-  if (heartbeatTimer) { clearInterval(heartbeatTimer); heartbeatTimer = null; }
-}
-/** Serverga "chiqib ketdim" deb bildiradi. keepalive — sahifa yopilayotganda ham yetib boradi. */
-function notifyLeave() {
-  if (!gameCode.value) return;
-  const token = localStorage.getItem("geo_token");
+async function loadMeta() {
   try {
-    fetch(resolveUrl(`/api/games/${gameCode.value}/leave`), {
-      method: "POST",
-      keepalive: true,
-      headers: { "Content-Type": "application/json", ...(token ? { Authorization: `Bearer ${token}` } : {}) },
-    }).catch(() => {});
+    const data = await api("/api/duels/games");
+    stats.value = data.stats ?? stats.value;
+    topics.value = data.topics ?? [];
+    serverGames.value = data.games ?? [];
   } catch {}
 }
+// O'yin tugagach statistika yangilanadi
+watch(() => duel.current?.status, (s) => { if (s === "finished") loadMeta(); });
 
-async function joinGame() {
-  joining.value = true; joinError.value = "";
-  try {
-    const g = await api(`/api/games/${gameCode.value}/join`, { method: "POST" });
-    activeGame.value = g;
-    startHeartbeat();
-    if (g.status === "active") {
-      if (g.gameType === "bosh_qotirma") { mode.value = "active-bt"; startBt(); }
-      else { mode.value = "active-quiz"; startQuizTimer(); }
-    } else { mode.value = "waiting"; startPolling(); }
-  } catch (e) { joinError.value = e.message || "Kod noto'g'ri"; }
-  joining.value = false;
-}
-function leaveGame() {
-  notifyLeave();
-  stopHeartbeat();
-  clearInterval(pollTimer);
-  mode.value = "join"; activeGame.value = null; gameCode.value = "";
-}
-async function pollWaiting() {
-  if (mode.value !== "waiting") return;
-  try {
-    const g = await api(`/api/games/${gameCode.value}`);
-    if (mode.value !== "waiting") return;
-    if (g.status === "active") {
-      clearInterval(pollTimer);
-      activeGame.value = g;
-      if (g.gameType === "bosh_qotirma") { startBt(); mode.value = "active-bt"; }
-      else { startQuizTimer(); mode.value = "active-quiz"; }
-    }
-    // chiqib ketganlarni ko'rsatmaymiz
-    waitingPlayers.value = (g.players ?? []).filter(p => !p.leftAt);
-  } catch {}
-}
-function startPolling() {
-  pollTimer = setInterval(pollWaiting, 2000);
-}
-// O'qituvchi o'yinni boshlasa yoki yangi o'yinchi qo'shilsa — darhol
-useLive(["games"], pollWaiting, { delay: 100 });
+// ── Do'stni chaqirish ──
+const picked = ref(null);           // tanlangan o'yin
+const topicId = ref(null);
+const topicQuery = ref("");
+const friendName = ref("");
+const friendClass = ref("");
+const friends = ref([]);
+const searching = ref(false);
+const inviting = ref(false);
+const inviteError = ref("");
+const preset = ref(null);           // chatdan kelgan: do'st allaqachon tanlangan
+const tick = ref(0);
+let searchTimer = null;
+let tickTimer = null;
 
-function startQuizTimer() {
-  quizTime.value = 20;
-  clearInterval(quizTimerInt);
-  quizTimerInt = setInterval(() => {
-    quizTime.value--;
-    if (quizTime.value <= 0) { clearInterval(quizTimerInt); if (!quizAnswered.value) answerQuiz(-1); }
-  }, 1000);
-}
-function answerQuiz(idx) {
-  clearInterval(quizTimerInt);
-  quizSelected.value = idx;
-  quizAnswered.value = true;
-  if (idx === currentQ.value?.correctIndex) gameScore.value += 10;
-  try { api(`/api/games/${gameCode.value}/answer`, { method: "POST", body: JSON.stringify({ answer: idx }) }); } catch {}
-}
-function nextQuiz() {
-  if (currentQuizIdx.value < (activeGame.value?.questions?.length ?? 0) - 1) {
-    currentQuizIdx.value++; quizSelected.value = null; quizAnswered.value = false; startQuizTimer();
-  } else {
-    resultPct.value = (gameScore.value / ((activeGame.value?.questions?.length ?? 1) * 10)) * 100;
-    mode.value = "result";
+const needsTopic = computed(() => serverGames.value.find(g => g.id === picked.value?.id)?.needsTopic ?? ["quiz", "truefalse"].includes(picked.value?.id));
+const canInvite = computed(() => !needsTopic.value || topicId.value != null);
+const shownTopics = computed(() => {
+  const q = topicQuery.value.trim().toLocaleLowerCase();
+  return q ? topics.value.filter(t => `${t.name} ${t.category}`.toLocaleLowerCase().includes(q)) : topics.value;
+});
+
+const waiting = computed(() => (duel.current?.status === "pending" ? duel.current : null));
+const waitPct = computed(() => {
+  tick.value;
+  const d = waiting.value;
+  if (!d) return 0;
+  return Math.max(0, Math.min(100, ((d.expiresAt - duel.now()) / (d.expiresAt - d.createdAt)) * 100));
+});
+const closedNote = computed(() => {
+  const d = duel.current;
+  if (!d || d.me !== 0) return null;
+  const name = d.players[1].name;
+  if (d.status === "declined") return { emoji: "🙅", text: `${name} taklifni rad etdi` };
+  if (d.status === "expired") return { emoji: "⌛", text: `${name} javob bermadi` };
+  return null;
+});
+
+function openInvite(g) {
+  picked.value = g;
+  topicId.value = null;
+  topicQuery.value = "";
+  inviteError.value = "";
+  if (!preset.value) {
+    friendName.value = "";
+    friendClass.value = auth.user?.className ?? "";
+    search();
   }
 }
-function startBt() {
-  btTime.value = 15; clearInterval(btTimerInt);
-  btTimerInt = setInterval(() => {
-    btTime.value--;
-    if (btTime.value <= 0) { clearInterval(btTimerInt); if (!btAnswered.value) answerBt(null); }
-  }, 1000);
+function closeInvite() {
+  if (waiting.value) duel.cancel();
+  duel.clear();
+  picked.value = null;
 }
-function answerBt(val) {
-  clearInterval(btTimerInt);
-  btSelected.value = val;
-  btAnswered.value = true;
-  if (val === currentBT.value?.isTrue) gameScore.value += 10;
-  try { api(`/api/games/${gameCode.value}/answer`, { method: "POST", body: JSON.stringify({ answer: val }) }); } catch {}
-}
-function nextBt() {
-  if (currentBtIdx.value < (activeGame.value?.questions?.length ?? 0) - 1) {
-    currentBtIdx.value++; btSelected.value = null; btAnswered.value = false; startBt();
-  } else {
-    resultPct.value = (gameScore.value / ((activeGame.value?.questions?.length ?? 1) * 10)) * 100;
-    mode.value = "result";
-  }
-}
-function goJoin() {
-  notifyLeave();
-  stopHeartbeat();
-  mode.value = "join"; gameCode.value = ""; gameScore.value = 0;
-  currentQuizIdx.value = 0; quizSelected.value = null; quizAnswered.value = false;
-  currentBtIdx.value = 0; btSelected.value = null; btAnswered.value = false;
+function inviteFromSolo() {
+  const g = gameById(soloId.value);
+  soloId.value = null;
+  openInvite(g);
 }
 
-function handlePageHide() { notifyLeave(); }
+async function search() {
+  searching.value = true;
+  try {
+    const q = new URLSearchParams({ q: friendName.value.trim(), className: friendClass.value.trim() });
+    friends.value = await api(`/api/duels/players?${q}`);
+  } catch { friends.value = []; }
+  searching.value = false;
+}
+function searchSoon() {
+  clearTimeout(searchTimer);
+  searchTimer = setTimeout(search, 280);
+}
+
+async function invite(friend) {
+  inviting.value = true;
+  inviteError.value = "";
+  try {
+    await duel.invite({ opponentId: friend.id, game: picked.value.id, topicId: topicId.value });
+  } catch (e) {
+    inviteError.value = e.message || "Taklif yuborilmadi";
+    if (!preset.value) search();
+  }
+  inviting.value = false;
+}
+
+function clearPreset() {
+  preset.value = null;
+  router.replace({ path: "/games" });
+}
+
+// O'yin boshlandi — oyna yopiladi. "Yana o'ynash" bosilganda esa kutish oynasi ochiladi.
+watch(() => duel.current, (d) => {
+  if (d?.status === "active") picked.value = null;
+  else if (d?.status === "pending" && d.me === 0 && !picked.value) picked.value = gameById(d.game);
+});
 
 onMounted(() => {
-  // Sahifa yopilsa / boshqa saytga o'tilsa — o'qituvchiga xabar ketsin
-  window.addEventListener("pagehide", handlePageHide);
+  loadMeta();
+  duel.refresh();
+  // Chatdagi "O'yinga chaqirish" tugmasidan kelgan bo'lsa
+  const id = Number(route.query.friend);
+  if (id) preset.value = { id, name: String(route.query.name || "Do'stingiz") };
+  const d = duel.current;
+  if (d?.status === "pending" && d.me === 0) picked.value = gameById(d.game);
+  tickTimer = setInterval(() => {
+    tick.value++;
+    // Kutish oynasi ochiq turganda ro'yxatdagi "saytda / o'yinda" holati yangilanib turadi
+    if (picked.value && !waiting.value && !preset.value && tick.value % 20 === 0) search();
+  }, 250);
 });
-
-onUnmounted(() => {
-  window.removeEventListener("pagehide", handlePageHide);
-  notifyLeave();
-  stopHeartbeat();
-  clearInterval(pollTimer); clearInterval(quizTimerInt); clearInterval(btTimerInt);
-});
+onUnmounted(() => { clearInterval(tickTimer); clearTimeout(searchTimer); });
 </script>
 
 <style scoped>
-.page-header { margin-bottom: 24px; }
+/* ── Hero ── */
+.hero {
+  position: relative; overflow: hidden; display: flex; align-items: flex-end; justify-content: space-between; gap: 20px; flex-wrap: wrap;
+  padding: 30px 30px 26px; border-radius: 28px; color: #fff; margin-bottom: 20px;
+  background: linear-gradient(125deg, #14122b 0%, #2a1458 45%, #0f3d5c 100%);
+  box-shadow: 0 20px 50px rgba(20, 18, 43, .35);
+}
+.hero-glow {
+  position: absolute; inset: 0; pointer-events: none;
+  background:
+    radial-gradient(circle at 12% 110%, rgba(0, 229, 255, .35), transparent 42%),
+    radial-gradient(circle at 88% -20%, rgba(255, 64, 129, .38), transparent 45%),
+    repeating-linear-gradient(0deg, rgba(255, 255, 255, .035) 0 1px, transparent 1px 28px),
+    repeating-linear-gradient(90deg, rgba(255, 255, 255, .035) 0 1px, transparent 1px 28px);
+}
+.hero-text { position: relative; max-width: 520px; }
+.hero-kicker { font-size: 12px; font-weight: 800; letter-spacing: .18em; text-transform: uppercase; color: #7df9ff; }
+.hero-title { margin-top: 4px; font-size: clamp(30px, 5vw, 42px); font-weight: 900; line-height: 1.05; letter-spacing: -.01em; }
+.hero-sub { margin-top: 8px; font-size: 14.5px; opacity: .85; }
+.hero-stats { position: relative; display: flex; gap: 10px; }
+.hero-stat {
+  min-width: 78px; padding: 10px 14px; border-radius: 16px; text-align: center;
+  background: rgba(255, 255, 255, .1); border: 1px solid rgba(255, 255, 255, .16); backdrop-filter: blur(6px);
+}
+.hero-stat-val { display: block; font-size: 24px; font-weight: 900; line-height: 1.1; font-variant-numeric: tabular-nums; }
+.hero-stat-lbl { font-size: 11px; opacity: .75; text-transform: uppercase; letter-spacing: .06em; }
+.hero-art { position: absolute; font-size: 54px; opacity: .2; pointer-events: none; animation: float 6s ease-in-out infinite; }
+.hero-art--1 { top: 12px; right: 34%; }
+.hero-art--2 { top: 44%; right: 6%; font-size: 84px; animation-delay: -2s; opacity: .14; }
+.hero-art--3 { bottom: -10px; left: 46%; animation-delay: -4s; }
+@keyframes float { 50% { transform: translateY(-12px) rotate(8deg); } }
 
-/* Join */
-.join-card { padding:36px 28px;text-align:center;display:flex;flex-direction:column;align-items:center;gap:16px;max-width:420px;margin:0 auto; }
-.join-icon { width:72px;height:72px;border-radius:20px;background:hsl(var(--primary)/0.1);display:flex;align-items:center;justify-content:center; }
-.join-title { font-size:17px;font-weight:700; }
-.code-input { text-align:center;font-size:22px;font-weight:800;letter-spacing:.14em;text-transform:uppercase;max-width:260px;font-family:'JetBrains Mono','Menlo',monospace; }
-.join-btn { padding:.6rem 2rem; }
-.join-error { font-size:13px;color:hsl(0 60% 46%);background:hsl(0 70% 50%/0.08);padding:8px 16px;border-radius:10px; }
+/* ── Tabs ── */
+.tabs { display: inline-flex; gap: 4px; padding: 4px; margin-bottom: 18px; border-radius: 16px; background: hsl(var(--muted)); max-width: 100%; }
+.tab {
+  display: inline-flex; align-items: center; gap: 7px; padding: 9px 16px; border-radius: 12px; border: none; cursor: pointer;
+  background: none; color: hsl(var(--muted-fg)); font-size: 14px; font-weight: 700; white-space: nowrap;
+}
+.tab.active { background: hsl(var(--card)); color: hsl(var(--fg)); box-shadow: 0 2px 8px rgba(0, 0, 0, .08); }
 
-/* Waiting */
-.waiting-card { padding:36px 24px;text-align:center;display:flex;flex-direction:column;align-items:center;gap:18px; }
-.waiting-anim { position:relative;width:64px;height:64px;display:flex;align-items:center;justify-content:center; }
-.w-ring { position:absolute;inset:0;border-radius:50%;border:3px solid transparent;border-top-color:hsl(var(--primary));animation:spin 1s linear infinite; }
-.waiting-title { font-size:15px;font-weight:600; }
-.players-box { width:100%;background:hsl(var(--muted));border-radius:14px;padding:14px 16px;text-align:left; }
-.players-label { font-size:12.5px;font-weight:700;margin-bottom:10px;color:hsl(var(--muted-fg)); }
-.players-chips { display:flex;flex-wrap:wrap;gap:6px;max-height:200px;overflow-y:auto; }
-.player-chip { display:flex;align-items:center;gap:6px;font-size:12.5px;padding:4px 10px;border-radius:99px;background:hsl(var(--card)); }
-.pc-av { width:20px;height:20px;border-radius:50%;background:hsl(var(--primary));color:white;font-size:10px;font-weight:700;display:flex;align-items:center;justify-content:center; }
+.preset {
+  display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-bottom: 14px; padding: 10px 14px;
+  border-radius: 14px; background: hsl(var(--primary-light)); color: hsl(var(--primary)); font-size: 14px;
+}
+.preset-x { border: none; background: none; cursor: pointer; color: inherit; display: flex; }
 
-/* Game header */
-.game-header { display:flex;align-items:center;gap:12px;margin-bottom:16px;flex-wrap:wrap; }
-.game-score-chip { display:inline-flex;align-items:center;gap:6px;font-size:14px;font-weight:700;padding:6px 14px;border-radius:99px;background:hsl(45 90% 50%/0.12);color:hsl(38 70% 30%); }
-.game-progress { flex:1;display:flex;align-items:center;gap:10px;min-width:140px; }
-.gp-label { font-size:12px;font-weight:700;color:hsl(var(--muted-fg));white-space:nowrap; }
-.gp-bar { flex:1;height:8px;background:hsl(var(--border));border-radius:99px;overflow:hidden; }
-.gp-fill { height:100%;background:linear-gradient(90deg, hsl(var(--primary)), hsl(172 70% 38%));border-radius:99px;transition:width .4s; }
-.timer-chip { display:inline-flex;align-items:center;gap:5px;font-size:13px;font-weight:700;padding:5px 12px;border-radius:99px;background:hsl(var(--muted));transition:all .3s; }
-.urgent { background:hsl(0 70% 50%/0.12);color:hsl(0 60% 46%);animation:pulse 1s infinite; }
+/* ── O'yin kartalari ── */
+.grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 18px; }
+.game {
+  display: flex; flex-direction: column; overflow: hidden; border-radius: 22px;
+  background: hsl(var(--card)); border: 1px solid hsl(var(--border));
+  box-shadow: 0 2px 8px rgba(0, 0, 0, .05); transition: transform .2s, box-shadow .2s;
+}
+.game:hover { transform: translateY(-5px); box-shadow: 0 18px 40px rgba(0, 0, 0, .16); }
+.game-cover {
+  position: relative; height: 150px; border: none; cursor: pointer; overflow: hidden; display: flex; align-items: center; justify-content: center;
+  background:
+    radial-gradient(circle at 50% 130%, rgba(255, 255, 255, .3), transparent 55%),
+    radial-gradient(circle at 15% 10%, rgba(255, 255, 255, .16), transparent 35%),
+    linear-gradient(135deg, var(--c1), var(--c2));
+}
+.game-shine {
+  position: absolute; inset: 0;
+  background:
+    repeating-linear-gradient(115deg, rgba(255, 255, 255, .05) 0 14px, transparent 14px 28px);
+}
+.game-emoji { position: relative; font-size: 74px; line-height: 1; filter: drop-shadow(0 12px 14px rgba(0, 0, 0, .4)); transition: transform .3s cubic-bezier(.2, 1.6, .4, 1); }
+.game:hover .game-emoji { transform: scale(1.16) rotate(-7deg); }
+.game-pill, .game-tag { position: absolute; top: 12px; padding: 3px 11px; border-radius: 99px; font-size: 11px; font-weight: 800; color: #fff; }
+.game-pill { right: 12px; background: rgba(0, 0, 0, .38); letter-spacing: .04em; }
+.game-tag { left: 12px; background: rgba(255, 255, 255, .22); backdrop-filter: blur(4px); }
+.game-body { flex: 1; display: flex; flex-direction: column; padding: 16px 18px 18px; }
+.game-title { font-size: 18px; font-weight: 800; }
+.game-desc { flex: 1; margin-top: 4px; font-size: 13.5px; line-height: 1.5; color: hsl(var(--muted-fg)); }
+.game-actions { display: flex; gap: 8px; margin-top: 14px; }
+.game-btn {
+  display: inline-flex; align-items: center; justify-content: center; gap: 6px; height: 40px; padding: 0 14px; border-radius: 12px; cursor: pointer;
+  border: 1px solid hsl(var(--border)); background: hsl(var(--card)); color: hsl(var(--fg)); font-size: 13px; font-weight: 700; transition: filter .15s, transform .12s;
+}
+.game-btn:active { transform: scale(.97); }
+.game-btn:hover { background: hsl(var(--muted)); }
+.game-btn--main { flex: 1; border: none; color: #fff; background: linear-gradient(135deg, var(--c1), var(--c2)); box-shadow: 0 6px 16px rgba(0, 0, 0, .18); }
+.game-btn--main:hover { filter: brightness(1.12); background: linear-gradient(135deg, var(--c1), var(--c2)); }
+.class-tab { max-width: 760px; }
 
-/* Quiz */
-.question-card { padding:24px;margin-bottom:14px;text-align:center; }
-.q-image-wrap { display:flex;justify-content:center;margin-bottom:18px; }
-.q-image { max-width:280px; width:100%; aspect-ratio:3/2; object-fit:contain; border-radius:12px; box-shadow:0 8px 24px -8px rgba(0,0,0,.25); background:#fff; padding:6px; }
-.question-text { font-size:17px;font-weight:600;line-height:1.55; }
+/* ── Chaqirish oynasi ── */
+.modal-backdrop {
+  position: fixed; inset: 0; z-index: 120; display: flex; align-items: center; justify-content: center; padding: 16px;
+  background: rgba(6, 12, 20, .6); backdrop-filter: blur(5px);
+}
+.modal {
+  width: 100%; max-width: 520px; max-height: min(92vh, 720px); display: flex; flex-direction: column; overflow: hidden;
+  border-radius: 24px; background: hsl(var(--card)); color: hsl(var(--card-fg)); box-shadow: 0 30px 80px rgba(0, 0, 0, .4);
+}
+.modal-head {
+  display: flex; align-items: center; gap: 14px; padding: 18px 20px; color: #fff;
+  background: linear-gradient(135deg, var(--c1), var(--c2));
+}
+.modal-emoji { font-size: 44px; line-height: 1; filter: drop-shadow(0 6px 8px rgba(0, 0, 0, .35)); }
+.modal-head-text { flex: 1; min-width: 0; }
+.modal-title { font-size: 19px; font-weight: 900; }
+.modal-rules { font-size: 12.5px; opacity: .88; line-height: 1.4; }
+.modal-x { flex: none; width: 34px; height: 34px; border-radius: 10px; border: none; cursor: pointer; background: rgba(0, 0, 0, .25); color: #fff; display: flex; align-items: center; justify-content: center; }
+.modal-body { padding: 18px 20px 20px; overflow-y: auto; display: flex; flex-direction: column; gap: 18px; }
+.step-title { display: flex; align-items: center; gap: 8px; margin-bottom: 10px; font-size: 14px; font-weight: 800; }
+.step-num { width: 22px; height: 22px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 12px; background: hsl(var(--primary)); color: #fff; }
+.topics { display: flex; flex-wrap: wrap; gap: 6px; max-height: 148px; overflow-y: auto; margin-top: 10px; padding: 2px; }
+.topic {
+  display: inline-flex; align-items: center; gap: 6px; padding: 6px 12px; border-radius: 99px; cursor: pointer;
+  border: 1.5px solid hsl(var(--border)); background: hsl(var(--card)); color: hsl(var(--fg)); font-size: 13px; font-weight: 600;
+}
+.topic:hover { border-color: hsl(var(--primary)); }
+.topic.active { border-color: hsl(var(--primary)); background: hsl(var(--primary)); color: #fff; }
+.search-row { display: flex; gap: 8px; }
+.search-field { position: relative; flex: 1; }
+.search-icon { position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: hsl(var(--muted-fg)); pointer-events: none; }
+.search-input { padding-left: 36px; }
+.class-input { width: 104px; flex: none; text-transform: uppercase; }
+.class-input::placeholder { text-transform: none; }
+.friends { display: flex; flex-direction: column; gap: 6px; margin-top: 10px; max-height: 250px; overflow-y: auto; }
+.friend { display: flex; align-items: center; gap: 12px; padding: 9px 10px; border-radius: 14px; border: 1px solid hsl(var(--border)); }
+.friend--preset { background: hsl(var(--primary-light)); border-color: transparent; }
+.friend-av {
+  position: relative; flex: none; width: 40px; height: 40px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center; background: hsl(var(--primary)); color: #fff; font-weight: 800;
+}
+.friend-av img { width: 100%; height: 100%; border-radius: 50%; object-fit: cover; }
+.friend-av.online::after { content: ""; position: absolute; right: 0; bottom: 0; width: 11px; height: 11px; border-radius: 50%; background: #2ecc71; border: 2px solid hsl(var(--card)); }
+.friend-text { flex: 1; min-width: 0; display: flex; flex-direction: column; }
+.friend-name { font-size: 14px; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.friend-class { font-size: 12px; color: hsl(var(--muted-fg)); }
+.friend-btn {
+  flex: none; display: inline-flex; align-items: center; gap: 6px; height: 36px; padding: 0 13px; border-radius: 11px; border: none; cursor: pointer;
+  background: linear-gradient(135deg, var(--c1), var(--c2)); color: #fff; font-size: 13px; font-weight: 800;
+}
+.friend-btn:disabled { opacity: .4; cursor: not-allowed; }
+.empty { padding: 18px 8px; text-align: center; font-size: 13.5px; color: hsl(var(--muted-fg)); }
+.hint { margin-top: 8px; font-size: 12.5px; color: hsl(var(--warning)); }
+.error { margin-top: 8px; font-size: 13px; color: hsl(var(--destructive)); }
 
-.answers-grid { display:grid;gap:10px;margin-bottom:16px; }
-@media (min-width: 640px) { .answers-grid { grid-template-columns:1fr 1fr; } }
-.answer-btn { display:flex;align-items:center;gap:12px;padding:14px 16px;border-radius:14px;border:2px solid hsl(var(--border));background:hsl(var(--card));text-align:left;cursor:pointer;font-family:inherit;transition:all .15s;color:hsl(var(--fg));font-size:14px;font-weight:500; }
-.answer-btn:hover:not(:disabled) { border-color:hsl(var(--primary)/.5);background:hsl(var(--primary)/0.04); }
-.answer-selected { border-color:hsl(var(--primary));background:hsl(var(--primary)/0.07); }
-.answer-correct { border-color:hsl(142 60% 36%);background:hsl(142 60% 36%/0.09); }
-.answer-wrong { border-color:hsl(0 70% 50%);background:hsl(0 70% 50%/0.08); }
-.ans-letter { width:30px;height:30px;border-radius:8px;background:hsl(var(--muted));font-size:13px;font-weight:800;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:all .15s; }
-.answer-selected .ans-letter { background:hsl(var(--primary));color:white; }
-.answer-correct .ans-letter { background:hsl(142 60% 36%);color:white; }
-.answer-wrong .ans-letter { background:hsl(0 70% 50%);color:white; }
+.wait { padding: 30px 24px 26px; display: flex; flex-direction: column; align-items: center; gap: 10px; text-align: center; }
+.wait-ring { position: relative; width: 92px; height: 92px; display: flex; align-items: center; justify-content: center; }
+.wait-ring::before, .wait-ring::after {
+  content: ""; position: absolute; inset: 0; border-radius: 50%; border: 3px solid var(--c1); animation: ring 1.8s ease-out infinite;
+}
+.wait-ring::after { animation-delay: .9s; }
+@keyframes ring { from { transform: scale(.7); opacity: .9; } to { transform: scale(1.35); opacity: 0; } }
+.wait-av { width: 62px; height: 62px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 24px; font-weight: 900; color: #fff; background: linear-gradient(135deg, var(--c1), var(--c2)); }
+.wait-emoji { font-size: 54px; line-height: 1; }
+.wait-title { font-size: 16px; }
+.wait-sub { font-size: 13px; color: hsl(var(--muted-fg)); }
+.wait-bar { width: 100%; max-width: 280px; height: 6px; margin: 6px 0 8px; border-radius: 99px; background: hsl(var(--muted)); overflow: hidden; }
+.wait-bar-fill { height: 100%; background: linear-gradient(90deg, var(--c1), var(--c2)); transition: width .25s linear; }
 
-/* Flag-grid quiz */
-.flag-grid { display:grid; gap:12px; margin-bottom:16px; grid-template-columns:1fr 1fr; }
-.flag-btn { display:flex;flex-direction:column;align-items:center;gap:8px;padding:14px;border-radius:14px;border:2px solid hsl(var(--border));background:hsl(var(--card));cursor:pointer;font-family:inherit;transition:all .15s; }
-.flag-btn img { width:100%; max-width:160px; aspect-ratio:3/2; object-fit:cover; border-radius:6px; box-shadow:0 2px 8px rgba(0,0,0,.18); }
-.flag-btn span { font-size:13px;font-weight:600; }
-.flag-btn:hover:not(:disabled) { border-color:hsl(var(--primary)/.5); transform:translateY(-2px); }
-.flag-selected { border-color:hsl(var(--primary));background:hsl(var(--primary)/0.06); }
-.flag-correct { border-color:hsl(142 60% 36%);background:hsl(142 60% 36%/0.1); }
-.flag-wrong { border-color:hsl(0 70% 50%);background:hsl(0 70% 50%/0.08); }
+.modal-enter-active, .modal-leave-active { transition: opacity .2s; }
+.modal-enter-active .modal, .modal-leave-active .modal { transition: transform .25s cubic-bezier(.2, 1.3, .4, 1); }
+.modal-enter-from, .modal-leave-to { opacity: 0; }
+.modal-enter-from .modal, .modal-leave-to .modal { transform: translateY(20px) scale(.96); }
 
-.next-row { display:flex;justify-content:flex-end; }
-
-/* Bosh qotirma */
-.bt-question { padding:32px 24px;margin-bottom:16px;text-align:center; }
-.bt-image-wrap { display:flex;justify-content:center;margin-bottom:18px; }
-.bt-image { max-width:280px;width:100%;aspect-ratio:3/2;object-fit:contain;border-radius:12px;box-shadow:0 8px 24px -8px rgba(0,0,0,.35);background:#fff;padding:6px; }
-.bt-topic { font-size:12px;font-weight:700;color:hsl(var(--muted-fg));margin-bottom:14px;text-transform:uppercase;letter-spacing:.05em; }
-.bt-text { font-size:19px;font-weight:700;line-height:1.5;white-space:pre-line; }
-.bt-btns { display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:16px; }
-.bt-btn { display:flex;flex-direction:column;align-items:center;gap:10px;padding:32px 16px;border-radius:16px;border:2.5px solid transparent;font-size:15px;font-weight:700;cursor:pointer;font-family:inherit;transition:all .2s; }
-.bt-true { background:hsl(142 60% 36%/0.1);color:hsl(142 55% 26%);border-color:hsl(142 60% 36%/0.3); }
-.bt-true:hover:not(:disabled) { background:hsl(142 60% 36%/0.18);border-color:hsl(142 60% 36%); }
-.bt-false { background:hsl(0 70% 50%/0.08);color:hsl(0 60% 40%);border-color:hsl(0 70% 50%/0.28); }
-.bt-false:hover:not(:disabled) { background:hsl(0 70% 50%/0.15);border-color:hsl(0 70% 50%); }
-.bt-selected { transform:scale(1.03);box-shadow:0 6px 20px rgba(0,0,0,.1); }
-.bt-disabled { opacity:.45; }
-.bt-correct { box-shadow:0 0 0 3px hsl(142 60% 36% / .35); }
-.bt-wrong-bg { box-shadow:0 0 0 3px hsl(0 70% 50% / .35); }
-.bt-explain { padding:14px 18px;margin-bottom:14px;font-size:13.5px;line-height:1.5;background:hsl(var(--muted)); }
-
-/* Result */
-.result-card { padding:36px 28px;text-align:center;display:flex;flex-direction:column;align-items:center;gap:20px; }
-.result-icon { width:72px;height:72px;border-radius:50%;display:flex;align-items:center;justify-content:center; }
-.result-ok { background:hsl(142 60% 36%/0.12);color:hsl(142 55% 32%); }
-.result-bad { background:hsl(0 70% 50%/0.1);color:hsl(0 60% 46%); }
-.result-title { font-size:22px;font-weight:800; }
-.result-stats { display:flex;align-items:center;gap:20px;padding:16px 24px;background:hsl(var(--muted));border-radius:16px; }
-.result-stat { display:flex;flex-direction:column;align-items:center;gap:3px; }
-.rs-val { font-size:1.8rem;font-weight:800;line-height:1; }
-.rs-lbl { font-size:12px;color:hsl(var(--muted-fg)); }
-.rs-div { width:1px;height:40px;background:hsl(var(--border)); }
-.result-actions { display:flex;gap:10px;flex-wrap:wrap;justify-content:center; }
+@media (max-width: 560px) {
+  .hero { padding: 22px 18px; border-radius: 22px; }
+  .hero-stats { width: 100%; }
+  .hero-stat { flex: 1; min-width: 0; }
+  .tabs { display: flex; }
+  .tab { flex: 1; justify-content: center; padding: 9px 8px; font-size: 13px; }
+  .grid { grid-template-columns: 1fr 1fr; gap: 12px; }
+  .game-cover { height: 108px; }
+  .game-emoji { font-size: 52px; }
+  .game-body { padding: 12px; }
+  .game-title { font-size: 15px; }
+  .game-desc { display: none; }
+  .game-actions { flex-direction: column; margin-top: 10px; }
+  .game-btn { padding: 0 8px; font-size: 12.5px; white-space: nowrap; }
+  .game-tag { display: none; }
+}
 </style>

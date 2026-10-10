@@ -11,7 +11,7 @@ const translations = {
 
     // nav
     dashboard: "Bosh sahifa", lessons: "Darslar", games: "O'yinlar",
-    ratings: "Reyting", results: "Natijalar", videos: "Videolar", ai: "AI Yordamchi",
+    ratings: "Reyting", results: "Natijalar", videos: "Videolar", ai: "AI Yordamchi", chat: "Do'stlar chati",
     homework: "Uy ishi", classes: "Sinflar", active_students: "Faol o'quvchilar",
     settings: "Sozlamalar", logout: "Chiqish", students: "O'quvchilar",
     teacher_panel: "O'qituvchi paneli", student_panel: "O'quvchi paneli",
@@ -121,7 +121,7 @@ const translations = {
     student: "Ученик", grade: "Класс",
 
     dashboard: "Главная", lessons: "Уроки", games: "Игры",
-    ratings: "Рейтинг", results: "Результаты", videos: "Видео", ai: "AI Помощник",
+    ratings: "Рейтинг", results: "Результаты", videos: "Видео", ai: "AI Помощник", chat: "Чат с друзьями",
     homework: "Домашнее задание", classes: "Классы", active_students: "Активные ученики",
     settings: "Настройки", logout: "Выйти", students: "Ученики",
     teacher_panel: "Панель учителя", student_panel: "Панель ученика",

@@ -20,6 +20,7 @@ const router = createRouter({
         { path: "topics/:id/test",     component: () => import("./views/Test.vue") },
         { path: "homework",            component: () => import("./views/Homework.vue") },
         { path: "games",               component: () => import("./views/Games.vue") },
+        { path: "chat/:userId?",       component: () => import("./views/Chat.vue") },
         { path: "ratings",             component: () => import("./views/Ratings.vue") },
         { path: "videos",              component: () => import("./views/Videos.vue") },
         { path: "ai",                  component: () => import("./views/AI.vue") },

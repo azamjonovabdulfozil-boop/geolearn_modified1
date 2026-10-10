@@ -2,6 +2,7 @@ import jwt from "jsonwebtoken";
 import { createHash } from "crypto";
 import { getUserById, touchUserSeen, userSection, userClassName } from "./db.js";
 import { runInScope, parseSection } from "./scope.js";
+import { setUserResolver } from "./events.js";
 
 // Production'da JWT_SECRET majburiy: kodda yozilgan ochiq qiymat bilan
 // istalgan odam token yasay olardi. Render'da u avtomatik yaratiladi
@@ -30,6 +31,12 @@ export function hashPassword(password) {
 export function generateToken(userId) {
   return jwt.sign({ userId }, JWT_SECRET, { expiresIn: "30d" });
 }
+
+// /api/events?token=... — shaxsiy hodisalar (chat, o'yinga taklif) kimga borishini aniqlaydi
+setUserResolver(token => {
+  if (!token) return null;
+  try { return getUserById(jwt.verify(String(token), JWT_SECRET).userId)?.id ?? null; } catch { return null; }
+});
 
 export function requireAuth(req, res, next) {
   const auth = req.headers.authorization;

@@ -22,6 +22,7 @@ backend/data/activity.json
 backend/data/games.json
 backend/data/ai_chats.json
 backend/data/ai_logs.json
+backend/data/chat_messages.json
 backend/uploads/
 
 # ── Boshqalar ──
