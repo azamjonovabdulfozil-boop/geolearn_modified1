@@ -189,7 +189,7 @@
         </template>
         <ol class="rank-list">
           <li v-for="(s, i) in topStudents.slice(0, 7)" :key="s.userId" class="rank-row">
-            <span class="rank-pos" :class="`rank-${i + 1}`">{{ i < 3 ? ['🥇','🥈','🥉'][i] : i + 1 }}</span>
+            <span class="rank-pos" :class="`rank-${i + 1}`"><Medal v-if="i < 3" :size="18" :class="`medal-${i + 1}`" /><template v-else>{{ i + 1 }}</template></span>
             <div class="rank-avatar">{{ initial(s.name) }}</div>
             <div class="rank-info">
               <p class="rank-name">{{ s.name }}</p>
@@ -202,7 +202,7 @@
 
       <PanelCard title="E'tibor talab qiladi" subtitle="Yordam kerak bo'lgan o'quvchilar"
                  :icon="AlertTriangle" color="hsl(var(--chart-4))" :loading="loading"
-                 :empty="!atRisk.length" empty-text="Hammasi yaxshi ketyapti 👍">
+                 :empty="!atRisk.length" empty-text="Hammasi yaxshi ketyapti">
         <ul class="risk-list">
           <li v-for="r in atRisk" :key="r.userId" class="risk-row">
             <div class="risk-avatar">{{ initial(r.name) }}</div>
@@ -293,6 +293,7 @@ import {
   Trophy, Activity, RefreshCw, Play, Star, AlertTriangle, Clock, BarChart3,
   GraduationCap, Radio, ChevronRight, CheckCircle2, PlayCircle, MonitorPlay,
 } from "lucide-vue-next";
+import { Medal } from "lucide-vue-next";
 import { api } from "@shared/composables/api";
 import { useLive } from "@shared/composables/live";
 import { useSettingsStore } from "@shared/stores/settings";
@@ -467,6 +468,9 @@ useLive(["users", "activity", "video_views", "videos", "lessons", "topics", "gam
 </script>
 
 <style scoped>
+.medal-1 { color: #d4a017; }
+.medal-2 { color: #8e9aa6; }
+.medal-3 { color: #b36a2e; }
 .dash { display: flex; flex-direction: column; gap: 14px; }
 
 /* Sarlavha */

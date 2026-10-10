@@ -1,59 +1,81 @@
 <template>
   <div class="fade-in">
     <!-- 1v1 o'yin xonasi -->
-    <DuelRoom v-if="inRoom" :key="duel.current.id" :duel="duel.current" @close="duel.clear()" />
+    <DuelRoom v-if="inDuel" :key="duel.current.id" :duel="duel.current" @close="duel.clear()" />
+
+    <!-- Jamoaviy xona -->
+    <TeamRoom v-else-if="team.room" :key="team.room.id" :room="team.room" />
 
     <!-- Yolg'iz mashq -->
     <SoloRoom v-else-if="soloId" :game-id="soloId" @close="soloId = null" @invite="inviteFromSolo" />
 
     <!-- O'yinlar bosh sahifasi (o'qituvchi o'yini uzilib qolmasligi uchun yashiriladi, o'chirilmaydi) -->
-    <div v-show="!inRoom && !soloId">
+    <div v-show="!inDuel && !team.room && !soloId">
       <section class="hero">
         <div class="hero-glow"></div>
         <div class="hero-text">
           <p class="hero-kicker">GeoLearn Arena</p>
           <h1 class="hero-title">O'yinlar</h1>
-          <p class="hero-sub">Do'stingizni chaqiring va 1 ga 1 bellashing — g'alaba uchun reytingga ball qo'shiladi.</p>
+          <p class="hero-sub">{{ GAMES.length }} ta o'yin: do'stingiz bilan 1 ga 1 yoki jamoa bo'lib bellashing — g'alaba uchun reytingga ball qo'shiladi.</p>
         </div>
         <div class="hero-stats">
           <div class="hero-stat"><span class="hero-stat-val">{{ stats.played }}</span><span class="hero-stat-lbl">o'yin</span></div>
           <div class="hero-stat"><span class="hero-stat-val">{{ stats.won }}</span><span class="hero-stat-lbl">g'alaba</span></div>
           <div class="hero-stat"><span class="hero-stat-val">{{ winRate }}%</span><span class="hero-stat-lbl">yutuq</span></div>
         </div>
-        <span class="hero-art hero-art--1">⚽</span>
-        <span class="hero-art hero-art--2">🎮</span>
-        <span class="hero-art hero-art--3">🏆</span>
+        <Goal class="hero-art hero-art--1" :size="54" />
+        <Gamepad2 class="hero-art hero-art--2" :size="84" />
+        <Trophy class="hero-art hero-art--3" :size="54" />
       </section>
 
       <div class="tabs">
-        <button class="tab" :class="{ active: tab === 'duel' }" @click="tab = 'duel'"><Swords :size="15" /> Do'st bilan 1 ga 1</button>
-        <button class="tab" :class="{ active: tab === 'class' }" @click="tab = 'class'"><Users :size="15" /> O'qituvchi o'yini</button>
+        <button class="tab" :class="{ active: tab === 'duel' }" @click="tab = 'duel'"><Swords :size="15" /> 1 ga 1 <span class="tab-n">{{ GAMES.length }}</span></button>
+        <button class="tab" :class="{ active: tab === 'team' }" @click="tab = 'team'"><Users :size="15" /> Jamoaviy <span class="tab-n">{{ TEAM_GAMES.length }}</span></button>
+        <button class="tab" :class="{ active: tab === 'class' }" @click="tab = 'class'"><GraduationCap :size="15" /> O'qituvchi o'yini</button>
       </div>
 
-      <div v-show="tab === 'duel'">
-        <div v-if="preset" class="preset">
+      <div v-show="tab !== 'class'">
+        <div v-if="tab === 'team'" class="team-info">
+          <Users :size="20" />
+          <p><strong>Jamoaviy o'yin qanday ishlaydi:</strong> o'yinni tanlab xona ochasiz va raqib sardorni chaqirasiz. Ikkala sardor o'z jamoasiga o'yinchilarni qidirib qo'shadi (har jamoada {{ maxTeam }} tagacha). Keyin hamma bir vaqtda o'ynaydi va jamoalar ochkosi solishtiriladi.</p>
+        </div>
+        <div v-if="tab === 'duel' && preset" class="preset">
           <span>Do'st tanlandi: <strong>{{ preset.name }}</strong> — endi o'yinni tanlang</span>
           <button class="preset-x" @click="clearPreset" aria-label="Bekor qilish"><X :size="14" /></button>
         </div>
 
+        <div class="filters">
+          <div class="filter-search">
+            <Search :size="15" class="filter-icon" />
+            <input v-model="query" class="geo-input filter-input" placeholder="O'yin qidirish..." />
+          </div>
+          <div class="chips">
+            <button class="chip" :class="{ active: cat === 'all' }" @click="cat = 'all'">Hammasi</button>
+            <button v-for="c in CATEGORIES" :key="c.id" v-show="tab === 'duel' || c.id !== 'board'" class="chip" :class="{ active: cat === c.id }" @click="cat = c.id">{{ c.label }}</button>
+          </div>
+        </div>
+
         <div class="grid">
-          <article v-for="g in GAMES" :key="g.id" class="game" :style="{ '--c1': g.colors[0], '--c2': g.colors[1] }">
-            <button class="game-cover" @click="openInvite(g)">
+          <article v-for="g in shown" :key="g.id" class="game" :style="{ '--c1': g.colors[0], '--c2': g.colors[1] }">
+            <button class="game-cover" @click="tab === 'team' ? openTeam(g) : openInvite(g)">
               <span class="game-shine"></span>
-              <span class="game-emoji">{{ g.emoji }}</span>
-              <span class="game-pill">1 ga 1</span>
-              <span class="game-tag">{{ g.tag }}</span>
+              <component :is="g.icon" class="game-icon" :size="70" :stroke-width="1.6" />
+              <span class="game-pill">{{ tab === 'team' ? 'Jamoa' : '1 ga 1' }}</span>
+              <span class="game-tag">{{ catLabel(g.cat) }}</span>
             </button>
             <div class="game-body">
               <h3 class="game-title">{{ g.title }}</h3>
               <p class="game-desc">{{ g.desc }}</p>
               <div class="game-actions">
-                <button class="game-btn game-btn--main" @click="openInvite(g)"><Swords :size="14" /> Do'stni chaqirish</button>
-                <button v-if="g.solo" class="game-btn" @click="soloId = g.id" title="Yolg'iz mashq qilish"><Play :size="14" /> Mashq</button>
+                <button v-if="tab === 'team'" class="game-btn game-btn--main" :disabled="creating" @click="openTeam(g)"><Users :size="14" /> Xona ochish</button>
+                <button v-else class="game-btn game-btn--main" @click="openInvite(g)"><Swords :size="14" /> Do'stni chaqirish</button>
+                <button v-if="g.race" class="game-btn" @click="soloId = g.id" title="Yolg'iz mashq qilish"><Play :size="14" /> Mashq</button>
               </div>
             </div>
           </article>
         </div>
+        <p v-if="!shown.length" class="empty">Bunday o'yin topilmadi</p>
+        <p v-if="teamError" class="error center">{{ teamError }}</p>
       </div>
 
       <div v-show="tab === 'class'" class="class-tab">
@@ -66,7 +88,7 @@
       <div v-if="picked" class="modal-backdrop" @click.self="closeInvite">
         <div class="modal" :style="{ '--c1': picked.colors[0], '--c2': picked.colors[1] }">
           <header class="modal-head">
-            <span class="modal-emoji">{{ picked.emoji }}</span>
+            <component :is="picked.icon" :size="42" class="modal-icon" />
             <div class="modal-head-text">
               <p class="modal-title">{{ picked.title }}</p>
               <p class="modal-rules">{{ picked.rules }}</p>
@@ -85,19 +107,19 @@
 
           <!-- Javob: rad etildi / vaqt o'tdi -->
           <div v-else-if="closedNote" class="wait">
-            <span class="wait-emoji">{{ closedNote.emoji }}</span>
+            <span class="wait-icon"><component :is="closedNote.icon" :size="38" /></span>
             <p class="wait-title">{{ closedNote.text }}</p>
             <button class="geo-btn-primary" @click="duel.clear()">Boshqa do'stni chaqirish</button>
           </div>
 
           <div v-else class="modal-body">
             <!-- 1. Mavzu (faqat savol-javob o'yinlarida) -->
-            <section v-if="needsTopic" class="step">
+            <section v-if="picked.topic" class="step">
               <p class="step-title"><span class="step-num">1</span> Mavzuni tanlang</p>
               <input v-model="topicQuery" class="geo-input" placeholder="Mavzu qidirish: bayroqlar, poytaxtlar, daryolar..." />
               <div class="topics">
                 <button v-for="t in shownTopics" :key="t.id" class="topic" :class="{ active: topicId === t.id }" @click="topicId = t.id">
-                  <span>{{ t.icon }}</span>{{ t.name }}
+                  {{ t.name }}
                 </button>
                 <p v-if="!shownTopics.length" class="empty">Bunday mavzu topilmadi</p>
               </div>
@@ -105,7 +127,7 @@
 
             <!-- 2. Do'st -->
             <section class="step">
-              <p class="step-title"><span class="step-num">{{ needsTopic ? 2 : 1 }}</span> Do'stingizni toping</p>
+              <p class="step-title"><span class="step-num">{{ picked.topic ? 2 : 1 }}</span> Do'stingizni toping</p>
               <div v-if="preset" class="friend friend--preset">
                 <span class="friend-av">{{ initial(preset.name) }}</span>
                 <span class="friend-text"><span class="friend-name">{{ preset.name }}</span><span class="friend-class">Tanlangan do'st</span></span>
@@ -130,8 +152,7 @@
                       <span class="friend-name">{{ f.name }}</span>
                       <span class="friend-class">{{ f.className || '—' }} · {{ f.busy ? "o'yinda" : f.online ? "saytda" : "hozir saytda emas" }}</span>
                     </span>
-                    <button class="friend-btn" :disabled="!canInvite || inviting || f.busy || !f.online" @click="invite(f)"
-                      :title="!f.online ? 'Do\'stingiz saytga kirganda chaqirishingiz mumkin' : ''">
+                    <button class="friend-btn" :disabled="!canInvite || inviting || f.busy || !f.online" @click="invite(f)" :title="f.online ? '' : OFFLINE_TIP">
                       <Swords :size="14" /> Chaqirish
                     </button>
                   </div>
@@ -141,7 +162,7 @@
                   </p>
                 </div>
               </template>
-              <p v-if="needsTopic && !topicId" class="hint">Avval mavzuni tanlang</p>
+              <p v-if="picked.topic && !topicId" class="hint">Avval mavzuni tanlang</p>
               <p v-if="inviteError" class="error">{{ inviteError }}</p>
             </section>
           </div>
@@ -154,12 +175,14 @@
 <script setup>
 import { ref, computed, watch, onMounted, onUnmounted } from "vue";
 import { useRoute, useRouter } from "vue-router";
-import { Swords, Users, Play, X, Search } from "lucide-vue-next";
+import { Swords, Users, Play, X, Search, Goal, Gamepad2, Trophy, GraduationCap, UserX, Hourglass } from "lucide-vue-next";
 import { api } from "@shared/composables/api";
 import { useAuthStore } from "@shared/stores/auth";
 import { useDuelStore } from "../stores/duel";
-import { GAMES, gameById } from "../lib/games";
+import { useTeamStore } from "../stores/team";
+import { GAMES, TEAM_GAMES, CATEGORIES, gameById } from "../lib/games";
 import DuelRoom from "../components/games/DuelRoom.vue";
+import TeamRoom from "../components/games/TeamRoom.vue";
 import SoloRoom from "../components/games/SoloRoom.vue";
 import TeacherGame from "../components/games/TeacherGame.vue";
 
@@ -167,29 +190,53 @@ const route = useRoute();
 const router = useRouter();
 const auth = useAuthStore();
 const duel = useDuelStore();
+const team = useTeamStore();
 
+const OFFLINE_TIP = "Do'stingiz saytga kirganda chaqirishingiz mumkin";
 const tab = ref("duel");
+const cat = ref("all");
+const query = ref("");
 const soloId = ref(null);
 const stats = ref({ played: 0, won: 0 });
 const topics = ref([]);
-const serverGames = ref([]);
+const maxTeam = ref(5);
 
-const inRoom = computed(() => ["active", "finished"].includes(duel.current?.status));
+const inDuel = computed(() => ["active", "finished"].includes(duel.current?.status));
 const winRate = computed(() => (stats.value.played ? Math.round((stats.value.won / stats.value.played) * 100) : 0));
 const initial = name => (name || "?").charAt(0).toUpperCase();
+const catLabel = id => CATEGORIES.find(c => c.id === id)?.label ?? "";
+
+const shown = computed(() => {
+  const q = query.value.trim().toLocaleLowerCase();
+  return (tab.value === "team" ? TEAM_GAMES : GAMES)
+    .filter(g => cat.value === "all" || g.cat === cat.value)
+    .filter(g => !q || `${g.title} ${g.desc}`.toLocaleLowerCase().includes(q));
+});
+// Jamoaviy yorliqda stol o'yinlari yo'q — tanlangan toifa bo'sh qolmasin
+watch(tab, (t) => { if (t === "team" && cat.value === "board") cat.value = "all"; });
 
 async function loadMeta() {
   try {
-    const data = await api("/api/duels/games");
-    stats.value = data.stats ?? stats.value;
-    topics.value = data.topics ?? [];
-    serverGames.value = data.games ?? [];
+    const [d, t] = await Promise.all([api("/api/duels/games"), api("/api/teams/games")]);
+    stats.value = { played: (d.stats?.played ?? 0) + (t.stats?.played ?? 0), won: (d.stats?.won ?? 0) + (t.stats?.won ?? 0) };
+    topics.value = d.topics ?? [];
+    maxTeam.value = t.maxTeam ?? 5;
   } catch {}
 }
 // O'yin tugagach statistika yangilanadi
-watch(() => duel.current?.status, (s) => { if (s === "finished") loadMeta(); });
+watch(() => [duel.current?.status, team.room?.status], ([a, b]) => { if (a === "finished" || b === "finished") loadMeta(); });
 
-// ── Do'stni chaqirish ──
+// ── Jamoaviy xona ──
+const creating = ref(false);
+const teamError = ref("");
+async function openTeam(g) {
+  creating.value = true; teamError.value = "";
+  try { await team.create(g.id); }
+  catch (e) { teamError.value = e.message || "Xona ochilmadi"; }
+  creating.value = false;
+}
+
+// ── Do'stni 1 ga 1 chaqirish ──
 const picked = ref(null);           // tanlangan o'yin
 const topicId = ref(null);
 const topicQuery = ref("");
@@ -204,8 +251,7 @@ const tick = ref(0);
 let searchTimer = null;
 let tickTimer = null;
 
-const needsTopic = computed(() => serverGames.value.find(g => g.id === picked.value?.id)?.needsTopic ?? ["quiz", "truefalse"].includes(picked.value?.id));
-const canInvite = computed(() => !needsTopic.value || topicId.value != null);
+const canInvite = computed(() => !picked.value?.topic || topicId.value != null);
 const shownTopics = computed(() => {
   const q = topicQuery.value.trim().toLocaleLowerCase();
   return q ? topics.value.filter(t => `${t.name} ${t.category}`.toLocaleLowerCase().includes(q)) : topics.value;
@@ -222,8 +268,8 @@ const closedNote = computed(() => {
   const d = duel.current;
   if (!d || d.me !== 0) return null;
   const name = d.players[1].name;
-  if (d.status === "declined") return { emoji: "🙅", text: `${name} taklifni rad etdi` };
-  if (d.status === "expired") return { emoji: "⌛", text: `${name} javob bermadi` };
+  if (d.status === "declined") return { icon: UserX, text: `${name} taklifni rad etdi` };
+  if (d.status === "expired") return { icon: Hourglass, text: `${name} javob bermadi` };
   return null;
 });
 
@@ -288,6 +334,7 @@ watch(() => duel.current, (d) => {
 onMounted(() => {
   loadMeta();
   duel.refresh();
+  team.refresh();
   // Chatdagi "O'yinga chaqirish" tugmasidan kelgan bo'lsa
   const id = Number(route.query.friend);
   if (id) preset.value = { id, name: String(route.query.name || "Do'stingiz") };
@@ -329,9 +376,9 @@ onUnmounted(() => { clearInterval(tickTimer); clearTimeout(searchTimer); });
 }
 .hero-stat-val { display: block; font-size: 24px; font-weight: 900; line-height: 1.1; font-variant-numeric: tabular-nums; }
 .hero-stat-lbl { font-size: 11px; opacity: .75; text-transform: uppercase; letter-spacing: .06em; }
-.hero-art { position: absolute; font-size: 54px; opacity: .2; pointer-events: none; animation: float 6s ease-in-out infinite; }
+.hero-art { position: absolute; opacity: .16; pointer-events: none; animation: float 6s ease-in-out infinite; }
 .hero-art--1 { top: 12px; right: 34%; }
-.hero-art--2 { top: 44%; right: 6%; font-size: 84px; animation-delay: -2s; opacity: .14; }
+.hero-art--2 { top: 44%; right: 6%; animation-delay: -2s; opacity: .12; }
 .hero-art--3 { bottom: -10px; left: 46%; animation-delay: -4s; }
 @keyframes float { 50% { transform: translateY(-12px) rotate(8deg); } }
 
@@ -342,6 +389,29 @@ onUnmounted(() => { clearInterval(tickTimer); clearTimeout(searchTimer); });
   background: none; color: hsl(var(--muted-fg)); font-size: 14px; font-weight: 700; white-space: nowrap;
 }
 .tab.active { background: hsl(var(--card)); color: hsl(var(--fg)); box-shadow: 0 2px 8px rgba(0, 0, 0, .08); }
+.tab-n { padding: 0 7px; border-radius: 99px; background: hsl(var(--primary) / .14); color: hsl(var(--primary)); font-size: 11.5px; font-weight: 800; }
+
+.team-info {
+  display: flex; align-items: flex-start; gap: 12px; margin-bottom: 14px; padding: 12px 16px; border-radius: 16px;
+  background: hsl(var(--primary-light)); color: hsl(var(--primary)); font-size: 13.5px; line-height: 1.5;
+}
+.team-info svg { flex: none; margin-top: 2px; }
+.team-info p { color: hsl(var(--fg)); }
+
+/* ── Qidiruv va toifalar ── */
+.filters { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; margin-bottom: 16px; }
+.filter-search { position: relative; flex: 1 1 220px; max-width: 320px; }
+.filter-icon { position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: hsl(var(--muted-fg)); pointer-events: none; }
+.filter-input { padding-left: 36px; }
+.chips { display: flex; gap: 6px; flex-wrap: wrap; }
+.chip {
+  padding: 7px 14px; border-radius: 99px; cursor: pointer; white-space: nowrap;
+  border: 1.5px solid hsl(var(--border)); background: hsl(var(--card)); color: hsl(var(--muted-fg)); font-size: 13px; font-weight: 700;
+}
+.chip:hover { border-color: hsl(var(--primary)); color: hsl(var(--fg)); }
+.chip.active { border-color: hsl(var(--primary)); background: hsl(var(--primary)); color: #fff; }
+.error.center { text-align: center; margin-top: 12px; }
+.game-btn:disabled { opacity: .5; cursor: default; }
 
 .preset {
   display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-bottom: 14px; padding: 10px 14px;
@@ -369,8 +439,8 @@ onUnmounted(() => { clearInterval(tickTimer); clearTimeout(searchTimer); });
   background:
     repeating-linear-gradient(115deg, rgba(255, 255, 255, .05) 0 14px, transparent 14px 28px);
 }
-.game-emoji { position: relative; font-size: 74px; line-height: 1; filter: drop-shadow(0 12px 14px rgba(0, 0, 0, .4)); transition: transform .3s cubic-bezier(.2, 1.6, .4, 1); }
-.game:hover .game-emoji { transform: scale(1.16) rotate(-7deg); }
+.game-icon { position: relative; color: #fff; filter: drop-shadow(0 10px 12px rgba(0, 0, 0, .4)); transition: transform .3s cubic-bezier(.2, 1.6, .4, 1); }
+.game:hover .game-icon { transform: scale(1.14) rotate(-6deg); }
 .game-pill, .game-tag { position: absolute; top: 12px; padding: 3px 11px; border-radius: 99px; font-size: 11px; font-weight: 800; color: #fff; }
 .game-pill { right: 12px; background: rgba(0, 0, 0, .38); letter-spacing: .04em; }
 .game-tag { left: 12px; background: rgba(255, 255, 255, .22); backdrop-filter: blur(4px); }
@@ -401,7 +471,7 @@ onUnmounted(() => { clearInterval(tickTimer); clearTimeout(searchTimer); });
   display: flex; align-items: center; gap: 14px; padding: 18px 20px; color: #fff;
   background: linear-gradient(135deg, var(--c1), var(--c2));
 }
-.modal-emoji { font-size: 44px; line-height: 1; filter: drop-shadow(0 6px 8px rgba(0, 0, 0, .35)); }
+.modal-icon { flex: none; filter: drop-shadow(0 6px 8px rgba(0, 0, 0, .35)); }
 .modal-head-text { flex: 1; min-width: 0; }
 .modal-title { font-size: 19px; font-weight: 900; }
 .modal-rules { font-size: 12.5px; opacity: .88; line-height: 1.4; }
@@ -451,7 +521,7 @@ onUnmounted(() => { clearInterval(tickTimer); clearTimeout(searchTimer); });
 .wait-ring::after { animation-delay: .9s; }
 @keyframes ring { from { transform: scale(.7); opacity: .9; } to { transform: scale(1.35); opacity: 0; } }
 .wait-av { width: 62px; height: 62px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 24px; font-weight: 900; color: #fff; background: linear-gradient(135deg, var(--c1), var(--c2)); }
-.wait-emoji { font-size: 54px; line-height: 1; }
+.wait-icon { width: 76px; height: 76px; border-radius: 50%; display: flex; align-items: center; justify-content: center; background: hsl(var(--muted)); color: hsl(var(--muted-fg)); }
 .wait-title { font-size: 16px; }
 .wait-sub { font-size: 13px; color: hsl(var(--muted-fg)); }
 .wait-bar { width: 100%; max-width: 280px; height: 6px; margin: 6px 0 8px; border-radius: 99px; background: hsl(var(--muted)); overflow: hidden; }
@@ -467,10 +537,13 @@ onUnmounted(() => { clearInterval(tickTimer); clearTimeout(searchTimer); });
   .hero-stats { width: 100%; }
   .hero-stat { flex: 1; min-width: 0; }
   .tabs { display: flex; }
-  .tab { flex: 1; justify-content: center; padding: 9px 8px; font-size: 13px; }
+  .tab { flex: 1; justify-content: center; padding: 9px 6px; font-size: 12.5px; gap: 4px; }
+  .tab-n { display: none; }
+  .filter-search { max-width: none; }
+  .chips { flex-wrap: nowrap; overflow-x: auto; width: 100%; padding-bottom: 4px; }
   .grid { grid-template-columns: 1fr 1fr; gap: 12px; }
   .game-cover { height: 108px; }
-  .game-emoji { font-size: 52px; }
+  .game-icon { width: 50px; height: 50px; }
   .game-body { padding: 12px; }
   .game-title { font-size: 15px; }
   .game-desc { display: none; }

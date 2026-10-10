@@ -8,20 +8,24 @@
 //   quiz    — ikkalasiga bir xil savollar, kim ko'p va tez topsa
 //   penalty — navbat bilan penalti: biri tepadi, ikkinchisi darvozada
 //   ttt     — X-O, navbat bilan (2 ta g'alabagacha)
-//   race    — har kim o'z maydonida o'ynaydi (ilon, tank, xotira), ochko solishtiriladi
+//   grid    — katakli taxta: To'rt qator (tosh pastga tushadi), Besh qator
+//   rps     — tosh-qaychi-qog'oz, 3 ta g'alabagacha
+//   race    — har kim o'z maydonida o'ynaydi (ilon, tank, tez hisob ...), ochko solishtiriladi
 import { randomBytes, randomInt } from "crypto";
 import { sendToUser } from "./events.js";
 import { getUserById, updateUser, userClassName } from "./db.js";
 import { getTopicById, generateQuestions } from "./topics.js";
+import { RACE_GAMES } from "./gameCatalog.js";
 
 export const DUEL_GAMES = {
   quiz:      { kind: "quiz", title: "Bilimlar jangi", needsTopic: true, questionType: "quiz" },
   truefalse: { kind: "quiz", title: "Bosh qotirma: To'g'ri / Noto'g'ri", needsTopic: true, questionType: "bosh_qotirma" },
   penalty:   { kind: "penalty", title: "Penalti" },
   tictactoe: { kind: "ttt", title: "X-O" },
-  snake:     { kind: "race", title: "Ilon", duration: 90, maxScore: 600 },
-  tank:      { kind: "race", title: "Tank jangi", duration: 90, maxScore: 600 },
-  memory:    { kind: "race", title: "Xotira: bayroqlar", duration: 120, maxScore: 8, fastestWins: true },
+  connect4:  { kind: "grid", title: "To'rt qator", cols: 7, rows: 6, k: 4, gravity: true },
+  gomoku:    { kind: "grid", title: "Besh qator", cols: 10, rows: 10, k: 5, gravity: false },
+  rps:       { kind: "rps", title: "Tosh-qaychi-qog'oz" },
+  ...RACE_GAMES,
 };
 
 const INVITE_TTL_MS = 45_000;     // taklif shuncha vaqt kutadi
@@ -43,6 +47,14 @@ const TTT_BETWEEN_MS = 3_000;
 const TTT_WINS = 2;
 const TTT_MAX_ROUNDS = 5;
 const TTT_LINES = [[0, 1, 2], [3, 4, 5], [6, 7, 8], [0, 3, 6], [1, 4, 7], [2, 5, 8], [0, 4, 8], [2, 4, 6]];
+
+const GRID_TURN_MS = 25_000;
+const GRID_DIRS = [[1, 0], [0, 1], [1, 1], [1, -1]];
+
+const RPS_WINS = 3;
+const RPS_MAX_ROUNDS = 9;
+const RPS_CHOOSE_MS = 8_000;
+const RPS_REVEAL_MS = 2_800;
 
 const REWARD_WIN = 10;
 const REWARD_DRAW = 3;
@@ -183,6 +195,16 @@ function initState(duel) {
       turnEndsAt: duel.startsAt + TTT_TURN_MS, phaseEndsAt: null,
     };
   }
+  if (def.kind === "grid") {
+    return {
+      cols: def.cols, rows: def.rows, k: def.k, gravity: def.gravity,
+      board: Array(def.cols * def.rows).fill(null), turnIdx: 0, line: null, last: null,
+      turnEndsAt: duel.startsAt + GRID_TURN_MS,
+    };
+  }
+  if (def.kind === "rps") {
+    return { round: 1, wins: [0, 0], target: RPS_WINS, phase: "choose", phaseEndsAt: duel.startsAt + RPS_CHOOSE_MS, picks: {}, last: null };
+  }
   // race
   const fresh = () => ({ score: 0, done: false, finishedAt: null });
   return {
@@ -206,6 +228,8 @@ export function moveDuel(duel, userId, body = {}) {
   if (duel.kind === "quiz") reply = quizAnswer(duel, userId, body.answer);
   else if (duel.kind === "penalty") penaltyPick(duel, userId, body.zone);
   else if (duel.kind === "ttt") tttMove(duel, i, body.cell);
+  else if (duel.kind === "grid") gridMove(duel, i, body.cell);
+  else if (duel.kind === "rps") rpsPick(duel, userId, body.pick);
   else raceReport(duel, userId, body);
 
   notify(duel);
@@ -347,7 +371,92 @@ function tttAdvance(duel) {
   s.turnEndsAt = now() + TTT_TURN_MS;
 }
 
-// race (ilon, tank, xotira) ────────────────────────
+// katakli taxta (To'rt qator, Besh qator) ──────────
+
+function gridMove(duel, i, cell) {
+  const s = duel.state;
+  if (s.turnIdx !== i) throw new Error("Hozir sizning navbatingiz emas");
+  let c = Number(cell);
+  if (!Number.isInteger(c) || c < 0 || c >= s.board.length) throw new Error("Noto'g'ri katak");
+  if (s.gravity) {
+    // Tosh tanlangan ustunning eng pastki bo'sh katagiga tushadi
+    const col = c % s.cols;
+    c = -1;
+    for (let row = s.rows - 1; row >= 0; row--) {
+      if (s.board[row * s.cols + col] == null) { c = row * s.cols + col; break; }
+    }
+    if (c === -1) throw new Error("Bu ustun to'lgan");
+  } else if (s.board[c] != null) {
+    throw new Error("Bu katak band");
+  }
+  gridPlace(duel, i, c);
+}
+function gridPlace(duel, i, c) {
+  const s = duel.state;
+  s.board[c] = i;
+  s.last = c;
+  const x0 = c % s.cols, y0 = Math.floor(c / s.cols);
+  const at = (x, y) => (x >= 0 && y >= 0 && x < s.cols && y < s.rows ? s.board[y * s.cols + x] : undefined);
+  for (const [dx, dy] of GRID_DIRS) {
+    const line = [c];
+    for (const dir of [1, -1]) {
+      for (let n = 1; at(x0 + dx * n * dir, y0 + dy * n * dir) === i; n++) line.push((y0 + dy * n * dir) * s.cols + x0 + dx * n * dir);
+    }
+    if (line.length >= s.k) { s.line = line; return finish(duel, i, "score"); }
+  }
+  if (s.board.every(v => v != null)) return finish(duel, null, "score");
+  s.turnIdx = other(i);
+  s.turnEndsAt = now() + GRID_TURN_MS;
+}
+function sweepGrid(duel, t) {
+  const s = duel.state;
+  if (t < s.turnEndsAt) return;
+  // O'ylab qolgan o'yinchi uchun tasodifiy yurish
+  const free = s.board.map((v, k) => (v == null ? k : -1)).filter(k => k !== -1);
+  const pick = free[randomInt(0, free.length)];
+  try { gridMove(duel, s.turnIdx, pick); } catch { gridPlace(duel, s.turnIdx, pick); }
+}
+
+// tosh-qaychi-qog'oz ───────────────────────────────
+
+function rpsPick(duel, userId, pick) {
+  const s = duel.state;
+  if (s.phase !== "choose") throw new Error("Hozir tanlab bo'lmaydi");
+  const p = Number(pick);
+  if (![0, 1, 2].includes(p)) throw new Error("Noto'g'ri tanlov");
+  if (s.picks[userId] != null) return;
+  s.picks[userId] = p;
+  if (duel.players.every(pl => s.picks[pl.userId] != null)) rpsResolve(duel);
+}
+/** 0 — tosh, 1 — qog'oz, 2 — qaychi: qog'oz toshni, qaychi qog'ozni, tosh qaychini yengadi. */
+function rpsResolve(duel) {
+  const s = duel.state;
+  const [a, b] = duel.players.map(p => s.picks[p.userId]);
+  const d = (a - b + 3) % 3;
+  const winner = d === 0 ? null : d === 1 ? 0 : 1;
+  if (winner != null) s.wins[winner]++;
+  s.last = { round: s.round, picks: [a, b], winner };
+  s.phase = "reveal";
+  s.phaseEndsAt = now() + RPS_REVEAL_MS;
+}
+function sweepRps(duel, t) {
+  const s = duel.state;
+  if (t < s.phaseEndsAt) return;
+  if (s.phase === "choose") {
+    for (const p of duel.players) if (s.picks[p.userId] == null) s.picks[p.userId] = randomInt(0, 3);
+    return rpsResolve(duel);
+  }
+  const [a, b] = s.wins;
+  if (a >= s.target || b >= s.target || s.round >= RPS_MAX_ROUNDS) {
+    return finish(duel, a === b ? null : (a > b ? 0 : 1), "score");
+  }
+  s.round++;
+  s.picks = {};
+  s.phase = "choose";
+  s.phaseEndsAt = now() + RPS_CHOOSE_MS;
+}
+
+// race (ilon, tank, xotira ...) ────────────────────
 
 function raceReport(duel, userId, { score, done }) {
   const def = DUEL_GAMES[duel.game];
@@ -424,6 +533,8 @@ function sweep() {
     if (duel.kind === "quiz") sweepQuiz(duel, t);
     else if (duel.kind === "penalty") sweepPenalty(duel, t);
     else if (duel.kind === "ttt") sweepTtt(duel, t);
+    else if (duel.kind === "grid") sweepGrid(duel, t);
+    else if (duel.kind === "rps") sweepRps(duel, t);
     else sweepRace(duel, t);
     if (duel.status === "active" && JSON.stringify(duel.state) !== before) notify(duel);
   }
@@ -516,7 +627,18 @@ export function viewDuel(duel, userId) {
       },
     };
   }
-  if (duel.kind === "ttt") return { ...base, state: s };
+  if (duel.kind === "ttt" || duel.kind === "grid") return { ...base, state: s };
+  if (duel.kind === "rps") {
+    const oppId = duel.players[other(me)].userId;
+    return {
+      ...base,
+      state: {
+        round: s.round, wins: s.wins, target: s.target, phase: s.phase, phaseEndsAt: s.phaseEndsAt,
+        myPick: s.picks[userId] ?? null, oppPicked: s.picks[oppId] != null,
+        last: s.phase === "reveal" || duel.status === "finished" ? s.last : null,
+      },
+    };
+  }
 
   const mine = s.progress[userId];
   const theirs = s.progress[duel.players[other(me)].userId];

@@ -8,7 +8,7 @@
           <span v-else>{{ initial(me.name) }}</span>
         </div>
         <div>
-          <h1 class="hero-title">{{ greeting }}, {{ firstName }}! 👋</h1>
+          <h1 class="hero-title">{{ greeting }}, {{ firstName }}!</h1>
           <p class="hero-sub">
             {{ me.grade }}-sinf · Sinfda <b>#{{ me.gradeRank ?? '—' }}</b> o'rin ·
             Umumiy <b>#{{ me.rank ?? '—' }}</b>
@@ -190,7 +190,7 @@
         <ol class="rank-list">
           <li v-for="(s, i) in classTop" :key="s.userId" class="rank-row"
               :class="{ 'rank-row--me': s.userId === me.id }">
-            <span class="rank-pos">{{ i < 3 ? ['🥇','🥈','🥉'][i] : i + 1 }}</span>
+            <span class="rank-pos"><Medal v-if="i < 3" :size="18" :class="`medal-${i + 1}`" /><template v-else>{{ i + 1 }}</template></span>
             <div class="rank-avatar">{{ initial(s.name) }}</div>
             <div class="rank-info">
               <p class="rank-name">{{ s.name }}<span v-if="s.userId === me.id"> (siz)</span></p>
@@ -351,6 +351,9 @@ useLive(["activity", "users", "video_views", "videos", "lessons", "topics", "hom
 </script>
 
 <style scoped>
+.medal-1 { color: #d4a017; }
+.medal-2 { color: #8e9aa6; }
+.medal-3 { color: #b36a2e; }
 .dash { display: flex; flex-direction: column; gap: 13px; }
 
 /* Hero */

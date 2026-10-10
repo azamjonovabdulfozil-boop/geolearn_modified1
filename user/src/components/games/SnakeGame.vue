@@ -4,7 +4,7 @@
       @touchstart.passive="onTouchStart" @touchmove.prevent="onTouchMove">
       <canvas ref="canvasEl" class="snake-canvas"></canvas>
       <div v-if="dead" class="snake-dead">
-        <span class="snake-dead-emoji">💥</span>
+        <Worm :size="40" />
         <span>Ilon urildi!</span>
       </div>
     </div>
@@ -20,7 +20,7 @@
 
 <script setup>
 import { ref, watch, onMounted, onUnmounted } from "vue";
-import { ChevronUp, ChevronDown, ChevronLeft, ChevronRight } from "lucide-vue-next";
+import { ChevronUp, ChevronDown, ChevronLeft, ChevronRight, Worm } from "lucide-vue-next";
 import { makeRng, play } from "../../lib/gameKit";
 
 // Ilon o'yini. Olmalar ketma-ketligi `seed` dan olinadi — 1v1 da ikkala

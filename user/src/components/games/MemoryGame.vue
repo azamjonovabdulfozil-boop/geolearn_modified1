@@ -6,7 +6,7 @@
         :disabled="!active || card.open || card.done || busy" @click="flip(i)">
         <span class="card-inner">
           <span class="card-face card-back">
-            <span class="card-globe">🌍</span>
+            <Globe :size="30" class="card-globe" />
           </span>
           <span class="card-face card-front">
             <img v-if="!failed[card.code]" :src="`https://flagcdn.com/w160/${card.code}.png`" :alt="card.name" draggable="false" @error="failed[card.code] = true" />
@@ -21,6 +21,7 @@
 
 <script setup>
 import { ref, reactive, watch } from "vue";
+import { Globe } from "lucide-vue-next";
 import { makeRng, shuffle, play } from "../../lib/gameKit";
 
 // Xotira o'yini: bir xil bayroqlar juftini topish. Kartalar joylashuvi
@@ -102,7 +103,7 @@ watch(() => props.seed, reset, { immediate: true });
   border: 2px solid rgba(255, 255, 255, .35); box-shadow: 0 4px 0 rgba(0, 0, 0, .25);
 }
 .card:not(:disabled):hover .card-back { filter: brightness(1.12); }
-.card-globe { font-size: clamp(22px, 6vw, 34px); filter: drop-shadow(0 2px 3px rgba(0, 0, 0, .35)); }
+.card-globe { color: rgba(255, 255, 255, .9); filter: drop-shadow(0 2px 3px rgba(0, 0, 0, .35)); }
 .card-front { transform: rotateY(180deg); background: #fff; border: 2px solid #dfe6ee; padding: 6px; }
 .card-front img { width: 82%; aspect-ratio: 3 / 2; object-fit: cover; border-radius: 6px; box-shadow: 0 1px 4px rgba(0, 0, 0, .25); }
 .card-name { font-size: clamp(9px, 2.3vw, 12px); font-weight: 700; color: #1c2b3a; text-align: center; line-height: 1.1; }

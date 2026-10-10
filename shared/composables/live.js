@@ -13,9 +13,9 @@ let source = null;
 let sourceToken = null;
 let everConnected = false;
 
-// Shaxsiy hodisalar (do'stning xabari, o'yinga taklif, 1v1 o'yindagi yurish):
+// Shaxsiy hodisalar (do'stning xabari, o'yinga taklif, 1v1 va jamoaviy o'yin holati):
 // server ularni faqat shu foydalanuvchiga yuboradi, ma'lumoti bilan birga.
-const PERSONAL_EVENTS = ["duel", "chat"];
+const PERSONAL_EVENTS = ["duel", "chat", "team"];
 const personal = new Map();   // hodisa nomi → Set<fn>
 
 function currentToken() {

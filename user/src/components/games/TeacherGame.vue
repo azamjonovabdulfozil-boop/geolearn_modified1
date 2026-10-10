@@ -27,7 +27,6 @@
       <div class="page-header">
         <h1 class="geo-page-title">{{ activeGame?.title }}</h1>
         <p class="geo-page-sub">
-          <span v-if="activeGame?.topicIcon">{{ activeGame.topicIcon }}</span>
           {{ activeGame?.topicName }} · O'qituvchi o'yinni boshlaguncha kuting
         </p>
       </div>
@@ -117,7 +116,6 @@
 
       <div class="bt-question geo-card">
         <div class="bt-topic">
-          <span v-if="activeGame?.topicIcon">{{ activeGame.topicIcon }}</span>
           {{ activeGame?.topicName }}
         </div>
         <div v-if="currentBT?.imageUrl" class="bt-image-wrap">
@@ -160,7 +158,7 @@
         <div class="result-icon" :class="resultPct >= 60 ? 'result-ok' : 'result-bad'">
           <component :is="resultPct >= 60 ? CheckCircle : XCircle" :size="36" />
         </div>
-        <p class="result-title">{{ resultPct >= 60 ? 'Barakalla! 🎉' : "Yana harakat qiling" }}</p>
+        <p class="result-title">{{ resultPct >= 60 ? 'Barakalla!' : "Yana harakat qiling" }}</p>
         <div class="result-stats">
           <div class="result-stat"><span class="rs-val" style="color:hsl(var(--primary))">{{ gameScore }}</span><span class="rs-lbl">ball</span></div>
           <div class="rs-div"></div>

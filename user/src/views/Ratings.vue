@@ -58,7 +58,7 @@
           class="rating-row"
           :class="{ 'rating-row--me': entry.userId === auth.user?.id }">
           <div class="rank-col">
-            <span v-if="entry.rank <= 3" class="medal">{{ ['🥇','🥈','🥉'][entry.rank-1] }}</span>
+            <span v-if="entry.rank <= 3" class="medal"><Medal :size="22" :class="`medal-${entry.rank}`" /></span>
             <span v-else class="rank-n">#{{ entry.rank }}</span>
           </div>
           <div class="user-av">{{ entry.name.charAt(0).toUpperCase() }}</div>
@@ -83,7 +83,7 @@
 
 <script setup>
 import { ref, onMounted } from "vue";
-import { Trophy, Star } from "lucide-vue-next";
+import { Trophy, Star, Medal } from "lucide-vue-next";
 import { api } from "@shared/composables/api";
 import { useLive } from "@shared/composables/live";
 import { useAuthStore } from "@shared/stores/auth";
@@ -124,6 +124,9 @@ useLive(["users", "activity"], () => Promise.all([loadMe(), loadRatings(true)]))
 </script>
 
 <style scoped>
+.medal-1 { color: #d4a017; }
+.medal-2 { color: #8e9aa6; }
+.medal-3 { color: #b36a2e; }
 /* Sinf bo'limlari */
 .grade-tabs { display:flex;flex-wrap:wrap;gap:7px;margin-bottom:14px; }
 .grade-tab {

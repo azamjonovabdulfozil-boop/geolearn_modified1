@@ -12,8 +12,8 @@
           </div>
           <span class="brand-name">{{ settings.brandName }}</span>
         </div>
-        <div v-if="APP_ROLE === 'teacher'" class="role-badge teacher-badge">🏫 O'qituvchi portali</div>
-        <div v-else-if="APP_ROLE === 'student'" class="role-badge student-badge">🎓 O'quvchi portali</div>
+        <div v-if="APP_ROLE === 'teacher'" class="role-badge teacher-badge"><School :size="14" class="role-ico" /> O'qituvchi portali</div>
+        <div v-else-if="APP_ROLE === 'student'" class="role-badge student-badge"><GraduationCap :size="14" class="role-ico" /> O'quvchi portali</div>
         <h2 class="left-title">Bilimingizni oshiring</h2>
         <p class="left-desc">Interaktiv darslar, testlar va o'yinlar orqali geografiyani o'rganing</p>
         <div class="features">
@@ -28,9 +28,9 @@
     <div class="auth-right">
       <div class="auth-box">
         <div class="auth-head">
-          <div v-if="APP_ROLE === 'teacher'" class="role-tag teacher-tag">🏫 O'qituvchi kirishi</div>
-          <div v-else-if="APP_ROLE === 'student'" class="role-tag student-tag">🎓 O'quvchi kirishi</div>
-          <h1 class="auth-title">Xush kelibsiz! 👋</h1>
+          <div v-if="APP_ROLE === 'teacher'" class="role-tag teacher-tag"><School :size="13" class="role-ico" /> O'qituvchi kirishi</div>
+          <div v-else-if="APP_ROLE === 'student'" class="role-tag student-tag"><GraduationCap :size="13" class="role-ico" /> O'quvchi kirishi</div>
+          <h1 class="auth-title">Xush kelibsiz!</h1>
           <p class="auth-sub">Akkauntingizga kiring</p>
         </div>
 
@@ -86,7 +86,7 @@
 <script setup>
 import { ref } from "vue";
 import { useRouter, useRoute, RouterLink } from "vue-router";
-import { User, Lock, LogIn, Eye, EyeOff, Loader2, BookOpen, Gamepad2, Trophy } from "lucide-vue-next";
+import { User, Lock, LogIn, Eye, EyeOff, Loader2, BookOpen, Gamepad2, Trophy, School, GraduationCap } from "lucide-vue-next";
 import { useAuthStore } from "@shared/stores/auth";
 import { useSettingsStore } from "@shared/stores/settings";
 import { safeRedirect } from "@shared/router/guard";
@@ -162,6 +162,7 @@ async function handleLogin() {
 </script>
 
 <style scoped>
+.role-ico { display: inline-block; vertical-align: -2px; margin-right: 3px; }
 .auth-shell {
   min-height: 100vh;
   display: flex;

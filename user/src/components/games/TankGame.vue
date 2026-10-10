@@ -4,12 +4,12 @@
       <canvas ref="canvasEl" class="tank-canvas"></canvas>
       <div class="tank-hud">
         <span class="hud-lives">
-          <span v-for="i in 3" :key="i" class="hud-heart" :class="{ lost: i > lives }">❤</span>
+          <Heart v-for="i in 3" :key="i" :size="15" class="hud-heart" :class="{ lost: i > lives }" fill="currentColor" />
         </span>
-        <span class="hud-kills">💥 {{ kills }}</span>
+        <span class="hud-kills"><Crosshair :size="14" /> {{ kills }}</span>
       </div>
       <div v-if="lives <= 0" class="tank-dead">
-        <span class="tank-dead-emoji">🔥</span>
+        <Flame :size="40" />
         <span>Tankingiz yo'q qilindi</span>
       </div>
     </div>
@@ -33,7 +33,7 @@
 
 <script setup>
 import { ref, watch, onMounted, onUnmounted } from "vue";
-import { ChevronUp, ChevronDown, ChevronLeft, ChevronRight, Crosshair } from "lucide-vue-next";
+import { ChevronUp, ChevronDown, ChevronLeft, ChevronRight, Crosshair, Heart, Flame } from "lucide-vue-next";
 import { makeRng, play } from "../../lib/gameKit";
 
 // Tank jangi: o'yinchi maydonda dushman tanklarini yo'q qiladi.
@@ -408,7 +408,7 @@ onUnmounted(() => {
   position: absolute; top: 8px; left: 8px; right: 8px; display: flex; justify-content: space-between; pointer-events: none;
   font-weight: 800; font-size: 14px; color: #fff; text-shadow: 0 1px 3px rgba(0, 0, 0, .8);
 }
-.hud-lives, .hud-kills { padding: 3px 10px; border-radius: 99px; background: rgba(0, 0, 0, .45); }
+.hud-lives, .hud-kills { display: inline-flex; align-items: center; gap: 4px; padding: 3px 10px; border-radius: 99px; background: rgba(0, 0, 0, .45); }
 .hud-heart { color: #ff5252; margin-right: 2px; }
 .hud-heart.lost { color: rgba(255, 255, 255, .25); }
 .tank-dead {

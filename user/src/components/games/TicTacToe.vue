@@ -4,7 +4,7 @@
       <template v-if="finished">O'yin tugadi</template>
       <template v-else-if="!started">Tayyorlaning...</template>
       <template v-else-if="state.phase === 'between'">
-        {{ state.roundWinner == null ? "Durang!" : state.roundWinner === duel.me ? "Bu raund sizniki! 🎉" : "Bu raundni raqib oldi" }}
+        {{ state.roundWinner == null ? "Durang!" : state.roundWinner === duel.me ? "Bu raund sizniki!" : "Bu raundni raqib oldi" }}
       </template>
       <template v-else-if="myTurn"><strong>Sizning navbatingiz</strong> — {{ mySign }} qo'ying</template>
       <template v-else>Raqib o'ylayapti...</template>

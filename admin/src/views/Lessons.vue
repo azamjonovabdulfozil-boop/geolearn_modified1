@@ -78,7 +78,7 @@
             </div>
 
             <p v-if="pdfResult.mode" class="pdf-mode">
-              🔍 {{ modeLabel }}<span v-if="pdfResult.pages"> · {{ pdfResult.pages }} sahifa</span>
+              <Search :size="13" style="display:inline-block;vertical-align:-2px" /> {{ modeLabel }}<span v-if="pdfResult.pages"> · {{ pdfResult.pages }} sahifa</span>
             </p>
 
             <!-- Mavzular ro'yxati -->
@@ -168,7 +168,7 @@
 <script setup>
 import { ref, computed, onMounted } from "vue";
 import { RouterLink } from "vue-router";
-import { Plus, BookOpen, Trash2, Upload, FileText, Loader2, X, CheckCircle2 } from "lucide-vue-next";
+import { Plus, BookOpen, Trash2, Upload, FileText, Loader2, X, CheckCircle2, Search } from "lucide-vue-next";
 import { api, resolveUrl } from "@shared/composables/api";
 import { useLive } from "@shared/composables/live";
 import { useGradesStore } from "@shared/stores/grades";

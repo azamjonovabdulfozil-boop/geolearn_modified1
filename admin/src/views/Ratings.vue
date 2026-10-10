@@ -53,7 +53,7 @@
           class="rating-row" @mouseenter="hoverId = entry.userId" @mouseleave="hoverId = null">
           <!-- Rank -->
           <div class="rank-col">
-            <span v-if="entry.rank <= 3" class="rank-medal">{{ ['🥇','🥈','🥉'][entry.rank-1] }}</span>
+            <span v-if="entry.rank <= 3" class="rank-medal"><Medal :size="22" :class="`medal-${entry.rank}`" /></span>
             <span v-else class="rank-num">#{{ entry.rank }}</span>
           </div>
           <!-- Avatar -->
@@ -91,7 +91,7 @@
 
 <script setup>
 import { ref, computed, watch, onMounted } from "vue";
-import { Trophy, Star, Trash2, Users, Loader2, Search } from "lucide-vue-next";
+import { Trophy, Star, Trash2, Users, Loader2, Search, Medal } from "lucide-vue-next";
 import { api } from "@shared/composables/api";
 import { useLive } from "@shared/composables/live";
 import { usePaged } from "@shared/composables/paged";
@@ -153,6 +153,9 @@ async function deleteStudent(entry) {
 </script>
 
 <style scoped>
+.medal-1 { color: #d4a017; }
+.medal-2 { color: #8e9aa6; }
+.medal-3 { color: #b36a2e; }
 .page-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 24px; flex-wrap: wrap; gap: 12px; }
 .ml-auto { margin-left: auto; }
 

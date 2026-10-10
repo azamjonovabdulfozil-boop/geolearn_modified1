@@ -2,7 +2,7 @@
   <div class="qd">
     <!-- Men tugatdim, raqib hali javob beryapti -->
     <div v-if="state.me.done && !feedback" class="qd-wait geo-card">
-      <div class="qd-wait-icon">⏳</div>
+      <div class="qd-wait-icon"><Hourglass :size="44" /></div>
       <p class="qd-wait-title">Siz savollarni tugatdingiz!</p>
       <p class="qd-wait-sub">Sizning ballingiz: <strong>{{ state.me.score }}</strong> · to'g'ri javoblar: {{ state.me.correct }} / {{ state.total }}</p>
       <p class="qd-wait-sub">Raqib {{ Math.min(state.opp.idx + 1, state.total) }}-savolda...</p>
@@ -55,7 +55,7 @@
 
 <script setup>
 import { ref, computed, watch, onMounted, onUnmounted } from "vue";
-import { CheckCircle, XCircle } from "lucide-vue-next";
+import { CheckCircle, XCircle, Hourglass } from "lucide-vue-next";
 import { useDuelStore } from "../../stores/duel";
 import { play } from "../../lib/gameKit";
 
@@ -189,7 +189,7 @@ button:disabled { cursor: default; }
 .qd-explain { display: block; margin-top: 4px; font-size: 13px; font-weight: 500; color: hsl(var(--fg)); }
 
 .qd-wait { padding: 36px 20px; text-align: center; }
-.qd-wait-icon { font-size: 44px; animation: qd-spin 2.4s ease-in-out infinite; }
+.qd-wait-icon { display: inline-flex; color: hsl(var(--primary)); animation: qd-spin 2.4s ease-in-out infinite; }
 @keyframes qd-spin { 50% { transform: rotate(180deg); } }
 .qd-wait-title { margin-top: 10px; font-size: 19px; font-weight: 800; }
 .qd-wait-sub { margin-top: 6px; font-size: 14px; color: hsl(var(--muted-fg)); }

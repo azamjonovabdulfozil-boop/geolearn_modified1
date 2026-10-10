@@ -8,9 +8,9 @@
         <span class="side-score">{{ scores[0] }}</span>
       </div>
       <div class="mid">
-        <span class="mid-emoji">{{ game.emoji }}</span>
-        <span class="mid-title">{{ duel.title }}</span>
-        <span v-if="duel.topic" class="mid-topic">{{ duel.topic.icon }} {{ duel.topic.name }}</span>
+        <component :is="game.icon" :size="26" class="mid-icon" />
+        <span class="mid-title">{{ game.title }}</span>
+        <span v-if="duel.topic" class="mid-topic">{{ duel.topic.name }}</span>
         <span v-else-if="isRace && running" class="mid-clock" :class="{ urgent: raceLeft <= 10 }">{{ clock(raceLeft) }}</span>
       </div>
       <div class="side side--opp">
@@ -24,8 +24,10 @@
       <QuizDuel v-if="duel.kind === 'quiz'" :duel="duel" />
       <PenaltyGame v-else-if="duel.kind === 'penalty'" :duel="duel" />
       <TicTacToe v-else-if="duel.kind === 'ttt'" :duel="duel" />
+      <GridGame v-else-if="duel.kind === 'grid'" :duel="duel" />
+      <RpsGame v-else-if="duel.kind === 'rps'" :duel="duel" />
       <template v-else>
-        <component :is="raceComponent" :seed="duel.state.seed" :active="running" @score="onScore" @over="onOver" />
+        <component :is="arcade.component" v-bind="arcade.props" :seed="duel.state.seed" :active="running" @score="onScore" @over="onOver" />
         <p v-if="iAmDone && !finished" class="race-wait">
           Siz tugatdingiz — raqib hali o'ynayapti (uning hisobi: <strong>{{ duel.state.opp.score }}</strong>)
         </p>
@@ -43,7 +45,7 @@
       <Transition name="fade">
         <div v-if="finished" class="overlay overlay--result">
           <div class="result" :class="outcome">
-            <span class="result-emoji">{{ outcome === 'win' ? '🏆' : outcome === 'lose' ? '😔' : '🤝' }}</span>
+            <span class="result-icon"><component :is="outcome === 'win' ? Trophy : outcome === 'lose' ? Frown : Handshake" :size="44" /></span>
             <p class="result-title">{{ outcome === 'win' ? "G'alaba!" : outcome === 'lose' ? "Bu safar yutqazdingiz" : "Durang" }}</p>
             <p class="result-sub">{{ reasonText }}</p>
             <div class="result-score">
@@ -68,23 +70,22 @@
 
 <script setup>
 import { ref, computed, onMounted, onUnmounted } from "vue";
-import { ArrowLeft, RotateCcw, Flag } from "lucide-vue-next";
+import { ArrowLeft, RotateCcw, Flag, Trophy, Frown, Handshake } from "lucide-vue-next";
 import { useDuelStore } from "../../stores/duel";
 import { gameById } from "../../lib/games";
 import { clock, play } from "../../lib/gameKit";
 import QuizDuel from "./QuizDuel.vue";
 import PenaltyGame from "./PenaltyGame.vue";
 import TicTacToe from "./TicTacToe.vue";
-import SnakeGame from "./SnakeGame.vue";
-import TankGame from "./TankGame.vue";
-import MemoryGame from "./MemoryGame.vue";
+import GridGame from "./board/GridGame.vue";
+import RpsGame from "./board/RpsGame.vue";
+import { ARCADE } from "../../lib/arcade";
 
 // 1v1 o'yin xonasi: hisob taxtasi, sanoq, o'yinning o'zi va natija.
 const props = defineProps({ duel: { type: Object, required: true } });
 defineEmits(["close"]);
 const store = useDuelStore();
 
-const RACE = { snake: SnakeGame, tank: TankGame, memory: MemoryGame };
 const REPORT_MS = 700;     // ochko serverga shundan tez-tez yuborilmaydi
 
 const tick = ref(0);
@@ -98,7 +99,7 @@ const me = computed(() => props.duel.players[props.duel.me]);
 const opp = computed(() => props.duel.players[props.duel.me === 0 ? 1 : 0]);
 const finished = computed(() => props.duel.status === "finished");
 const isRace = computed(() => props.duel.kind === "race");
-const raceComponent = computed(() => RACE[props.duel.game]);
+const arcade = computed(() => ARCADE[props.duel.game]);
 const initial = name => (name || "?").charAt(0).toUpperCase();
 
 const countdown = computed(() => {
@@ -111,7 +112,12 @@ const scores = computed(() => {
   const s = props.duel.state, i = props.duel.me, o = i === 0 ? 1 : 0;
   if (!s) return [0, 0];
   if (props.duel.kind === "penalty") return [s.score[i], s.score[o]];
-  if (props.duel.kind === "ttt") return [s.wins[i], s.wins[o]];
+  if (props.duel.kind === "ttt" || props.duel.kind === "rps") return [s.wins[i], s.wins[o]];
+  if (props.duel.kind === "grid") {
+    // Taxta o'yinida hisob yo'q — tugagach g'olibga 1 yoziladi
+    const w = props.duel.result?.winnerId;
+    return w == null ? [0, 0] : [w === me.value.userId ? 1 : 0, w === me.value.userId ? 0 : 1];
+  }
   return [Math.max(s.me.score, localScore.value), s.opp.score];
 });
 
@@ -216,7 +222,7 @@ onUnmounted(() => { clearInterval(timer); clearTimeout(sendTimer); });
 .side-class { font-size: 11px; opacity: .8; }
 .side-score { font-size: 34px; font-weight: 900; line-height: 1; min-width: 38px; text-align: center; font-variant-numeric: tabular-nums; text-shadow: 0 2px 8px rgba(0, 0, 0, .3); }
 .mid { display: flex; flex-direction: column; align-items: center; gap: 1px; padding: 0 6px; }
-.mid-emoji { font-size: 26px; line-height: 1; }
+.mid-icon { filter: drop-shadow(0 2px 4px rgba(0, 0, 0, .35)); }
 .mid-title { font-size: 12px; font-weight: 800; letter-spacing: .05em; text-transform: uppercase; white-space: nowrap; }
 .mid-topic { font-size: 11px; opacity: .85; max-width: 150px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .mid-clock { font-size: 17px; font-weight: 900; font-variant-numeric: tabular-nums; padding: 0 10px; border-radius: 99px; background: rgba(0, 0, 0, .3); }
@@ -238,7 +244,12 @@ onUnmounted(() => { clearInterval(timer); clearTimeout(sendTimer); });
   width: min(400px, 92%); padding: 28px 24px; text-align: center; border-radius: 26px;
   background: hsl(var(--card)); border: 1px solid hsl(var(--border)); box-shadow: 0 24px 60px rgba(0, 0, 0, .25);
 }
-.result-emoji { font-size: 64px; line-height: 1; display: inline-block; animation: result-in .6s cubic-bezier(.2, 1.6, .4, 1); }
+.result-icon {
+  width: 84px; height: 84px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center;
+  background: hsl(var(--muted)); color: hsl(var(--muted-fg)); animation: result-in .6s cubic-bezier(.2, 1.6, .4, 1);
+}
+.result.win .result-icon { background: hsl(38 90% 48% / .18); color: hsl(38 90% 42%); }
+.result.draw .result-icon { background: hsl(var(--primary-light)); color: hsl(var(--primary)); }
 @keyframes result-in { from { transform: scale(0) rotate(-30deg); } }
 .result-title { margin-top: 8px; font-size: 26px; font-weight: 900; }
 .result.win .result-title { color: hsl(38 90% 45%); }

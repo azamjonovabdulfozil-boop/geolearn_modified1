@@ -19,7 +19,7 @@ export const useChatStore = defineStore("chat", () => {
 
   function preview(m) {
     if (m.text) return m.text;
-    return { image: "📷 Rasm", voice: "🎤 Ovozli xabar", audio: "🎵 Audio", video: "🎬 Video", file: "📎 " + (m.file?.name ?? "Fayl") }[m.kind] ?? "Xabar";
+    return { image: "Rasm", voice: "Ovozli xabar", audio: "Audio", video: "Video", file: m.file?.name ?? "Fayl" }[m.kind] ?? "Xabar";
   }
 
   function onEvent(e) {

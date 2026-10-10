@@ -32,6 +32,7 @@ import classRoutes from "./routes/classes.js";
 import gradeRoutes from "./routes/grades.js";
 import duelRoutes from "./routes/duels.js";
 import chatRoutes from "./routes/chat.js";
+import teamRoutes from "./routes/teams.js";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const REPO_ROOT = join(__dirname, "../..");
@@ -375,6 +376,11 @@ function createApp(siteKey) {
   app.use(
     "/api",
     chatRoutes
+  );
+
+  app.use(
+    "/api",
+    teamRoutes
   );
 
   // ─────────────────────────────────────────────────────────

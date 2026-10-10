@@ -6,7 +6,7 @@
         <span class="pen-name">{{ i === duel.me ? "Siz" : p.name }}</span>
         <span class="pen-dots">
           <span v-for="(k, n) in kicksOf(i)" :key="n" class="pen-dot" :class="k">
-            {{ k === 'goal' ? '⚽' : k === 'miss' ? '✕' : '' }}
+            <Check v-if="k === 'goal'" :size="14" /><X v-else-if="k === 'miss'" :size="14" />
           </span>
         </span>
         <span class="pen-total">{{ state.score[i] }}</span>
@@ -19,12 +19,12 @@
       <!-- Darvozaning 6 qismi -->
       <div v-if="canPick" class="pen-zones">
         <button v-for="z in 6" :key="z" class="pen-zone" :class="{ keeper: !iShoot }" @click="pick(z - 1)">
-          <span class="pen-zone-mark">{{ iShoot ? '🎯' : '🧤' }}</span>
+          <component :is="iShoot ? Crosshair : Hand" :size="30" class="pen-zone-mark" />
         </button>
       </div>
       <div v-else-if="state.phase === 'choose' && state.myPick != null && !finished" class="pen-zones pen-zones--picked">
         <span v-for="z in 6" :key="z" class="pen-zone pen-zone--static" :class="{ chosen: state.myPick === z - 1 }">
-          <span v-if="state.myPick === z - 1" class="pen-zone-mark">{{ iShoot ? '🎯' : '🧤' }}</span>
+          <component :is="iShoot ? Crosshair : Hand" v-if="state.myPick === z - 1" :size="30" class="pen-zone-mark" />
         </span>
       </div>
 
@@ -41,10 +41,10 @@
       <template v-else-if="!started">Tayyorlaning...</template>
       <template v-else-if="state.phase === 'reveal'">Keyingi zarbaga tayyorlaning...</template>
       <template v-else-if="canPick">
-        <strong>{{ iShoot ? "Siz tepasiz ⚽" : "Siz darvozadasiz 🧤" }}</strong>
+        <strong>{{ iShoot ? "Siz tepasiz" : "Siz darvozadasiz" }}</strong>
         — {{ iShoot ? "to'pni qayerga yo'llaysiz?" : "qaysi tomonga sakraysiz?" }}
       </template>
-      <template v-else>Tanlandi ✓ — raqib o'ylayapti...</template>
+      <template v-else>Tanlandi — raqib o'ylayapti...</template>
     </div>
     <div v-if="started && state.phase === 'choose' && !finished" class="pen-timer">
       <div class="pen-timer-fill" :class="{ urgent: leftPct < 30 }" :style="{ width: leftPct + '%' }"></div>
@@ -55,6 +55,7 @@
 
 <script setup>
 import { ref, computed, watch, onMounted, onUnmounted } from "vue";
+import { Check, X, Crosshair, Hand } from "lucide-vue-next";
 import { useDuelStore } from "../../stores/duel";
 import { play } from "../../lib/gameKit";
 
@@ -358,7 +359,7 @@ onUnmounted(() => {
   width: 24px; height: 24px; border-radius: 50%; display: flex; align-items: center; justify-content: center;
   font-size: 12px; font-weight: 900; border: 2px dashed hsl(var(--border));
 }
-.pen-dot.goal { border: none; background: hsl(142 60% 40% / .18); }
+.pen-dot.goal { border: none; background: hsl(142 60% 40% / .2); color: hsl(142 60% 32%); }
 .pen-dot.miss { border: none; background: hsl(var(--destructive) / .16); color: hsl(var(--destructive)); }
 .pen-total { font-size: 20px; font-weight: 900; min-width: 22px; text-align: right; }
 
@@ -379,7 +380,7 @@ onUnmounted(() => {
 .pen-zone:hover { background: rgba(255, 235, 59, .32); }
 .pen-zone.keeper:hover { background: rgba(100, 200, 255, .32); }
 .pen-zone:active { transform: scale(.95); }
-.pen-zone-mark { font-size: clamp(18px, 4.6vw, 30px); opacity: 0; transition: opacity .12s; filter: drop-shadow(0 2px 3px rgba(0, 0, 0, .5)); }
+.pen-zone-mark { color: #fff; opacity: 0; transition: opacity .12s; filter: drop-shadow(0 2px 3px rgba(0, 0, 0, .5)); }
 .pen-zone:hover .pen-zone-mark { opacity: 1; }
 .pen-zones--picked { pointer-events: none; }
 .pen-zone--static { cursor: default; border-color: transparent; background: none; }

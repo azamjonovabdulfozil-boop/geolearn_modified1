@@ -65,7 +65,7 @@
                     <button v-for="l in lessons" :key="l.id" type="button"
                       class="lesson-btn" :class="{ 'lesson-btn--on': form.lessonId === l.id }"
                       @click="selectLesson(l)">
-                      <span class="lesson-ico">📘</span>
+                      <span class="lesson-ico"><BookOpen :size="16" /></span>
                       <span class="lesson-info">
                         <strong>{{ l.title }}</strong>
                         <em>{{ l.grade }}-sinf · {{ l.topics?.length || 0 }} ta mavzu</em>
@@ -100,7 +100,7 @@
                 <button v-for="t in filteredTopics" :key="t.id" type="button"
                   @click="form.topicId = t.id"
                   class="topic-btn" :class="{ 'topic-btn--on': form.topicId === t.id }">
-                  <span class="topic-icon">{{ t.icon }}</span>
+                  <span class="topic-icon"><Globe2 :size="15" /></span>
                   <span class="topic-name">{{ t.name }}</span>
                   <span v-if="t.hasImages" class="topic-tag">rasm</span>
                 </button>
@@ -116,7 +116,7 @@
             <!-- Step 3: settings -->
             <div v-else class="form-stack">
               <div class="picked-topic">
-                <span class="topic-icon-big">{{ form.source === 'lesson' ? '📘' : pickedTopic?.icon }}</span>
+                <span class="topic-icon-big"><component :is="form.source === 'lesson' ? BookOpen : Globe2" :size="26" /></span>
                 <div>
                   <strong>{{ pickedSummary.title }}</strong>
                   <p>{{ pickedSummary.sub }} · {{ form.gameType === 'bosh_qotirma' ? "Bosh qo'tirma" : 'Viktorina' }}</p>
@@ -172,7 +172,7 @@
 
         <div class="game-card__head">
           <div class="game-card__icon">
-            <span style="font-size:22px">{{ game.topicIcon || (game.gameType === 'bosh_qotirma' ? '🧠' : '❓') }}</span>
+            <component :is="game.source === 'lesson' ? BookOpen : game.gameType === 'bosh_qotirma' ? Brain : HelpCircle" :size="22" />
           </div>
           <div class="game-card__title-wrap">
             <div class="game-card__title-row">

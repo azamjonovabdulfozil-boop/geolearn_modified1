@@ -25,11 +25,11 @@ export function clearStrikes(userId) {
 export function warningText(n, language = "uz", blocked = false) {
   const left = Math.max(0, MAX_WARNINGS - n);
   if (language === "ru") {
-    if (blocked) return `🚫 **Предупреждение №${n} — вы заблокированы.** Из-за повторных оскорблений AI-помощник и чат с друзьями для вас закрыты. Разблокировать может только учитель.`;
-    return `⚠️ **Предупреждение ${n} из ${MAX_WARNINGS}.** Пожалуйста, пишите вежливо — оскорбления и нецензурные слова запрещены. Учителю отправлено уведомление. Ещё ${left} — и вы будете заблокированы автоматически.`;
+    if (blocked) return `**Предупреждение №${n} — вы заблокированы.** Из-за повторных оскорблений AI-помощник и чат с друзьями для вас закрыты. Разблокировать может только учитель.`;
+    return `**Предупреждение ${n} из ${MAX_WARNINGS}.** Пожалуйста, пишите вежливо — оскорбления и нецензурные слова запрещены. Учителю отправлено уведомление. Ещё ${left} — и вы будете заблокированы автоматически.`;
   }
-  if (blocked) return `🚫 **${n}-ogohlantirish — siz bloklandingiz.** Takroran haqoratli so'z ishlatganingiz uchun AI yordamchi va do'stlar chati siz uchun yopildi. Blokni faqat o'qituvchi ochishi mumkin.`;
-  return `⚠️ **Ogohlantirish ${n} / ${MAX_WARNINGS}.** Iltimos, odob bilan yozing — haqoratli va so'kinish so'zlarini ishlatish taqiqlanadi. Bu haqda o'qituvchingizga xabar yuborildi. Yana ${left} marta takrorlansa, avtomatik bloklanasiz.`;
+  if (blocked) return `**${n}-ogohlantirish — siz bloklandingiz.** Takroran haqoratli so'z ishlatganingiz uchun AI yordamchi va do'stlar chati siz uchun yopildi. Blokni faqat o'qituvchi ochishi mumkin.`;
+  return `**Ogohlantirish ${n} / ${MAX_WARNINGS}.** Iltimos, odob bilan yozing — haqoratli va so'kinish so'zlarini ishlatish taqiqlanadi. Bu haqda o'qituvchingizga xabar yuborildi. Yana ${left} marta takrorlansa, avtomatik bloklanasiz.`;
 }
 
 /** O'qituvchi uchun yozuv: admin paneldagi "AI nazorati" bo'limida darhol ko'rinadi. */

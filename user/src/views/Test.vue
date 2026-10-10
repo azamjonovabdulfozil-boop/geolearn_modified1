@@ -52,7 +52,7 @@
       <div class="result-icon" :class="percentage >= 60 ? 'result-ok' : 'result-bad'">
         <component :is="percentage >= 60 ? CheckCircle : XCircle" :size="36" />
       </div>
-      <p class="result-title">{{ percentage >= 60 ? 'Barakalla! 🎉' : "Qayta urinib ko'ring" }}</p>
+      <p class="result-title">{{ percentage >= 60 ? 'Barakalla!' : "Qayta urinib ko'ring" }}</p>
       <div class="result-stats">
         <div class="result-stat">
           <span class="rs-val" style="color:hsl(var(--primary))">{{ correctCount }}</span>

@@ -46,7 +46,7 @@
             </span>
           </button>
           <div v-if="!dialogs.length && loaded" class="list-empty list-empty--big">
-            <span class="list-empty-emoji">💬</span>
+            <MessageCircle :size="40" class="empty-icon" />
             <p>Hali suhbatlar yo'q</p>
             <p class="list-empty-sub">Yuqoridagi qidiruvga do'stingizning ismini yoki sinfini yozing</p>
           </div>
@@ -57,7 +57,7 @@
     <!-- ── O'ng panel: suhbat ── -->
     <section class="pane" @dragover.prevent="dragging = true" @dragleave.prevent="dragging = false" @drop.prevent="onDrop">
       <div v-if="!peerId" class="pane-empty">
-        <span class="pane-empty-emoji">✈️</span>
+        <Send :size="52" class="empty-icon" />
         <p class="pane-empty-title">Suhbatni tanlang</p>
         <p class="pane-empty-sub">Do'stingizga xabar, rasm, ovozli xabar yoki fayl yuboring</p>
       </div>
@@ -83,7 +83,7 @@
             {{ loadingMore ? "Yuklanmoqda..." : "Oldingi xabarlar" }}
           </button>
           <p v-if="loadedDialog && !messages.length" class="msgs-empty">
-            Bu yerda hali xabar yo'q. Birinchi bo'lib salom yozing 👋
+            Bu yerda hali xabar yo'q. Birinchi bo'lib salom yozing
           </p>
 
           <template v-for="(m, i) in messages" :key="m.id">
@@ -219,7 +219,7 @@ import { ref, computed, watch, nextTick, onMounted, onUnmounted, reactive } from
 import { useRoute, useRouter } from "vue-router";
 import {
   Search, ArrowLeft, Swords, Check, CheckCheck, Reply, Copy, Pencil, Trash2, X, Paperclip, Smile,
-  SendHorizontal, Mic, FileText, ChevronDown, Loader2, Ban,
+  SendHorizontal, Mic, FileText, ChevronDown, Loader2, Ban, MessageCircle, Send,
 } from "lucide-vue-next";
 import { api, resolveUrl } from "@shared/composables/api";
 import { onLiveEvent } from "@shared/composables/live";
@@ -489,7 +489,7 @@ async function send(payload) {
     id: `tmp-${Date.now()}`, from: myId.value, to: peerId.value, pending: true,
     // Fayl yuklanayotganda vaqtincha matnli pufakcha ko'rsatiladi
     kind: "text",
-    text: payload.text || (payload.voice ? "🎤 Ovozli xabar yuborilmoqda..." : payload.file ? `📎 ${payload.file.name}` : ""),
+    text: payload.text || (payload.voice ? "Ovozli xabar yuborilmoqda..." : payload.file ? `${payload.file.name} yuborilmoqda...` : ""),
     createdAt: new Date().toISOString(), reply: payload.reply ?? null,
   };
   messages.value.push(temp);
@@ -749,7 +749,7 @@ onUnmounted(() => {
 .row.active .typing-text { color: #fff; }
 .list-empty { padding: 22px 12px; text-align: center; font-size: 13.5px; color: hsl(var(--muted-fg)); }
 .list-empty--big { padding-top: 50px; }
-.list-empty-emoji { font-size: 40px; }
+.empty-icon { color: hsl(var(--primary)); opacity: .55; }
 .list-empty-sub { margin-top: 4px; font-size: 12.5px; }
 
 /* ── O'ng panel ── */
@@ -763,7 +763,7 @@ onUnmounted(() => {
   background-size: auto, auto, 22px 22px;
 }
 .pane-empty { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 20px; }
-.pane-empty-emoji { font-size: 56px; }
+
 .pane-empty-title { margin-top: 8px; font-size: 19px; font-weight: 800; }
 .pane-empty-sub { font-size: 14px; color: hsl(var(--muted-fg)); }
 .pane-head { display: flex; align-items: center; gap: 11px; padding: 10px 14px; background: hsl(var(--card)); border-bottom: 1px solid hsl(var(--border)); }

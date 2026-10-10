@@ -6,7 +6,7 @@
     <div v-if="invite" class="invite-backdrop">
       <div class="invite-card" :style="{ '--c1': inviteGame.colors[0], '--c2': inviteGame.colors[1] }">
         <div class="invite-art">
-          <span class="invite-emoji">{{ inviteGame.emoji }}</span>
+          <component :is="inviteGame.icon" :size="76" :stroke-width="1.6" class="invite-icon" />
           <span class="invite-vs">1 ga 1</span>
         </div>
         <div class="invite-body">
@@ -18,7 +18,7 @@
           </p>
           <p class="invite-game">
             {{ inviteGame.title }}
-            <span v-if="invite.topic"> · {{ invite.topic.icon }} {{ invite.topic.name }}</span>
+            <span v-if="invite.topic"> · {{ invite.topic.name }}</span>
           </p>
           <div class="invite-timer"><div class="invite-timer-fill" :style="{ width: inviteLeftPct + '%' }"></div></div>
           <p v-if="inviteError" class="invite-error">{{ inviteError }}</p>
@@ -33,6 +33,42 @@
         </div>
       </div>
     </div>
+  </Transition>
+
+  <!-- Jamoaviy o'yinga taklif -->
+  <Transition name="invite">
+    <div v-if="!invite && teamInvite" class="invite-backdrop">
+      <div class="invite-card" :style="{ '--c1': teamGame.colors[0], '--c2': teamGame.colors[1] }">
+        <div class="invite-art">
+          <component :is="teamGame.icon" :size="76" :stroke-width="1.6" class="invite-icon" />
+          <span class="invite-vs">Jamoaviy</span>
+        </div>
+        <div class="invite-body">
+          <p class="invite-kicker">{{ teamInvite.leader ? "Sardorlikka taklif" : "Jamoaga taklif" }}</p>
+          <p class="invite-title">
+            <strong>{{ teamInvite.fromName }}</strong>
+            {{ teamInvite.leader ? "sizni raqib jamoaning sardori bo'lishga chaqiryapti" : "sizni o'z jamoasiga chaqiryapti" }}
+          </p>
+          <p class="invite-game">{{ teamGame.title }}</p>
+          <p v-if="teamInvite.leader" class="invite-note">Qabul qilsangiz, o'z jamoangizga o'yinchilarni o'zingiz yig'asiz</p>
+          <div class="invite-timer"><div class="invite-timer-fill" :style="{ width: teamLeftPct + '%' }"></div></div>
+          <p v-if="inviteError" class="invite-error">{{ inviteError }}</p>
+          <div class="invite-actions">
+            <button class="invite-btn invite-btn--no" :disabled="accepting" @click="team.decline(teamInvite.id)">
+              <X :size="16" /> Rad etish
+            </button>
+            <button class="invite-btn invite-btn--yes" :disabled="accepting" @click="acceptTeam">
+              <Users :size="16" /> {{ accepting ? "Kutilmoqda..." : "Qo'shilish" }}
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </Transition>
+
+  <!-- Jamoaviy o'yin bo'yicha qisqa xabar -->
+  <Transition name="toast">
+    <div v-if="team.note" class="team-note"><Users :size="16" /> {{ team.note }}</div>
   </Transition>
 
   <!-- Yangi xabar bildirishnomalari (chat sahifasidan tashqarida) -->
@@ -55,12 +91,13 @@ import { computed, ref, onMounted, onUnmounted, watch } from "vue";
 import { useRouter, useRoute } from "vue-router";
 import {
   LayoutDashboard, BookOpen, Gamepad2, Trophy, Video, Bot, Settings, ClipboardCheck,
-  MessageCircle, Swords, X,
+  MessageCircle, Swords, X, Users,
 } from "lucide-vue-next";
 import GeoLayout from "@shared/components/GeoLayout.vue";
 import { useAuthStore } from "@shared/stores/auth";
 import { useDuelStore } from "../stores/duel";
 import { useChatStore } from "../stores/chat";
+import { useTeamStore } from "../stores/team";
 import { gameById } from "../lib/games";
 
 const router = useRouter();
@@ -68,12 +105,13 @@ const route = useRoute();
 const auth = useAuthStore();
 const duel = useDuelStore();
 const chat = useChatStore();
+const team = useTeamStore();
 
 const navItems = computed(() => [
   { to: "/dashboard", icon: LayoutDashboard, labelKey: "dashboard" },
   { to: "/lessons",   icon: BookOpen,       labelKey: "lessons" },
   { to: "/homework",  icon: ClipboardCheck, labelKey: "homework" },
-  { to: "/games",     icon: Gamepad2,       labelKey: "games", badge: duel.incoming.length || null, badgeTone: "danger" },
+  { to: "/games",     icon: Gamepad2,       labelKey: "games", badge: (duel.incoming.length + team.invites.length) || null, badgeTone: "danger" },
   { to: "/chat",      icon: MessageCircle,  labelKey: "chat", badge: chat.unread || null, badgeTone: "danger" },
   { to: "/ratings",   icon: Trophy,         labelKey: "ratings" },
   { to: "/videos",    icon: Video,          labelKey: "videos" },
@@ -111,6 +149,31 @@ async function acceptInvite() {
 }
 watch(invite, () => { inviteError.value = ""; });
 
+// ── Jamoaga taklif ──
+const teamInvite = computed(() => team.invites[0] ?? null);
+const teamGame = computed(() => gameById(teamInvite.value?.game));
+const teamLeftPct = computed(() => {
+  tick.value;
+  const i = teamInvite.value;
+  if (!i) return 0;
+  return Math.max(0, Math.min(100, ((i.expiresAt - team.now()) / (i.expiresAt - i.createdAt)) * 100));
+});
+async function acceptTeam() {
+  accepting.value = true;
+  inviteError.value = "";
+  try {
+    await team.accept(teamInvite.value.id);
+    if (route.path !== "/games") router.push("/games");
+  } catch (e) {
+    inviteError.value = e.message || "Qo'shilib bo'lmadi";
+    team.refresh();
+  }
+  accepting.value = false;
+}
+watch(teamInvite, () => { inviteError.value = ""; });
+// Jamoadoshlar o'yinni boshlasa — qaysi sahifada bo'lsa ham o'yinga o'tkazamiz
+watch(() => team.room?.status, (s) => { if (s === "active" && route.path !== "/games") router.push("/games"); });
+
 function openChat(t) {
   chat.dismiss(t.id);
   router.push(`/chat/${t.peerId}`);
@@ -118,11 +181,13 @@ function openChat(t) {
 
 onMounted(() => {
   duel.start();
+  team.start();
   chat.start(auth.user?.id);
   tickTimer = setInterval(() => { tick.value++; }, 250);
 });
 onUnmounted(() => {
   duel.stop();
+  team.stop();
   chat.stop();
   clearInterval(tickTimer);
 });
@@ -144,7 +209,7 @@ onUnmounted(() => {
     radial-gradient(circle at 50% 120%, rgba(255, 255, 255, .28), transparent 60%),
     linear-gradient(135deg, var(--c1), var(--c2));
 }
-.invite-emoji { font-size: 78px; filter: drop-shadow(0 10px 14px rgba(0, 0, 0, .35)); animation: invite-bob 1.4s ease-in-out infinite; }
+.invite-icon { color: #fff; filter: drop-shadow(0 10px 14px rgba(0, 0, 0, .35)); animation: invite-bob 1.4s ease-in-out infinite; }
 .invite-vs {
   position: absolute; top: 14px; right: 14px; padding: 4px 12px; border-radius: 99px;
   background: rgba(0, 0, 0, .35); color: #fff; font-size: 12px; font-weight: 800; letter-spacing: .04em;
@@ -155,6 +220,12 @@ onUnmounted(() => {
 .invite-title { margin-top: 6px; font-size: 17px; line-height: 1.45; }
 .invite-class { display: inline-block; margin: 0 2px; padding: 0 8px; border-radius: 99px; background: hsl(var(--muted)); font-size: 12px; font-weight: 700; }
 .invite-game { margin-top: 8px; font-size: 14px; font-weight: 700; color: hsl(var(--muted-fg)); }
+.invite-note { margin-top: 6px; font-size: 12.5px; color: hsl(var(--muted-fg)); }
+.team-note {
+  position: fixed; left: 50%; top: 18px; transform: translateX(-50%); z-index: 160; display: flex; align-items: center; gap: 8px;
+  max-width: calc(100vw - 32px); padding: 10px 16px; border-radius: 99px; background: hsl(var(--fg)); color: hsl(var(--bg)); font-size: 13.5px; font-weight: 700;
+  box-shadow: 0 12px 32px rgba(0, 0, 0, .25);
+}
 .invite-timer { margin: 16px 0 0; height: 5px; border-radius: 99px; background: hsl(var(--muted)); overflow: hidden; }
 .invite-timer-fill { height: 100%; background: hsl(var(--primary)); transition: width .25s linear; }
 .invite-error { margin-top: 10px; font-size: 13px; color: hsl(var(--destructive)); }
