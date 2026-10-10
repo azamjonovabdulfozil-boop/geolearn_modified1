@@ -106,13 +106,22 @@ function scopeContent(list) {
   const section = contentSection();
   return section ? list.filter(x => contentInSection(x, section)) : list;
 }
+/**
+ * O'quvchi shu bo'limda ko'rinadimi? Sinfi admin ro'yxatida bo'lmagan
+ * (bo'limi noma'lum) o'quvchi hech bir filtrda yashirilmaydi — aks holda
+ * uning video ko'rishlari, natijalari va o'zi admin panelda yo'qolib qoladi.
+ */
+function inSection(user, section, classes) {
+  const own = userSection(user, classes);
+  return !own || own === section;
+}
 /** Bo'limdagi o'quvchilar id'lari (filtr yo'q bo'lsa — null). */
 function sectionStudentIds() {
   const section = teacherSection();
   if (!section) return null;
   const classes = read("classes");
   return new Set(read("users")
-    .filter(u => u.role === "student" && userSection(u, classes) === section)
+    .filter(u => u.role === "student" && inSection(u, section, classes))
     .map(u => u.id));
 }
 function scopeByUser(list, field = "userId") {
@@ -127,7 +136,7 @@ export function getUsers() {
   const section = teacherSection();
   if (!section) return list;
   const classes = read("classes");
-  return list.filter(u => u.role !== "student" || userSection(u, classes) === section);
+  return list.filter(u => u.role !== "student" || inSection(u, section, classes));
 }
 export function getUserById(id)    { return read("users").find(u => u.id === id) ?? null; }
 /**
