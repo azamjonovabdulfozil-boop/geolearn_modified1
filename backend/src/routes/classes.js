@@ -8,7 +8,7 @@ import {
 } from "../lib/db.js";
 import { requireAuth } from "../lib/auth.js";
 import { parseSection, currentScope } from "../lib/scope.js";
-import { parseRosterFile, rowsToStudents, namesMatch } from "../lib/rosterParse.js";
+import { parseRosterFile, textToStudents, namesMatch } from "../lib/rosterParse.js";
 import { isValidGrade, MIN_GRADE, MAX_GRADE } from "../lib/constants.js";
 
 const router = Router();
@@ -140,15 +140,16 @@ router.post("/classes/parse", requireAuth, upload.single("file"), async (req, re
     if (req.file) {
       rows = await parseRosterFile(req.file, defaultClass);
     } else if (typeof req.body?.text === "string") {
-      rows = rowsToStudents(
-        req.body.text.split(/\r?\n/).filter(l => l.trim()).map(l => [l.trim()]),
-        defaultClass,
-      );
+      rows = textToStudents(req.body.text, defaultClass);
     } else {
       return res.status(400).json({ error: "Fayl yoki ro'yxat matni kerak" });
     }
     if (!rows.length) {
-      return res.status(400).json({ error: "Faylda o'quvchilar ismi topilmadi. F.I.Sh ustuni borligini tekshiring." });
+      return res.status(400).json({
+        error: req.file
+          ? "Faylda o'quvchilar ismi topilmadi. F.I.Sh ustuni borligini tekshiring."
+          : "Ro'yxatda ism topilmadi. Har bir qatorga bitta o'quvchining ismini yozing.",
+      });
     }
 
     const students = allStudents();

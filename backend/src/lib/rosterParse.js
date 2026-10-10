@@ -117,21 +117,26 @@ export function docxRows(buf) {
   const xml = files["word/document.xml"]?.toString("utf8");
   if (!xml) throw new Error("Word hujjat ichida matn topilmadi");
 
-  const paraText = (p) => textOf(p.replace(/<w:tab\/>/g, "<w:t>\t</w:t>"), "w:t");
+  // <w:br/> — paragraf ichidagi qator uzilishi (Shift+Enter): ro'yxat ko'pincha shunday yoziladi
+  const paraText = (p) => textOf(
+    p.replace(/<w:tab\/>/g, "<w:t>\t</w:t>").replace(/<w:(?:br|cr)(?:\s[^>]*)?\/>/g, "<w:t>\n</w:t>"),
+    "w:t",
+  );
   const rows = [];
 
   // Jadvallar — har bir qator alohida
   for (const tbl of blocks(xml, "w:tbl")) {
     for (const tr of blocks(tbl.inner, "w:tr")) {
       rows.push(blocks(tr.inner, "w:tc").map(tc =>
-        blocks(tc.inner, "w:p").map(p => paraText(p.inner)).join(" ").trim()));
+        blocks(tc.inner, "w:p").map(p => paraText(p.inner)).join(" ").replace(/\n/g, " ").trim()));
     }
   }
   // Jadvaldan tashqaridagi paragraflar — har biri bitta qator
   const outside = xml.replace(/<w:tbl(?:\s[^>]*)?>[\s\S]*?<\/w:tbl>/g, "");
   for (const p of blocks(outside, "w:p")) {
-    const line = paraText(p.inner);
-    if (line.trim()) rows.push(splitLine(line));
+    for (const line of paraText(p.inner).split("\n")) {
+      if (line.trim()) rows.push(splitLine(line));
+    }
   }
   return rows;
 }
@@ -158,7 +163,7 @@ function textRows(text) {
 // ── Qatorlardan o'quvchilar ───────────────────────────────────────────────
 
 // Sarlavha katagi: "F.I.Sh", "Familiyasi", "Ism", "ФИО", "O'quvchining F.I.Sh" ...
-const NAME_HEADER = /^(o['ʻ‘’`]?quvchi(ning)?\s+)?(f\.?\s*i\.?\s*(sh|o)\.?|ф\.?\s*и\.?\s*о\.?|familiya\S*|ism\S*|sharifi?|otasining ismi|фамилия|имя|отчество|name|full name|ученик)(\s*(va|,|и)?\s*(ism\S*|familiya\S*|sharifi?|имя|отчество))*$/i;
+const NAME_HEADER = /^(o['ʻ‘’`]?quvchi(ning)?\s+)?(f\.?\s*i\.?\s*(sh|o)\.?|ф\.?\s*и\.?\s*о\.?|familiya(?:si|lar|lari)?|ism(?:i|lar|lari)?|sharifi?|otasining ismi|фамилия|имя|отчество|name|full name|ученик)(\s*(va|,|и)?\s*(ism(?:i|lar|lari)?|familiya(?:si|lar|lari)?|sharifi?|имя|отчество))*$/i;
 const CLASS_HEADER = /^(sinf|sinfi|класс|class|guruh)\b/i;
 const HEADER_ONLY = /^(f\.?\s*i\.?\s*sh\.?|ф\.?\s*и\.?\s*о\.?|ism(i)?|familiya(si)?|ism(i)? familiya(si)?|familiya(si)?,? ism(i)?.*|name|full name|o['ʻ‘’`]?quvchi(lar)?( ro['ʻ‘’`]?yxati)?|ученик(и)?|список.*|ro['ʻ‘’`]?yxat.*)$/i;
 const NOT_NAME = /(sinf|ro['ʻ‘’`]?yxat|o['ʻ‘’`]?quvchilar|maktab|jadval|список|класс|ученик|школ|итого|jami)/i;
@@ -166,7 +171,7 @@ const NUM_HEADER = /^(№|#|n|t\/?r|т\/?р|no\.?|nomer|raqam)$/i;
 
 function cleanName(s) {
   return String(s ?? "")
-    .replace(/^\s*\d{1,4}\s*[.)\-–:]\s*/, "")   // "1. ", "12) "
+    .replace(/^\s*\d{1,4}\s*[.)\-–:]?\s*(?=\p{L})/u, "")   // "1. ", "12) ", "3 ", "4-"
     .replace(/\s+/g, " ")
     .trim();
 }
@@ -188,9 +193,9 @@ function looksLikeName(s, strict) {
 }
 
 /** Qatorning oxirida yozilgan sinfni ajratadi: "Aliyev Vali 7-A" → ["Aliyev Vali", "7-A"]. */
-function splitTrailingClass(text) {
+function splitTrailingClass(text, lenient = false) {
   const m = String(text).match(/^(.*?)[\s,;(]+(\d{1,2}\s*[-–]?\s*["'«]?\p{L}["'»]?)\s*\)?\s*(?:sinf|класс)?\s*$/iu);
-  if (m && isClassCell(m[2]) && looksLikeName(m[1], true)) return [m[1], m[2]];
+  if (m && isClassCell(m[2]) && looksLikeName(m[1], !lenient)) return [m[1], m[2]];
   return [text, null];
 }
 
@@ -198,8 +203,10 @@ function splitTrailingClass(text) {
  * Jadval qatorlaridan o'quvchilar ro'yxati: [{ fullName, className }]
  * Sarlavha qatori bo'lsa (F.I.Sh, Sinf ...) — ustunlar shundan olinadi,
  * aks holda har bir qatordan ism va sinfga o'xshash kataklar topiladi.
+ * `lenient` — bir so'zli ismlar ham qabul qilinadi ("Sardor"): qo'lda
+ * yozilgan ro'yxat va faqat ismlardan iborat fayllar uchun.
  */
-export function rowsToStudents(rows, defaultClass = null) {
+export function rowsToStudents(rows, defaultClass = null, { lenient = false } = {}) {
   const table = rows.map(r => r.map(c => String(c ?? "").replace(/\s+/g, " ").trim()));
 
   let headerIdx = -1;
@@ -245,21 +252,39 @@ export function rowsToStudents(rows, defaultClass = null) {
     const cells = row
       .filter(c => c && !NUM_HEADER.test(c) && !/^\d+[.)]?$/.test(c))
       .flatMap(c => {                               // "Aliyev Vali 7-A" → ism + sinf
-        const [n, cls] = splitTrailingClass(c);
+        const [n, cls] = splitTrailingClass(c, lenient);
         return cls ? [n, cls] : [c];
       });
     const cls = cells.find(isClassCell) ?? null;
     const textCells = cells.filter(c => !isClassCell(c));
-    let name = textCells.find(c => looksLikeName(c, true));
+    // Bir qatorda vergul bilan yozilgan bir nechta to'liq ism: "Aliyev Vali, Karimova Nigora"
+    const full = textCells.filter(c => looksLikeName(c, true));
+    if (full.length >= 2) { full.forEach(n => push(n, cls)); return; }
+    let name = full[0];
     if (!name && textCells.length >= 2 && textCells.slice(0, 3).every(c => looksLikeName(c, false))) {
       name = textCells.slice(0, 3).join(" ");      // Familiya | Ism | Sharif alohida ustunlarda
     }
+    if (!name && lenient && textCells.length === 1) name = textCells[0];
     if (!name) return;
-    if (!looksLikeName(name, true)) return;
+    if (!looksLikeName(name, !lenient)) return;
     push(name, cls);
   });
 
   return out;
+}
+
+/**
+ * Qo'lda yozilgan ro'yxat: har bir qator (yoki vergul bilan ajratilgan qism)
+ * — bitta o'quvchi. Faqat ism yozilgan bo'lsa ham qabul qilinadi.
+ */
+export function textToStudents(text, defaultClass = null) {
+  const rows = String(text ?? "")
+    .split(/[\r\n]+/)
+    .flatMap(line => line.split(/[,;]/))
+    .map(part => part.replace(/\t/g, " ").trim())
+    .filter(Boolean)
+    .map(part => [part]);
+  return rowsToStudents(rows, defaultClass, { lenient: true });
 }
 
 /**
@@ -290,7 +315,9 @@ export async function parseRosterFile(file, defaultClass = null) {
   } else {
     rows = textRows(buf.toString("utf8").replace(/^﻿/, ""));
   }
-  return rowsToStudents(rows, defaultClass);
+  const strict = rowsToStudents(rows, defaultClass);
+  // Faylda faqat ismlar yozilgan bo'lsa (familiyasiz) — bir so'zli qatorlar ham olinadi
+  return strict.length ? strict : rowsToStudents(rows, defaultClass, { lenient: true });
 }
 
 // ── Ismlarni taqqoslash ───────────────────────────────────────────────────
