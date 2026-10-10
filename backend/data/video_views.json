@@ -1,16 +1,1 @@
-[
-  {
-    "id": 1,
-    "videoId": 1,
-    "userId": 3,
-    "views": 2,
-    "firstViewedAt": "2026-08-25T12:51:03.694Z",
-    "lastViewedAt": "2026-09-18T08:05:34.801Z",
-    "positionSec": 19,
-    "durationSec": 209,
-    "percent": 9,
-    "watchedSec": 21,
-    "completed": false,
-    "completedAt": null
-  }
-]
+[]
