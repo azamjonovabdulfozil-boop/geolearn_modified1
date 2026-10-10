@@ -547,28 +547,80 @@ function start(
 // SEED ADMIN TEACHER
 // ─────────────────────────────────────────────────────────────
 
-// Admin paroli ADMIN_PASSWORD env o'zgaruvchisidan olinadi (Render →
-// Environment yoki backend/.env). U berilgan bo'lsa, server har ishga
-// tushganda admin paroli shu qiymatga keltiriladi — parolni almashtirish
-// uchun env'ni o'zgartirib, qayta deploy qilish kifoya.
+// Admin (o'qituvchi) hisobi. Login va parolni ADMIN_USERNAME /
+// ADMIN_PASSWORD env o'zgaruvchilari bilan almashtirish mumkin (Render →
+// Environment yoki backend/.env); berilmasa quyidagi standart qiymatlar
+// ishlatiladi. Standart parol ochiq yozilmaydi — faqat uning xeshi.
+const ADMIN_USERNAME =
+  String(
+    process.env.ADMIN_USERNAME ?? ""
+  ).trim() || "toxir";
+
 const ADMIN_PASSWORD = String(
   process.env.ADMIN_PASSWORD ?? ""
 ).trim();
 
-const adminUser = getUserByUsername(
-  "admin"
+const ADMIN_HASH = ADMIN_PASSWORD
+  ? hashPassword(ADMIN_PASSWORD)
+  : "39dea881559374f916bc1f680540a3a80fba90bac902b12f3e94d80e843ff529";
+
+const adminTaken = getUserByUsername(
+  ADMIN_USERNAME
 );
 
+const adminUser =
+  adminTaken?.role === "teacher"
+    ? adminTaken
+    : null;
+
+// Eski standart hisob (admin / admin123) — yangi login/parolga ko'chiriladi
+const legacyAdmin =
+  ADMIN_USERNAME !== "admin"
+    ? getUserByUsername("admin")
+    : null;
+
 if (
-  !adminUser
+  adminUser
 ) {
+  // ADMIN_PASSWORD berilgan bo'lsa — parol har ishga tushganda shunga keltiriladi
+  if (
+    ADMIN_PASSWORD &&
+    adminUser.passwordHash !== ADMIN_HASH
+  ) {
+    updateUser(
+      adminUser.id,
+      { passwordHash: ADMIN_HASH }
+    );
+
+    console.log(
+      "🔑 Admin paroli ADMIN_PASSWORD bo'yicha yangilandi"
+    );
+  }
+} else if (
+  adminTaken
+) {
+  console.error(
+    `⚠️  "${ADMIN_USERNAME}" logini o'quvchida band — admin hisobi yaratilmadi. ADMIN_USERNAME ni boshqa qiymatga o'zgartiring.`
+  );
+} else if (
+  legacyAdmin?.role === "teacher"
+) {
+  updateUser(
+    legacyAdmin.id,
+    {
+      username: ADMIN_USERNAME,
+      passwordHash: ADMIN_HASH,
+    }
+  );
+
+  console.log(
+    `🔑 Admin hisobi yangilandi: login "${ADMIN_USERNAME}"`
+  );
+} else {
   createUser({
     name: "Administrator",
-    username: "admin",
-    passwordHash:
-      hashPassword(
-        ADMIN_PASSWORD || "admin123"
-      ),
+    username: ADMIN_USERNAME,
+    passwordHash: ADMIN_HASH,
     role: "teacher",
     grade: null,
     theme: "light",
@@ -577,21 +629,7 @@ if (
   });
 
   console.log(
-    ADMIN_PASSWORD
-      ? "✅ Admin yaratildi: admin / (ADMIN_PASSWORD)"
-      : "✅ Admin yaratildi: admin / admin123"
-  );
-} else if (
-  ADMIN_PASSWORD &&
-  adminUser.passwordHash !== hashPassword(ADMIN_PASSWORD)
-) {
-  updateUser(
-    adminUser.id,
-    { passwordHash: hashPassword(ADMIN_PASSWORD) }
-  );
-
-  console.log(
-    "🔑 Admin paroli ADMIN_PASSWORD bo'yicha yangilandi"
+    `✅ Admin yaratildi: login "${ADMIN_USERNAME}"`
   );
 }
 

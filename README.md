@@ -232,7 +232,7 @@ Ma'lumotlar: `backend/data/homework.json` va `backend/data/homework_submissions.
 
 | Foydalanuvchi | Parol | Rol | Qaysi saytda |
 |---------------|-------|-----|--------------|
-| admin | admin123 | teacher | admin sayti (5173) |
+| toxir | (egasidan oling) | teacher | admin sayti (5173) |
 
 O'quvchilar user saytidagi `/register` sahifasida ro'yxatdan o'tadi.
 

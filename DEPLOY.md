@@ -222,7 +222,7 @@ qo'ymang. Maxfiy kalitlar faqat Render tomonda (backend'da) yashaydi.
 Deploy tugagach:
 
 1. `https://geolearn-backend.onrender.com/api/site` → `{"site":"api",...}`
-2. Admin saytini oching → login: `admin` / `admin123`
+2. Admin saytini oching → login: `toxir` (parolni loyiha egasidan oling)
 3. **Darhol parolni almashtiring** (Sozlamalar bo'limida)
 4. O'quvchi saytida ro'yxatdan o'ting → o'yin kodi bilan qo'shiling
 5. Brauzer konsolida (F12) CORS xatosi yo'qligini tekshiring
