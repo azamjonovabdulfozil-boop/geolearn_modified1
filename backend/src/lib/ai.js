@@ -11,13 +11,6 @@ const TOTAL_BUDGET_MS = 90000;
 
 const PROVIDERS = [
   {
-    name: "OpenAI",
-    url: "https://api.openai.com/v1/chat/completions",
-    envKey: "OPENAI_API_KEY",
-    models: ["gpt-4o-mini"],
-    visionModels: ["gpt-4o-mini"],
-  },
-  {
     // Google Gemini — bepul tarifi katta, o'zbek tilida yaxshi javob beradi.
     // Kalit: https://aistudio.google.com/apikey
     name: "Gemini",
@@ -27,6 +20,16 @@ const PROVIDERS = [
     // aniq versiya eskirib o'chirilsa ham AI ishlayveradi.
     models: ["gemini-flash-latest", "gemini-2.5-flash", "gemini-flash-lite-latest", "gemini-2.5-flash-lite"],
     visionModels: ["gemini-flash-latest", "gemini-2.5-flash", "gemini-flash-lite-latest"],
+    // "O'ylash" rejimi qisqartiriladi — oddiy maktab savollariga javob tezroq keladi.
+    // Model bu parametrni tanimasa (400) — so'rov parametrsiz qayta yuboriladi.
+    extra: { reasoning_effort: "low" },
+  },
+  {
+    name: "OpenAI",
+    url: "https://api.openai.com/v1/chat/completions",
+    envKey: "OPENAI_API_KEY",
+    models: ["gpt-4o-mini"],
+    visionModels: ["gpt-4o-mini"],
   },
   {
     name: "OpenRouter",
@@ -86,7 +89,7 @@ function isDisabled(name) {
   return true;
 }
 
-async function callChat(provider, model, messages, timeoutMs = CALL_TIMEOUT_MS) {
+async function callChat(provider, model, messages, timeoutMs = CALL_TIMEOUT_MS, useExtra = true) {
   const key = provider.envKey ? process.env[provider.envKey] : null;
   const headers = { "Content-Type": "application/json" };
   if (key) headers["Authorization"] = `Bearer ${key}`;
@@ -99,6 +102,7 @@ async function callChat(provider, model, messages, timeoutMs = CALL_TIMEOUT_MS) 
       messages,
       temperature: 0.3,
       max_tokens: 1200,
+      ...(useExtra ? provider.extra : null),
     }),
     signal: AbortSignal.timeout(timeoutMs),
   });
@@ -106,6 +110,9 @@ async function callChat(provider, model, messages, timeoutMs = CALL_TIMEOUT_MS) 
   if (!resp.ok) {
     let detail = "";
     try { detail = (await resp.text()).slice(0, 200); } catch {}
+    if (resp.status === 400 && useExtra && provider.extra) {
+      return callChat(provider, model, messages, timeoutMs, false);
+    }
     const err = new Error(`${provider.name} ${resp.status}: ${detail}`);
     err.status = resp.status;
     throw err;
