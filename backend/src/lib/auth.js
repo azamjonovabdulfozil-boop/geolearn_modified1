@@ -70,6 +70,8 @@ export function userToJson(u) {
     totalScore: u.totalScore ?? 0,
     avatarUrl: u.avatarUrl ?? null,
     aiBlocked: Boolean(u.aiBlocked),
+    chatBlocked: Boolean(u.chatBlocked),
+    warnings: u.aiWarnings ?? 0,
     createdAt: u.createdAt,
   };
 }

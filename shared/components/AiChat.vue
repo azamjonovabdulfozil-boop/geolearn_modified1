@@ -634,6 +634,8 @@ async function send(q, voice = null) {
       createdAt: new Date().toISOString(),
       meta: { offline: res.offline, provider: res.provider, warning: res.warning },
     });
+    // 3-ogohlantirishda server avtomatik bloklaydi — holatni darhol yangilaymiz
+    if (res.blocked) auth.refreshMe();
     if (res.chatId) {
       activeChatId.value = res.chatId;
       localStorage.setItem(STORAGE_KEY.value, String(res.chatId));

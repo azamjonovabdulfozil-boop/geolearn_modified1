@@ -256,7 +256,7 @@
             <button class="geo-btn-outline btn-sm" :class="manage.user?.aiBlocked ? 'btn-ok' : 'btn-danger'"
               :disabled="busy" @click="toggleBlock">
               <component :is="manage.user?.aiBlocked ? Unlock : Ban" :size="14" />
-              {{ manage.user?.aiBlocked ? "AI'ni qayta ochish" : "AI'dan foydalanishni bloklash" }}
+              {{ manage.user?.aiBlocked ? "Blokni ochish (AI va chat)" : "AI'dan foydalanishni bloklash" }}
             </button>
             <button class="geo-btn-outline btn-sm btn-danger" :disabled="busy || !manage.chats.length" @click="deleteAllChats">
               <Trash2 :size="14" /> Barcha chatlarini o'chirish

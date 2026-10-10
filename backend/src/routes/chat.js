@@ -8,7 +8,8 @@ import { requireAuth } from "../lib/auth.js";
 import { read, write, getUserById, isGradeOpen } from "../lib/db.js";
 import { saveFile, loadFile } from "../lib/storage.js";
 import { sendToUser } from "../lib/events.js";
-import { findProfanity } from "../lib/profanity.js";
+import { findProfanity, maskWord } from "../lib/profanity.js";
+import { addStrike, warningText, logFlag } from "../lib/moderation.js";
 import { searchStudents, publicUser } from "../lib/friends.js";
 
 // ── O'quvchilar o'rtasidagi chat ──────────────────────────────────────────
@@ -110,16 +111,35 @@ function replyPreview(list, id) {
 function toJson(m, list) {
   return { ...m, reply: replyPreview(list, m.replyTo) };
 }
-function checkText(text, res) {
+const BLOCKED_TEXT = "Do'stlar chati siz uchun bloklangan (haqoratli so'zlar uchun 3 ta ogohlantirish). Blokni o'qituvchi ochadi.";
+
+/** Bloklangan o'quvchi yoza olmaydi (o'qish mumkin). */
+function notBlocked(req, res, next) {
+  if (req.user.chatBlocked) return res.status(403).json({ error: BLOCKED_TEXT, blocked: true });
+  next();
+}
+
+/**
+ * Matnni tekshiradi. So'kinish bo'lsa — xabar yuborilmaydi, o'quvchi
+ * ogohlantirish oladi (3-chisida avtomatik bloklanadi), o'qituvchiga yozuv tushadi.
+ */
+function checkText(text, req, res, peer) {
   if (text.length > MAX_TEXT) {
     res.status(400).json({ error: `Xabar ${MAX_TEXT} belgidan oshmasin` });
     return false;
   }
-  if (text && findProfanity(text).length) {
-    res.status(400).json({ error: "Xabarda nojo'ya so'z bor. Iltimos, odob bilan yozing." });
-    return false;
-  }
-  return true;
+  const bad = text ? findProfanity(text) : [];
+  if (!bad.length) return true;
+
+  const { warnings, blocked } = addStrike(req.user.id);
+  const answer = warningText(warnings, req.user.language === "ru" ? "ru" : "uz", blocked).replaceAll("**", "");
+  logFlag({
+    userId: req.user.id, userName: req.user.name, role: req.user.role,
+    question: `[Do'stlar chati${peer ? " → " + peer.name : ""}] ${text}`, answer,
+    badWords: bad.map(maskWord), warningNo: warnings, autoBlocked: blocked, detectedBy: "filter", source: "chat",
+  });
+  res.status(blocked ? 403 : 400).json({ error: answer, warning: true, warnings, blocked });
+  return false;
 }
 
 // ── Qidiruv va suhbatlar ro'yxati ─────────────────────────────────────────
@@ -194,13 +214,13 @@ router.get("/chat/with/:userId", requireAuth, onlyStudent, (req, res) => {
 });
 
 // Xabar yuborish: JSON { text, replyTo } yoki multipart (file + text + replyTo + voice + duration)
-router.post("/chat/with/:userId", requireAuth, onlyStudent, upload.single("file"), (req, res) => {
+router.post("/chat/with/:userId", requireAuth, onlyStudent, notBlocked, upload.single("file"), (req, res) => {
   const peer = peerOf(req, res);
   if (!peer) return;
   const me = req.user.id;
   const text = String(req.body?.text ?? "").trim();
   if (!text && !req.file) return res.status(400).json({ error: "Xabar bo'sh" });
-  if (!checkText(text, res)) return;
+  if (!checkText(text, req, res, peer)) return;
   if (tooFast(me)) return res.status(429).json({ error: "Juda tez yozyapsiz, biroz kuting" });
 
   const all = messages();
@@ -235,13 +255,13 @@ router.post("/chat/with/:userId", requireAuth, onlyStudent, upload.single("file"
 });
 
 // O'z xabarini tahrirlash (faqat matn)
-router.put("/chat/messages/:id", requireAuth, onlyStudent, (req, res) => {
+router.put("/chat/messages/:id", requireAuth, onlyStudent, notBlocked, (req, res) => {
   const all = messages();
   const m = all.find(x => x.id === Number(req.params.id));
   if (!m || m.from !== req.user.id) return res.status(404).json({ error: "Xabar topilmadi" });
   const text = String(req.body?.text ?? "").trim();
   if (!text && !m.file) return res.status(400).json({ error: "Xabar bo'sh" });
-  if (!checkText(text, res)) return;
+  if (!checkText(text, req, res, getUserById(m.to))) return;
   m.text = text;
   m.editedAt = new Date().toISOString();
   save(all);

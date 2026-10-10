@@ -177,6 +177,11 @@
             <button class="send" @click="stopRecording(true)" title="Yuborish"><SendHorizontal :size="19" /></button>
           </div>
 
+          <div v-else-if="auth.user?.chatBlocked" class="blocked-note">
+            <Ban :size="17" />
+            <span>Chat siz uchun bloklangan: haqoratli so'zlar uchun 3 ta ogohlantirish oldingiz. Blokni faqat o'qituvchi ochishi mumkin.</span>
+          </div>
+
           <div v-else class="input-row">
             <button class="icon-btn" @click="fileEl.click()" title="Rasm yoki fayl biriktirish"><Paperclip :size="20" /></button>
             <input ref="fileEl" type="file" hidden @change="onPick" />
@@ -214,7 +219,7 @@ import { ref, computed, watch, nextTick, onMounted, onUnmounted, reactive } from
 import { useRoute, useRouter } from "vue-router";
 import {
   Search, ArrowLeft, Swords, Check, CheckCheck, Reply, Copy, Pencil, Trash2, X, Paperclip, Smile,
-  SendHorizontal, Mic, FileText, ChevronDown, Loader2,
+  SendHorizontal, Mic, FileText, ChevronDown, Loader2, Ban,
 } from "lucide-vue-next";
 import { api, resolveUrl } from "@shared/composables/api";
 import { onLiveEvent } from "@shared/composables/live";
@@ -470,7 +475,11 @@ async function post({ text = "", file = null, voice = false, duration = null, re
     headers: { ...headers, Authorization: `Bearer ${localStorage.getItem("geo_token")}` },
   });
   const data = await res.json().catch(() => null);
-  if (!res.ok) throw new Error(data?.error || "Xabar yuborilmadi");
+  if (!res.ok) {
+    // So'kinish uchun ogohlantirish yoki blok — holatni yangilaymiz
+    if (data?.blocked) auth.refreshMe();
+    throw new Error(data?.error || "Xabar yuborilmadi");
+  }
   return data;
 }
 
@@ -515,7 +524,10 @@ async function submit() {
       const i = messages.value.findIndex(x => x.id === m.id);
       if (i !== -1) messages.value[i] = m;
       resetComposer();
-    } catch (e) { error.value = e.message; }
+    } catch (e) {
+      error.value = e.message;
+      if (e?.data?.blocked) auth.refreshMe();
+    }
     sending.value = false;
     return;
   }
@@ -839,6 +851,8 @@ onUnmounted(() => {
 .strip-title { font-size: 13px; font-weight: 800; color: hsl(var(--primary)); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .strip-sub { font-size: 13px; color: hsl(var(--muted-fg)); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .composer-error { padding: 0 6px 6px; font-size: 13px; color: hsl(var(--destructive)); }
+.blocked-note { display: flex; align-items: center; gap: 10px; padding: 10px 12px; border-radius: 14px; background: hsl(var(--destructive) / .1); color: hsl(var(--destructive)); font-size: 13.5px; font-weight: 600; }
+.blocked-note svg { flex: none; }
 .input-row { display: flex; align-items: flex-end; gap: 4px; }
 .input {
   flex: 1; min-width: 0; resize: none; max-height: 140px; padding: 9px 14px; border-radius: 20px; border: 1px solid transparent; outline: none;

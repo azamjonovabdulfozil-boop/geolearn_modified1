@@ -2,6 +2,7 @@ import { Router } from "express";
 import { requireAuth } from "../lib/auth.js";
 import { read, write, userClassName, getUserById, updateUser } from "../lib/db.js";
 import { findProfanity, maskWord } from "../lib/profanity.js";
+import { addStrike, clearStrikes, warningText } from "../lib/moderation.js";
 import { askAI, aiProviderStatus } from "../lib/ai.js";
 import { detectLanguage, buildMessages } from "../lib/aiPrompt.js";
 import { processAttachments, withFileTexts } from "../lib/aiFiles.js";
@@ -18,49 +19,13 @@ import {
 const router = Router();
 
 // ── Offline zaxira javob (hech bir provayder ishlamaganda) ────────────────
+// Ilgari bu yerda kalit so'zlar bo'yicha tayyor javoblar bor edi, lekin ular
+// boshqa savolga ham chiqib ketardi ("Avstraliya poytaxti?" → "Toshkent").
+// Noto'g'ri javobdan ko'ra "hozir javob bera olmayman" degani to'g'riroq.
 function localGeoAnswer(question, language) {
-  const q = question.toLowerCase();
-  const uz = language !== "ru";
-  const facts = [
-    { keys: ["poytaxt", "столица", "toshkent", "ташкент"],
-      uz: "O'zbekiston poytaxti — Toshkent shahri. U mamlakatning eng yirik shahri va Markaziy Osiyodagi eng katta shaharlardan biri hisoblanadi.",
-      ru: "Столица Узбекистана — город Ташкент, крупнейший город страны и один из самых больших в Центральной Азии." },
-    { keys: ["everest", "эверест", "jomolungma", "eng baland cho'qqi", "высочайшая вершина"],
-      uz: "Jomolungma (Everest) — dunyodagi eng baland cho'qqi, balandligi taxminan 8 849 metr. U Himolay tog'larida, Nepal va Xitoy chegarasida joylashgan.",
-      ru: "Джомолунгма (Эверест) — высочайшая вершина мира, примерно 8 849 метров. Находится в Гималаях на границе Непала и Китая." },
-    { keys: ["orol", "арал"],
-      uz: "Orol dengizi — Amudaryo va Sirdaryo suvining sug'orishga ko'plab olinishi natijasida 1960-yillardan boshlab qurib borgan ko'l. Bu XX asrning eng yirik ekologik falokatlaridan biri hisoblanadi.",
-      ru: "Аральское море начало высыхать с 1960-х годов из-за забора воды Амударьи и Сырдарьи на орошение. Это одна из крупнейших экологических катастроф XX века." },
-    { keys: ["amudaryo", "амударь"],
-      uz: "Amudaryo — Markaziy Osiyodagi eng sersuv daryo, uzunligi taxminan 2 400 km. Panj va Vaxsh daryolarining qo'shilishidan hosil bo'ladi.",
-      ru: "Амударья — самая полноводная река Центральной Азии, длина примерно 2 400 км. Образуется слиянием Пянджа и Вахша." },
-    { keys: ["sirdaryo", "сырдарь"],
-      uz: "Sirdaryo — Markaziy Osiyodagi eng uzun daryo, uzunligi taxminan 2 200 km. Norin va Qoradaryo daryolarining qo'shilishidan boshlanadi.",
-      ru: "Сырдарья — самая длинная река Центральной Азии, примерно 2 200 км. Начинается слиянием Нарына и Карадарьи." },
-    { keys: ["sahro", "cho'l", "пустын", "qizilqum", "кызылкум"],
-      uz: "Cho'l — yog'in juda kam bo'ladigan, o'simlik qoplami siyrak quruq iqlimli hudud. O'zbekistondagi eng yirik cho'l — Qizilqum, u Amudaryo va Sirdaryo oralig'ida joylashgan.",
-      ru: "Пустыня — сухая территория с малым количеством осадков и редкой растительностью. Крупнейшая пустыня Узбекистана — Кызылкум, между Амударьёй и Сырдарьёй." },
-    { keys: ["nil", "нил"],
-      uz: "Nil — Afrikadagi va dunyodagi eng uzun daryolardan biri, uzunligi taxminan 6 650 km. Misr va Sudan uchun asosiy suv manbai hisoblanadi.",
-      ru: "Нил — одна из длиннейших рек мира, примерно 6 650 км. Главный источник воды для Египта и Судана." },
-    { keys: ["okean", "океан"],
-      uz: "Dunyo okeani Yer yuzasining taxminan 71 foizini qoplaydi. Asosiy okeanlar: Tinch, Atlantika, Hind, Shimoliy Muz va Janubiy okean. Eng kattasi va chuquri — Tinch okeani.",
-      ru: "Мировой океан покрывает примерно 71% поверхности Земли. Основные океаны: Тихий, Атлантический, Индийский, Северный Ледовитый и Южный. Самый крупный и глубокий — Тихий." },
-    { keys: ["materik", "qit'a", "матери", "контин"],
-      uz: "Yerda oltita qit'a ajratiladi: Yevrosiyo, Afrika, Shimoliy Amerika, Janubiy Amerika, Avstraliya va Antarktida. Eng kattasi — Yevrosiyo.",
-      ru: "На Земле выделяют шесть материков: Евразия, Африка, Северная Америка, Южная Америка, Австралия и Антарктида. Крупнейший — Евразия." },
-    { keys: ["iqlim", "климат"],
-      uz: "O'zbekiston iqlimi keskin kontinental: yozi issiq va quruq, qishi nisbatan sovuq. Yillik yog'in miqdori tekisliklarda taxminan 100-200 mm ni tashkil etadi.",
-      ru: "Климат Узбекистана резко континентальный: жаркое сухое лето и относительно холодная зима. Годовое количество осадков на равнинах примерно 100-200 мм." },
-    { keys: ["tabiiy boylik", "ресурс", "qazilma", "ископаем"],
-      uz: "O'zbekistonning asosiy tabiiy boyliklari: tabiiy gaz, oltin, mis, uran, ko'mir, neft, marmar va tuz konlari. Oltin qazib olish bo'yicha mamlakat dunyoda oldingi o'rinlardan birida turadi.",
-      ru: "Основные природные ресурсы Узбекистана: природный газ, золото, медь, уран, уголь, нефть, мрамор и соль. По добыче золота страна входит в число мировых лидеров." },
-  ];
-  const found = facts.find(f => f.keys.some(k => q.includes(k)));
-  if (found) return uz ? found.uz : found.ru;
-  return uz
-    ? `Hozir AI xizmatiga ulanib bo'lmadi, shuning uchun to'liq javob bera olmayapman. Savolingizni ("${question}") biroz keyinroq qayta yuboring yoki uni aniqroq shaklda yozing.`
-    : `Сейчас не удалось подключиться к AI-сервису, поэтому полный ответ дать не могу. Повторите вопрос («${question}») чуть позже или сформулируйте его точнее.`;
+  return language === "ru"
+    ? "Сейчас AI-помощник недоступен, поэтому я не могу ответить на вопрос. Чтобы не дать неверный ответ, я ничего не выдумываю. Попробуйте ещё раз чуть позже или спросите учителя."
+    : "Hozir AI yordamchi ishlamayapti, shuning uchun savolingizga javob bera olmayman. Noto'g'ri javob bermaslik uchun taxmin qilmayman. Birozdan so'ng qayta urinib ko'ring yoki o'qituvchingizdan so'rang.";
 }
 
 // ── Rasm yaratish: AI javobidagi [[RASM: ...]] belgilari ─────────────────
@@ -110,18 +75,7 @@ function writeLog(entry) {
   return item;
 }
 
-// ── So'kinish: ogohlantirish + o'qituvchiga xabar ─────────────────────────
-function warningText(n, language) {
-  if (language === "ru") {
-    return n === 1
-      ? "⚠️ **Предупреждение.** Пожалуйста, пишите вежливо — оскорбления и нецензурные слова запрещены. Об этом сообщено вашему учителю. Задайте вопрос корректно, и я обязательно помогу."
-      : `⚠️ **Предупреждение №${n}.** Вы снова использовали нецензурные слова. Учитель уже уведомлён. Пожалуйста, соблюдайте правила общения.`;
-  }
-  return n === 1
-    ? "⚠️ **Ogohlantirish.** Iltimos, odob bilan yozing — haqoratli va so'kinish so'zlarini ishlatish taqiqlanadi. Bu haqda o'qituvchingizga xabar yuborildi. Savolingizni odobli shaklda qayta yozing, men albatta yordam beraman."
-    : `⚠️ **${n}-ogohlantirish.** Siz yana haqoratli so'z ishlatdingiz. Bu holat o'qituvchingizga yetkazildi. Iltimos, muloqot qoidalariga rioya qiling.`;
-}
-
+// ── So'kinish: ogohlantirish + o'qituvchiga xabar, 3-chisida avtomatik blok ──
 const AI_FLAG = /\[\[\s*HAQORAT\s*\]\]/i;
 
 /**
@@ -130,9 +84,8 @@ const AI_FLAG = /\[\[\s*HAQORAT\s*\]\]/i;
  * @param detectedBy "filter" (so'zlar ro'yxati) yoki AI provayder nomi
  */
 function flagProfanity(user, question, language, existing, badWords, detectedBy) {
-  const warnings = (getUserById(user.id)?.aiWarnings ?? 0) + 1;
-  updateUser(user.id, { aiWarnings: warnings });
-  const answer = warningText(warnings, language);
+  const { warnings, blocked } = addStrike(user.id);
+  const answer = warningText(warnings, language, blocked);
   const chat = appendMessages(user.id, existing?.id ?? null, [
     { role: "user", content: maskText(question) },
     { role: "assistant", content: answer, meta: { provider: "moderation", warning: true } },
@@ -140,10 +93,10 @@ function flagProfanity(user, question, language, existing, badWords, detectedBy)
   writeLog({
     userId: user.id, userName: user.name, role: user.role,
     question, answer, success: false, provider: "moderation", chatId: chat.id,
-    flagged: true, badWords, warningNo: warnings, reviewed: false,
+    flagged: true, badWords, warningNo: warnings, reviewed: false, autoBlocked: blocked,
     detectedBy: detectedBy === "filter" ? "filter" : "ai",
   });
-  return { answer, reply: answer, warning: true, warnings, provider: "moderation", chatId: chat.id, chatTitle: chat.title };
+  return { answer, reply: answer, warning: true, warnings, blocked, provider: "moderation", chatId: chat.id, chatTitle: chat.title };
 }
 
 /** Suhbat tarixida so'kinishlarni yulduzcha bilan yopadi. */
@@ -183,7 +136,12 @@ router.post(["/ai/ask", "/ai/chat"], requireAuth, async (req, res) => {
 
   // Admin bloklagan bo'lsa — AI dan foydalanib bo'lmaydi
   if (req.user.aiBlocked) {
-    return res.status(403).json({ error: "AI yordamchi siz uchun o'qituvchi tomonidan bloklangan", blocked: true });
+    return res.status(403).json({
+      error: req.user.blockedAuto
+        ? "AI yordamchi siz uchun bloklangan (haqoratli so'zlar uchun 3 ta ogohlantirish). Blokni o'qituvchi ochadi."
+        : "AI yordamchi siz uchun o'qituvchi tomonidan bloklangan",
+      blocked: true,
+    });
   }
 
   // Biriktirilgan fayllar: hujjatlardan matn, rasmlar — vision modelga, ovoz — matnga
@@ -444,7 +402,9 @@ router.put("/ai/admin/users/:userId/block", requireAuth, (req, res) => {
   const u = getUserById(Number(req.params.userId));
   if (!u || u.role !== "student") return res.status(404).json({ error: "O'quvchi topilmadi" });
   const blocked = req.body?.blocked !== false;
-  updateUser(u.id, { aiBlocked: blocked, aiBlockedAt: blocked ? new Date().toISOString() : null });
+  // Blok ochilganda chat ham ochiladi va ogohlantirishlar sanog'i nolga tushadi
+  if (blocked) updateUser(u.id, { aiBlocked: true, aiBlockedAt: new Date().toISOString(), blockedAuto: false });
+  else clearStrikes(u.id);
   res.json({ success: true, blocked });
 });
 

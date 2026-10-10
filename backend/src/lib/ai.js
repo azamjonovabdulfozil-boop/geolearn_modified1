@@ -23,8 +23,10 @@ const PROVIDERS = [
     name: "Gemini",
     url: "https://generativelanguage.googleapis.com/v1beta/openai/chat/completions",
     envKey: "GEMINI_API_KEY",
-    models: ["gemini-2.5-flash", "gemini-2.5-flash-lite"],
-    visionModels: ["gemini-2.5-flash", "gemini-2.5-flash-lite"],
+    // "-latest" nomlari Google tomonidan eng yangi modelga yo'naltiriladi —
+    // aniq versiya eskirib o'chirilsa ham AI ishlayveradi.
+    models: ["gemini-flash-latest", "gemini-2.5-flash", "gemini-flash-lite-latest", "gemini-2.5-flash-lite"],
+    visionModels: ["gemini-flash-latest", "gemini-2.5-flash", "gemini-flash-lite-latest"],
   },
   {
     name: "OpenRouter",
@@ -62,18 +64,6 @@ const PROVIDERS = [
     models: ["llama-3.3-70b-versatile"],
     visionModels: ["meta-llama/llama-4-scout-17b-16e-instruct"],
   },
-  {
-    name: "Pollinations",
-    url: "https://text.pollinations.ai/openai",
-    envKey: null, // kalitsiz, oxirgi zaxira
-    models: ["openai"],
-    // Kalitsiz tarif sekin (30 soniyagacha) va tez-tez so'rasa 402/429 qaytaradi.
-    // Shuning uchun uzoqroq kutamiz, bir necha marta qayta urinamiz va hech qachon
-    // o'chirib qo'ymaymiz — aks holda kalitlar ishlamaganda AI butunlay jim qoladi.
-    timeoutMs: 45000,
-    retries: 2,
-    neverDisable: true,
-  },
 ];
 
 // Kvota tugagan / kalit noto'g'ri bo'lgan provayderni qayta-qayta urinib vaqt
@@ -81,6 +71,9 @@ const PROVIDERS = [
 // balans to'ldirilsa yoki limit yangilansa, serverni qayta ishga tushirish shart emas.
 const DISABLE_MS = 10 * 60 * 1000;
 const disabledProviders = new Map(); // name -> { reason, until }
+// Tashxis uchun: har bir provayderning oxirgi xatosi va oxirgi muvaffaqiyatli javobi
+const lastError = new Map();         // name -> { model, message, at }
+const lastOk = new Map();            // name -> { model, at }
 
 function isFatalStatus(status) {
   return status === 401 || status === 402 || status === 403 || status === 429;
@@ -169,10 +162,12 @@ export async function askAI(messages) {
 
       try {
         const answer = await callWithRetry(provider, model, messages, deadline);
+        lastOk.set(provider.name, { model, at: new Date().toISOString() });
         console.log(`✅ AI javob berdi: ${provider.name} / ${model}`);
         return { answer, provider: provider.name, model };
       } catch (e) {
         errors.push(e.message);
+        lastError.set(provider.name, { model, message: e.message.slice(0, 300), at: new Date().toISOString() });
         console.log(`⚠️  ${provider.name} / ${model} — ${e.message}`);
         if (isFatalStatus(e.status) && !provider.neverDisable) {
           // Kalit/kvota muammosi — bu provayderning boshqa modellarini sinamaymiz
@@ -193,5 +188,7 @@ export function aiProviderStatus() {
     name: p.name,
     configured: p.envKey ? Boolean(process.env[p.envKey]) : true,
     disabledReason: isDisabled(p.name) ? disabledProviders.get(p.name).reason : null,
+    lastError: lastError.get(p.name) ?? null,
+    lastOk: lastOk.get(p.name) ?? null,
   }));
 }
