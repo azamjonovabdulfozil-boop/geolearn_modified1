@@ -114,9 +114,22 @@ if (!allowedOrigins.includes(ADMIN_ORIGIN)) {
   allowedOrigins.push(ADMIN_ORIGIN);
 }
 
+// O'z domenimiz: geolearn.uz va uning barcha subdomenlari
+// (admin.geolearn.uz, www.geolearn.uz, ...) — FRONTEND_URL ga
+// qo'shish esdan chiqsa ham ishlayveradi.
+const OWN_DOMAIN_RE =
+  /^https:\/\/([a-z0-9-]+\.)*geolearn\.uz$/i;
+
+function isAllowedOrigin(origin) {
+  return (
+    allowedOrigins.includes(origin) ||
+    OWN_DOMAIN_RE.test(origin)
+  );
+}
+
 console.log(
   "✅ CORS allowed origins:",
-  allowedOrigins
+  [...allowedOrigins, "https://*.geolearn.uz"]
 );
 
 // ─────────────────────────────────────────────────────────────
@@ -131,7 +144,7 @@ const corsOptions = {
     }
 
     // Ruxsat berilgan frontend
-    if (allowedOrigins.includes(origin)) {
+    if (isAllowedOrigin(origin)) {
       return callback(null, true);
     }
 
